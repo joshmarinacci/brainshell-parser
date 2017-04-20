@@ -1,9 +1,17 @@
 BrainShell {
-	AddExpr = Number "+" Number --plus
-                | PriExpr
-	PriExpr = Number
+	Expr    = AddExpr 
+	
+	AddExpr = AddExpr "+" MulExpr --plus
+		| AddExpr "-" MulExpr --minus
+                | MulExpr
+	MulExpr = MulExpr "*" MulExpr --multiply
+		| MulExpr "/" MulExpr --divide
+		| PriExpr
+	PriExpr = "(" Expr ")" --paren
+		| Number
 	Number = hex | float | integer
 	hex = "0x" hexDigit+
-	float = digit+ "." digit+
+	float = digit+ "." digit+ exp?
+	exp = "e" "-"? digit+
 	integer = digit+
 }
