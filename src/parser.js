@@ -9,16 +9,18 @@ var sem = grammar.createSemantics().addOperation('toJS', {
 	},
 	float: function(a,b,c) {
 		return parseFloat(this.sourceString);
+	},
+	hex:  function(a,b) {
+		return parseInt(this.sourceString);
 	}
 });
 
 module.exports = {
    parseString: function(str) {
-	console.log("parsing",str);
 	var m = grammar.match(str);
 	if(m.failed()) throw new Error("match failed");
 	var js = sem(m).toJS();
-	console.log('js = ', js);
+	console.log("parsing",str, "->", js);
 	return js;
    }
 }

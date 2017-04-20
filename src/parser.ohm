@@ -1,5 +1,6 @@
 BrainShell {
-	Number = float | integer
+	Number = hex | float | integer
+	hex = "0x" hexDigit+
 	float = digit+ "." digit+
 	integer = digit+
 }
