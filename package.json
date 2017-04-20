@@ -6,6 +6,7 @@
     "react-scripts": "0.9.5"
   },
   "dependencies": {
+    "ohm-js": "^0.13.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "tape": "^4.6.3"
