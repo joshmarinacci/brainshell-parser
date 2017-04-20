@@ -1,3 +1,5 @@
 BrainShell {
-	Number = digit+
+	Number = float | integer
+	float = digit+ "." digit+
+	integer = digit+
 }

@@ -15,3 +15,8 @@ test('parse a number', (t)=>{
 	t.equal(val,50);
 	t.end();
 });
+
+test('parse a float', (t) => {
+	t.equal(Parser.parseString('50.0'),50.0);
+	t.end();
+});
