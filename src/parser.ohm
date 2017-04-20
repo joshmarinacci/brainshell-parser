@@ -2,11 +2,13 @@ BrainShell {
 	Expr    = AddExpr 
 	
 	AddExpr = AddExpr "+" MulExpr --plus
-		| AddExpr "-" MulExpr --minus
-                | MulExpr
+        | AddExpr "-" MulExpr --minus
+        | MulExpr
 	MulExpr = MulExpr "*" MulExpr --multiply
 		| MulExpr "/" MulExpr --divide
-		| PriExpr
+		| ExpExpr
+	ExpExpr = ExpExpr "^" ExpExpr -- power
+	    | PriExpr
 	PriExpr = "(" Expr ")" --paren
 		| Number
 	Number = hex | float | integer

@@ -39,6 +39,8 @@ function generateSemantics(grammar) {
         AddExpr_minus: ((a,_,b) => a.calc()- b.calc()),
         MulExpr_multiply: ((a,_,b) => a.calc() * b.calc()),
         MulExpr_divide: ((a,_,b) => a.calc() / b.calc()),
+        ExpExpr_power: ((a,_,b) => Math.pow(a.calc(), b.calc())),
+        PriExpr_paren: ((p1,a,p2) => a.calc()),
         _terminal: function() {
             return this.sourceString;
         }
