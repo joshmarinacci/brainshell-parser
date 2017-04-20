@@ -28,16 +28,17 @@ class App extends Component {
     }
     render() {
         return (
-            <div className="vbox">
+            <div className="vbox center">
+                <h1>Jesse Calculator</h1>
                 <div className="hbox">
                     <input type="text" value={this.state.text} ref="input"
                            onChange={this.changed.bind(this)}
                            onKeyDown={this.keydown.bind(this)}/>
                     <button onClick={this.click.bind(this)}>Calculate</button>
                 </div>
-                <div>
+                <h2>
                     <span>{this.state.result}</span>
-                </div>
+                </h2>
             </div>
         );
     }

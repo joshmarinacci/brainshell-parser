@@ -1,24 +1,21 @@
-.App {
-  text-align: center;
+html {
+  font-family: sans-serif;
+  font-size: 2rem;
+}
+input, button {
+  font-size: 100%;
+  margin: 0.25rem;
+  padding: 0.5rem;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.vbox {
+  display: flex;
+  flex-direction: column;
 }
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+.vbox.center {
+  align-items: center;
 }
-
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.hbox {
+  display: flex;
+  flex-direction: row;
 }
