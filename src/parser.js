@@ -1,8 +1,5 @@
-var fs = require('fs');
 var ohm = require('ohm-js');
 
-var file = require('./parser.ohm');
-console.log("the file is",file)
 
 var grammar;
 var sem;
@@ -18,56 +15,50 @@ function GET(url) {
     });
 }
 
+function generateSemantics(grammar) {
+    var sem = grammar.createSemantics().addOperation('calc', {
+        Number: (a) => a.calc(),
+        integer: function(a,b) {
+            var v = parseInt(this.sourceString, 10);
+            if(b) {
+                var exp = b.calc();
+                return v * Math.pow(10,exp);
+            }
+            return v;
+        },
+        float: function(a,b,c,e) {
+            return parseFloat(this.sourceString);
+        },
+        hex:  function(a,b) {
+            return parseInt(this.sourceString);
+        },
+        exp: function(_,sign,exp) {
+            return parseFloat(exp.calc());
+        },
+        AddExpr_plus: ((a,_,b) => a.calc()+b.calc()),
+        AddExpr_minus: ((a,_,b) => a.calc()- b.calc()),
+        MulExpr_multiply: ((a,_,b) => a.calc() * b.calc()),
+        MulExpr_divide: ((a,_,b) => a.calc() / b.calc()),
+        _terminal: function() {
+            return this.sourceString;
+        }
+
+    });
+    return sem;
+}
 function init() {
     var source = "";
-    if(typeof window !== undefined) {
+    if(typeof window !== 'undefined') {
+        var file = require('./parser.ohm');
         GET(file).then((source)=>{
-            console.log("got the souce",source);
             grammar = ohm.grammar(source);
-            sem = grammar.createSemantics().addOperation('calc', {
-                Number: (a) => a.calc(),
-                integer: function(a) {
-                    return parseInt(this.sourceString,10);
-                },
-                float: function(a,b,c,e) {
-                    return parseFloat(this.sourceString);
-                },
-                hex:  function(a,b) {
-                    return parseInt(this.sourceString);
-                },
-                exp: function(_,sign,exp) {
-                    return parseFloat(exp);
-                },
-                AddExpr_plus: ((a,_,b) => a.calc()+b.calc()),
-                AddExpr_minus: ((a,_,b) => a.calc()- b.calc()),
-                MulExpr_multiply: ((a,_,b) => a.calc() * b.calc()),
-                MulExpr_divide: ((a,_,b) => a.calc() / b.calc()),
-
-            });
+            sem = generateSemantics(grammar);
         });
     } else {
+        var fs = require('fs');
         source = fs.readFileSync("src/parser.ohm");
         grammar = ohm.grammar(source);
-        sem = grammar.createSemantics().addOperation('calc', {
-            Number: (a) => a.calc(),
-            integer: function(a) {
-                return parseInt(this.sourceString,10);
-            },
-            float: function(a,b,c,e) {
-                return parseFloat(this.sourceString);
-            },
-            hex:  function(a,b) {
-                return parseInt(this.sourceString);
-            },
-            exp: function(_,sign,exp) {
-                return parseFloat(exp);
-            },
-            AddExpr_plus: ((a,_,b) => a.calc()+b.calc()),
-            AddExpr_minus: ((a,_,b) => a.calc()- b.calc()),
-            MulExpr_multiply: ((a,_,b) => a.calc() * b.calc()),
-            MulExpr_divide: ((a,_,b) => a.calc() / b.calc()),
-
-        });
+        sem = generateSemantics(grammar);
     }
 }
 

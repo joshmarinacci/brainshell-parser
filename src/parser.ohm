@@ -13,5 +13,5 @@ BrainShell {
 	hex = "0x" hexDigit+
 	float = digit+ "." digit+ exp?
 	exp = "e" "-"? digit+
-	integer = digit+
+	integer = digit+ exp?
 }

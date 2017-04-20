@@ -16,7 +16,8 @@ tests('parsing 42 in different formats', [
 	['42',42],
 	['4.2',4.2],
 	['0x42',0x42],
-	['4.2e2',420]
+	['4.2e2',420],
+    ['42e2',4200]
 ]);
 tests("simple math 2", [
 	['4+2',6],
