@@ -1,21 +1,46 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Parser from "./parser";
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+    constructor(props) {
+        super(props);
+        Parser.init();
+        this.state = {
+            result:"result",
+            text:"4 + 6",
+        }
+    }
+    keydown(e) {
+        if(e.keyCode == 13) {
+            this.click();
+        }
+    }
+    changed() {
+        var txt = this.refs.input.value;
+        this.setState({text:txt});
+    }
+    click() {
+        var txt = this.refs.input.value;
+        var val = Parser.parseString(txt);
+        this.setState({result:val});
+    }
+    render() {
+        return (
+            <div className="vbox">
+                <div className="hbox">
+                    <input type="text" value={this.state.text} ref="input"
+                           onChange={this.changed.bind(this)}
+                           onKeyDown={this.keydown.bind(this)}/>
+                    <button onClick={this.click.bind(this)}>Calculate</button>
+                </div>
+                <div>
+                    <span>{this.state.result}</span>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default App;
