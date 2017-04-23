@@ -29,7 +29,11 @@ class Literal {
     constructor(value, unit) {
         this.value = value;
         if(unit) {
-            this.unit = new Unit(unit);
+            if(unit instanceof Unit) {
+                this.unit = unit;
+            } else {
+                this.unit = new Unit(unit);
+            }
         }
     }
 

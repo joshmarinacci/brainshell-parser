@@ -52,6 +52,8 @@ unittests("simple units", [
     ['6 cups', new Literal(6, 'cups')],
     ['40 m', new Literal(40, 'meter')],
     ['40m', new Literal(40, 'meter')],
-    ['40m as feet', new Literal(131.234,'foot')]
+    ['40m as feet', new Literal(131.234,'foot')],
+    ['4 ft',new Literal(4,'feet')],
+    ['4 ft + 5 ft', new Literal(9,'feet')]
 ]);
 
