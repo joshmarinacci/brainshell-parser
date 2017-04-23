@@ -1,6 +1,6 @@
 BrainShell {
-	Expr    = AddExpr 
-	
+	Expr    = AsExpr | AddExpr
+	AsExpr = Expr "as" unit
 	AddExpr = AddExpr "+" MulExpr --plus
         | AddExpr "-" MulExpr --minus
         | MulExpr
@@ -11,11 +11,11 @@ BrainShell {
 	    | PriExpr
 	PriExpr = "(" Expr ")" --paren
 		| Literal
-    Literal = Number Unit?
+    Literal = Number unit?
 	Number = hex | float | integer
 	hex = "0x" hexDigit+
 	float = digit+ "." digit+ exp?
 	exp = "e" "-"? digit+
 	integer = digit+ exp?
-	Unit = letter+
+	unit = (~"as" letter+)
 }

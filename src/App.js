@@ -37,10 +37,18 @@ class App extends Component {
                     <button onClick={this.click.bind(this)}>Calculate</button>
                 </div>
                 <h2>
-                    <span>{this.state.result}</span>
+                    <span>{this.renderResult(this.state.result)}</span>
                 </h2>
             </div>
         );
+    }
+    renderResult(lit) {
+        var str =  lit.value + " ";
+        if(lit.unit) {
+            str += lit.unit.name;
+        }
+        console.log("final",str);
+        return str;
     }
 }
 

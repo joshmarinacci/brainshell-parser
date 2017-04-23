@@ -17,36 +17,24 @@ function GET(url) {
 
 function generateSemantics(grammar) {
     var sem = grammar.createSemantics().addOperation('calc', {
-        Literal: (num, unit) => {
-            return new Literal(num.calc(), unit.calc()[0]);
-        },
-        Unit: function(_) {
-            return this.sourceString;
-        },
+        Literal: (num, unit) => new Literal(num.calc(), unit.calc()[0]),
+        unit: function(_) {  return this.sourceString;  },
         Number: (a) => a.calc(),
         integer: function(a,b) {
             var v = parseInt(this.sourceString, 10);
-            if(b) {
-                var exp = b.calc();
-                return v * Math.pow(10,exp);
-            }
+            if(b) return v * Math.pow(10, b.calc());
             return v;
         },
-        float: function(a,b,c,e) {
-            return parseFloat(this.sourceString);
-        },
-        hex:  function(a,b) {
-            return parseInt(this.sourceString);
-        },
-        exp: function(_,sign,exp) {
-            return parseFloat(exp.calc());
-        },
+        float: function(a,b,c,e) {  return parseFloat(this.sourceString);  },
+        hex:  function(a,b) {       return parseInt(this.sourceString);    },
+        exp: (_,sign,exp) => parseFloat(exp.calc()),
         AddExpr_plus: ((a,_,b) => a.calc().add(b.calc())),
         AddExpr_minus: ((a,_,b) => a.calc().subtract(b.calc())),
         MulExpr_multiply: ((a,_,b) => a.calc().multiply(b.calc())),
         MulExpr_divide: ((a,_,b) => a.calc().divide(b.calc())),
         ExpExpr_power: ((a,_,b) => a.calc().exponent(b.calc())),
         PriExpr_paren: ((p1,a,p2) => a.calc()),
+        AsExpr: (a,_,u) => a.calc().as(u.calc()),
         _terminal: function() {
             return this.sourceString;
         }

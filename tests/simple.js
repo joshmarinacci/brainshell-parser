@@ -20,8 +20,8 @@ function unittests(msg,arr) {
             var str = tcase[0];
             var ans = tcase[1];
             var res = Parser.parseString(str);
-            t.approximately(res.value,ans.value,0.00001);
-            t.equal(res.unit,ans.unit,0.00001);
+            t.approximately(res.value,ans.value,0.001);
+            t.equal(res.unit.name,ans.unit.name);
         });
         t.end();
     });
@@ -50,5 +50,8 @@ unittests("simple units", [
 	['6 feet', new Literal(6,'feet')],
 	['6 meter', new Literal(6, 'meter')],
     ['6 cups', new Literal(6, 'cups')],
+    ['40 m', new Literal(40, 'meter')],
+    ['40m', new Literal(40, 'meter')],
+    ['40m as feet', new Literal(131.234,'foot')]
 ]);
 
