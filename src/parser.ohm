@@ -10,10 +10,12 @@ BrainShell {
 	ExpExpr = ExpExpr "^" ExpExpr -- power
 	    | PriExpr
 	PriExpr = "(" Expr ")" --paren
-		| Number
+		| Literal
+    Literal = Number Unit?
 	Number = hex | float | integer
 	hex = "0x" hexDigit+
 	float = digit+ "." digit+ exp?
 	exp = "e" "-"? digit+
 	integer = digit+ exp?
+	Unit = letter+
 }
