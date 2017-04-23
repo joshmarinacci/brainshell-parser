@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Parser from "./parser";
+import Numeral from "numeral";
 
 class App extends Component {
     constructor(props) {
@@ -43,7 +44,7 @@ class App extends Component {
         );
     }
     renderResult(lit) {
-        var str =  lit.value + " ";
+        var str =  Numeral(lit.value).format('0,0') + " ";
         if(lit.unit) {
             str += lit.unit.name;
         }
