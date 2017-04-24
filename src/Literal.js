@@ -25,12 +25,19 @@ class Unit {
             this.base = 'meter';
             this.ratio = 1/1000;
         }
-        if(name === 'gallon') {
+        if(name === 'gallon' || name === 'gallons') {
             this.name = 'gallon';
             this.dimension = 1;
             this.type = 'volume';
             this.base = 'gallon';
             this.ratio = 1;
+        }
+        if(name === 'cup' || name === 'cups') {
+            this.name = 'cup';
+            this.dimension = 1;
+            this.type = 'volume';
+            this.base = 'cup';
+            this.ratio = 4*4;
         }
         if(name === 'quarts' || name === 'quart') {
             this.name = 'quart';

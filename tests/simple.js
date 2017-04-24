@@ -51,7 +51,7 @@ tests("big numbers", [
 unittests("simple units", [
 	['6 feet', new Literal(6,'feet')],
 	['6 meter', new Literal(6, 'meter')],
-    //['6 cups', new Literal(6, 'cups')],
+    ['6 cups', new Literal(6, 'cups')],
     ['40 m', new Literal(40, 'meter')],
     ['40m', new Literal(40, 'meter')],
     ['40m as feet', new Literal(131.234,'foot')],
@@ -59,6 +59,7 @@ unittests("simple units", [
     ['4 ft + 5 ft', new Literal(9,'feet')],
     ['5 km as meters',new Literal(5000,'meter')],
     ['4 quart as gallon', new Literal(1,'gallon')],
+    ['16 cups as gallons', new Literal(1,'gallon')],
 ]);
 
 
