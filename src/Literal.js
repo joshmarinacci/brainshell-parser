@@ -1,7 +1,7 @@
 /**
  * Created by josh on 4/22/17.
  */
-
+var Decimal = require('decimal.js');
 class Unit {
     constructor(name) {
         if(name === 'm' || name === 'meter' || name === 'meters') {
@@ -27,7 +27,11 @@ class Unit {
 
 class Literal {
     constructor(value, unit) {
-        this.value = value;
+        if(!(value instanceof Decimal)) {
+            this.value = new Decimal(value);
+        } else {
+            this.value = value;
+        }
         if(unit) {
             if(unit instanceof Unit) {
                 this.unit = unit;
@@ -36,9 +40,16 @@ class Literal {
             }
         }
     }
+    toString() {
+        var u = "";
+        if( this.unit && this.unit.name) {
+            u = this.unit.name;
+        }
+        return this.value.toString() + " " + u;
+    }
 
     add(b) {
-        return new Literal(this.value + b.value, this.unit);
+        return new Literal(this.value.plus(b.value), this.unit);
     }
     subtract(b) {
         return new Literal(this.value - b.value, this.unit);
@@ -50,7 +61,10 @@ class Literal {
         return new Literal(this.value / b.value, this.unit);
     }
     exponent(b) {
-        return new Literal(Math.pow(this.value, b.value), this.unit);
+        console.log('exponent', this.value.toString(),
+            b.value.toString(),
+            this.value.toPower(b.value).toString());
+        return new Literal(this.value.pow(b.value), this.unit);
     }
     as(unit) {
         var v2 = this.unit.convertTo(this.value,unit);

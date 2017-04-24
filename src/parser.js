@@ -67,7 +67,7 @@ module.exports = {
         var m = grammar.match(str);
         if(m.failed()) throw new Error("match failed");
         var js = sem(m).calc();
-        console.log("parsing",str, "->", js);
+        console.log("parsing",str, "->", js.toString());
         return js;
     }
 }

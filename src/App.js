@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Parser from "./parser";
-import Numeral from "numeral";
+var Literal = require('../src/Literal').Literal;
 
 class App extends Component {
     constructor(props) {
         super(props);
         Parser.init();
         this.state = {
-            result:"result",
+            result:new Literal(0),
             text:"4 + 6",
         }
     }
@@ -44,12 +44,10 @@ class App extends Component {
         );
     }
     renderResult(lit) {
-        var str =  Numeral(lit.value).format('0,0') + " ";
-        if(lit.unit) {
-            str += lit.unit.name;
+        if(!lit.value.isFinite()) {
+            return "\u221E";
         }
-        console.log("final",str);
-        return str;
+        return lit.toString();
     }
 }
 

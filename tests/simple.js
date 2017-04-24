@@ -9,7 +9,7 @@ function tests(msg,arr) {
         arr.forEach((tcase) => {
             var str = tcase[0];
             var ans = tcase[1];
-            t.approximately(Parser.parseString(str).value,ans,0.00001);
+            t.approximately(Parser.parseString(str).value.toFixed(5),ans,0.00001);
         });
         t.end();
     });
@@ -41,7 +41,7 @@ tests("simple math 2", [
 	['4-2',2],
 	['4*2',8],
 	['4/2',2],
-    ['4^2',16],
+    ['4^2',16]
 ]);
 
 
@@ -57,3 +57,7 @@ unittests("simple units", [
     ['4 ft + 5 ft', new Literal(9,'feet')]
 ]);
 
+
+tests("big numbers", [
+    ['4^100',Math.pow(4,100)]
+]);
