@@ -16,19 +16,35 @@ class Unit {
             this.dimension = 1;
             this.type = 'distance';
             this.base = 'meter';
-            this.ratio = 0.3048;
+            this.ratio = 1/0.3048;
         }
         if(name === 'kilometer' || name === 'km' || name === 'kilometers') {
             this.name = 'kilometer';
             this.dimension = 1;
             this.type = 'distance';
             this.base = 'meter';
-            this.ratio = 1000;
+            this.ratio = 1/1000;
         }
+        if(name === 'gallon') {
+            this.name = 'gallon';
+            this.dimension = 1;
+            this.type = 'volume';
+            this.base = 'gallon';
+            this.ratio = 1;
+        }
+        if(name === 'quarts' || name === 'quart') {
+            this.name = 'quart';
+            this.dimension = 1;
+            this.type = 'volume';
+            this.base = 'gallon';
+            this.ratio = 4;
+        }
+        if(!this.name) throw new Error("unrecognized unit " + name);
     }
     convertTo(val,name) {
         var unit = new Unit(name);
-        return val * this.ratio / unit.ratio;
+        console.log('converting', val.toString(), this.name,'to',name);
+        return val / this.ratio * unit.ratio;
     }
 }
 

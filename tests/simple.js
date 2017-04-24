@@ -44,21 +44,21 @@ tests("simple math 2", [
     ['4^2',16]
 ]);
 
-
+tests("big numbers", [
+    ['4^100',Math.pow(4,100)]
+]);
 
 unittests("simple units", [
 	['6 feet', new Literal(6,'feet')],
 	['6 meter', new Literal(6, 'meter')],
-    ['6 cups', new Literal(6, 'cups')],
+    //['6 cups', new Literal(6, 'cups')],
     ['40 m', new Literal(40, 'meter')],
     ['40m', new Literal(40, 'meter')],
     ['40m as feet', new Literal(131.234,'foot')],
     ['4 ft',new Literal(4,'feet')],
     ['4 ft + 5 ft', new Literal(9,'feet')],
-    ['5km as meters',new Literal(5000,'meter')],
+    ['5 km as meters',new Literal(5000,'meter')],
+    ['4 quart as gallon', new Literal(1,'gallon')],
 ]);
 
 
-tests("big numbers", [
-    ['4^100',Math.pow(4,100)]
-]);
