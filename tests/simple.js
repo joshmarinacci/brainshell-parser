@@ -7,8 +7,8 @@ var Literal = require('../src/Literal').Literal;
 function tests(msg,arr) {
     test(msg, (t)=>{
         arr.forEach((tcase) => {
-            var str = tcase[0];
-            var ans = tcase[1];
+            let str = tcase[0];
+            let ans = tcase[1];
             t.approximately(Parser.parseString(str).value.toFixed(5),ans,0.00001);
         });
         t.end();
@@ -17,11 +17,12 @@ function tests(msg,arr) {
 function unittests(msg,arr) {
     test(msg, (t)=>{
         arr.forEach((tcase) => {
-            var str = tcase[0];
-            var ans = tcase[1];
-            var res = Parser.parseString(str);
+            let str = tcase[0];
+            let ans = tcase[1];
+            let res = Parser.parseString(str);
             t.approximately(res.value,ans.value,0.001);
             t.equal(res.unit.name,ans.unit.name);
+            t.equal(res.unit.dimension, ans.unit.dimension);
         });
         t.end();
     });
@@ -61,6 +62,16 @@ unittests("simple units", [
     ['4 quart as gallon', new Literal(1,'gallon')],
     ['16 cups as gallons', new Literal(1,'gallon')],
     ['3 teaspoons as tablespoons', new Literal(1,'tablespoon')],
+    ['2 ft * 2 ft', new Literal(4,'foot',2)],
+    ['2 sqft', new Literal(2,'foot',2)],
+    //['2 ft^2', new Literal(2, 'foot',2)],
 ]);
+
+test("error",(t)=>{
+    t.throws(()=>{  Parser.parseString("1.2.3"); });
+    t.throws(()=>{ Parser.parseString("4a5")});
+    t.throws(()=>{ Parser.parseString("4ft + 5")});
+    t.end();
+});
 
 

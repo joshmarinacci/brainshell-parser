@@ -3,7 +3,7 @@
  */
 var Decimal = require('decimal.js');
 class Unit {
-    constructor(name) {
+    constructor(name, dimension) {
         if(name === 'm' || name === 'meter' || name === 'meters') {
             this.name = 'meter';
             this.dimension = 1;
@@ -59,6 +59,18 @@ class Unit {
             this.base = 'gallon';
             this.ratio = 4;
         }
+
+
+        if(name === 'sqft') {
+            this.name = 'foot';
+            this.dimension = 2;
+            this.type = 'area';
+            this.base = 'meter';
+            this.ratio = 1/0.3048;
+        }
+
+        if(dimension) this.dimension = dimension;
+
         if(!this.name) throw new Error("unrecognized unit " + name);
     }
     convertTo(val,name) {
@@ -66,10 +78,13 @@ class Unit {
         console.log('converting', val.toString(), this.name,'to',name);
         return val / this.ratio * unit.ratio;
     }
+    multiply(unit) {
+        return new Unit(this.name, this.dimension + unit.dimension);
+    }
 }
 
 class Literal {
-    constructor(value, unit) {
+    constructor(value, unit, dimension) {
         if(!(value instanceof Decimal)) {
             this.value = new Decimal(value);
         } else {
@@ -79,7 +94,7 @@ class Literal {
             if(unit instanceof Unit) {
                 this.unit = unit;
             } else {
-                this.unit = new Unit(unit);
+                this.unit = new Unit(unit,dimension);
             }
         }
     }
@@ -92,13 +107,27 @@ class Literal {
     }
 
     add(b) {
+        if(this.unit || b.unit) {
+            if ((this.unit && !b.unit) ||
+                (!this.unit && b.unit) ||
+                (this.unit.type !== b.unit.type)) {
+                throw new Error("units are incompatible");
+            }
+        }
         return new Literal(this.value.plus(b.value), this.unit);
     }
     subtract(b) {
         return new Literal(this.value - b.value, this.unit);
     }
     multiply(b) {
-        return new Literal(this.value * b.value, this.unit);
+        //if zero or one has a unit
+        if((!this.unit && !b.unit)
+            || (this.unit && !b.unit)
+            || (!this.unit && b.unit)) {
+            return new Literal(this.value * b.value, this.unit);
+        }
+        //both have a unit
+        return new Literal(this.value.mul(b.value), this.unit.multiply(b.unit));
     }
     divide(b) {
         return new Literal(this.value / b.value, this.unit);
