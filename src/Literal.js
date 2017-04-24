@@ -36,8 +36,21 @@ class Unit {
             this.name = 'cup';
             this.dimension = 1;
             this.type = 'volume';
-            this.base = 'cup';
-            this.ratio = 4*4;
+            this.base = 'gallon';
+            this.ratio = 16;
+        }
+        if(name === 'teaspoon' || name === 'teaspoons') {
+            this.name = 'teaspoon';
+            this.dimension = 1;
+            this.type = 'volume';
+            this.base = 'gallon';
+            this.ratio = 768;
+        }
+        if(name === 'tablespoon' || name === 'tablespoons') {
+            this.name = 'tablespoon';
+            this.type = 'volume';
+            this.base = 'gallon';
+            this.ratio = 256;
         }
         if(name === 'quarts' || name === 'quart') {
             this.name = 'quart';

@@ -60,6 +60,7 @@ unittests("simple units", [
     ['5 km as meters',new Literal(5000,'meter')],
     ['4 quart as gallon', new Literal(1,'gallon')],
     ['16 cups as gallons', new Literal(1,'gallon')],
+    ['3 teaspoons as tablespoons', new Literal(1,'tablespoon')],
 ]);
 
 
