@@ -18,6 +18,13 @@ class Unit {
             this.base = 'meter';
             this.ratio = 0.3048;
         }
+        if(name === 'kilometer' || name === 'km' || name === 'kilometers') {
+            this.name = 'kilometer';
+            this.dimension = 1;
+            this.type = 'distance';
+            this.base = 'meter';
+            this.ratio = 1000;
+        }
     }
     convertTo(val,name) {
         var unit = new Unit(name);

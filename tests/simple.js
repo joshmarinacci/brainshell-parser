@@ -54,7 +54,8 @@ unittests("simple units", [
     ['40m', new Literal(40, 'meter')],
     ['40m as feet', new Literal(131.234,'foot')],
     ['4 ft',new Literal(4,'feet')],
-    ['4 ft + 5 ft', new Literal(9,'feet')]
+    ['4 ft + 5 ft', new Literal(9,'feet')],
+    ['5km as meters',new Literal(5000,'meter')],
 ]);
 
 
