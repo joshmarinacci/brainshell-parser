@@ -67,7 +67,7 @@ unittests("simple units", [
     //['2 ft^2', new Literal(2, 'foot',2)],
 ]);
 
-test("error",(t)=>{
+test("crashed",(t)=>{
     t.throws(()=>{  Parser.parseString("1.2.3"); });
     t.throws(()=>{ Parser.parseString("4a5")});
     t.throws(()=>{ Parser.parseString("4ft + 5")});

@@ -11,6 +11,8 @@ class App extends Component {
         this.state = {
             result:new Literal(0),
             text:"4 + 6",
+            crashed:false,
+            error:null
         }
     }
     keydown(e) {
@@ -24,8 +26,13 @@ class App extends Component {
     }
     click() {
         var txt = this.refs.input.value;
-        var val = Parser.parseString(txt);
-        this.setState({result:val});
+        try {
+            var val = Parser.parseString(txt);
+            this.setState({result: val, crashed:false, error:null});
+        } catch (e) {
+            console.log("crashed occurred while parsing",e);
+            this.setState({crashed:true, error:e});
+        }
     }
     render() {
         return (
@@ -38,12 +45,16 @@ class App extends Component {
                     <button onClick={this.click.bind(this)}>Calculate</button>
                 </div>
                 <h2>
-                    <span>{this.renderResult(this.state.result)}</span>
+                    <span>{this.renderResult()}</span>
                 </h2>
             </div>
         );
     }
-    renderResult(lit) {
+    renderResult() {
+        if(this.state.crashed) {
+            return "error";
+        }
+        var lit = this.state.result;
         if(!lit.value.isFinite()) {
             return "\u221E";
         }
