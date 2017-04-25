@@ -2,8 +2,38 @@
  * Created by josh on 4/22/17.
  */
 var Decimal = require('decimal.js');
+
+var UNITS = {};
+function makeTime(dr) {
+    var unit = {
+        name:dr.name,
+        dimension: 1,
+        type:'duration',
+        base:'second',
+        ratio: dr.ratio
+    };
+    UNITS[unit.name] = unit;
+    dr.abbr.forEach((abbr) =>  UNITS[abbr] = unit);
+}
+makeTime({name:'second',abbr:['s','sec','seconds'], ratio:1});
+makeTime({name:'minute',abbr:['min','minutes'], ratio:1/60.0});
+makeTime({name:'hour',  abbr:['hr','hours'],ratio: 1/(60*60)});
+makeTime({name:'day',   abbr:['day','days'],ratio: 1/(60*60*24)});
+makeTime({name:'month', abbr:['months'],ratio: 1/(60*60*24*30)});
+makeTime({name:'year',  abbr:['yr','years'],ratio: 1/(60*60*24*365)});
+
+
+
 class Unit {
     constructor(name, dimension) {
+        if(UNITS[name]) {
+            var unit = UNITS[name];
+            this.name = unit.name;
+            this.dimension = unit.dimension;
+            this.type = unit.type;
+            this.base = unit.base;
+            this.ratio = unit.ratio;
+        }
         if(name === 'm' || name === 'meter' || name === 'meters') {
             this.name = 'meter';
             this.dimension = 1;
@@ -76,6 +106,10 @@ class Unit {
     convertTo(val,name) {
         var unit = new Unit(name);
         console.log('converting', val.toString(), this.name,'to',name);
+        console.log("types", this.type, unit.type, this.ratio, unit.ratio);
+        if(this.type !== unit.type) {
+            throw new Error(`'${this.type}' and '${unit.type}' are incompatible types. Cannot convert between them.`);
+        }
         return val / this.ratio * unit.ratio;
     }
     multiply(unit) {

@@ -67,11 +67,24 @@ unittests("simple units", [
     //['2 ft^2', new Literal(2, 'foot',2)],
 ]);
 
+
 test("crashed",(t)=>{
     t.throws(()=>{  Parser.parseString("1.2.3"); });
     t.throws(()=>{ Parser.parseString("4a5")});
     t.throws(()=>{ Parser.parseString("4ft + 5")});
+    t.throws(()=>{ Parser.parseString('120m as hours')});
     t.end();
 });
 
 
+unittests("duration units", [
+    ["1 second", new Literal(1,'second')],
+    ['1s', new Literal(1,'second')],
+    ['120s as minutes', new Literal(2, 'minute')],
+    ['7200s as hours', new Literal(2, 'hour')],
+    ['120min as hours', new Literal(2, 'hour')],
+    ['12 hr as days', new Literal(0.5, 'day')],
+    ['90 days as months', new Literal(3, 'month')],
+    ['730 days as years', new Literal(2, 'year')],
+    ['5 years as seconds', new Literal(157680000,'second')]
+]);
