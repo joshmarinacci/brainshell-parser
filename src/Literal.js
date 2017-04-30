@@ -22,6 +22,43 @@ makeTime({name:'day',   abbr:['day','days'],ratio: 1/(60*60*24)});
 makeTime({name:'month', abbr:['months'],ratio: 1/(60*60*24*30)});
 makeTime({name:'year',  abbr:['yr','years'],ratio: 1/(60*60*24*365)});
 
+function make(name,dim,type,base,ratio,abbr) {
+    var unit = { name:name, dimension:dim, type:type,base:base,ratio:ratio};
+    UNITS[unit.name] = unit;
+    UNITS[abbr] = unit;
+    console.log('added',unit.name, abbr, unit.ratio);
+}
+
+var metric_prefixes = ['kilo','mega','giga','tera','peta','exa','zetta','yotta'];
+metric_prefixes.forEach((prefix,i)=>{
+    let abbr1 = prefix[0].toUpperCase()+'B';
+    make(prefix+'byte',1,'storage','byte',Math.pow(1000,i+1),abbr1);
+    let abbr2 = prefix[0].toLowerCase()+'b';
+    make(prefix+'bit',1,'storage','bit',Math.pow(1000,i+1),abbr2);
+});
+
+['kibi','mebi','gibi','tebi','pebi','exbi','zebi','yobi'].forEach((prefix,i)=>{
+    let abbr1 = prefix[0].toUpperCase()+'iB';
+    make(prefix+'byte',1,'storage','byte',Math.pow(1000,i+1),abbr1);
+    let abbr2 = prefix[0].toUpperCase()+'ib';
+    make(prefix+'bit',1,'storage','bit',Math.pow(1000,i+1),abbr2);
+});
+
+
+make('meter',1,'distance','meter',1,'m');
+make('decameter',1,'distance','meter',10,'dam');
+make('hectometer',1,'distance','meter',100,'hm');
+metric_prefixes.forEach((prefix,i)=>{
+    let abbr1 = prefix[0].toUpperCase()+'m';
+    make(prefix+'meter',1,'distance','meter',Math.pow(1000,i+1),abbr1);
+});
+
+make('decimeter',1,'distance','meter',1/10,'dm');
+make('centimeter',1,'distance','meter',1/100,'cm');
+const metric_sub_prefixes = ['milli','micro','nano','pico','femto','atto','zepto','yocto'];
+metric_sub_prefixes.forEach((prefix,i) => {
+    make(prefix+'meter',1,'distance','meter',Math.pow(1000,-(i+1)),prefix[0]+'m');
+});
 
 
 class Unit {
@@ -34,26 +71,12 @@ class Unit {
             this.base = unit.base;
             this.ratio = unit.ratio;
         }
-        if(name === 'm' || name === 'meter' || name === 'meters') {
-            this.name = 'meter';
-            this.dimension = 1;
-            this.type = 'distance';
-            this.base = 'meter';
-            this.ratio = 1;
-        }
         if(name === 'feet' || name === 'foot' || name === 'ft') {
             this.name = 'foot';
             this.dimension = 1;
             this.type = 'distance';
             this.base = 'meter';
             this.ratio = 1/0.3048;
-        }
-        if(name === 'kilometer' || name === 'km' || name === 'kilometers') {
-            this.name = 'kilometer';
-            this.dimension = 1;
-            this.type = 'distance';
-            this.base = 'meter';
-            this.ratio = 1/1000;
         }
         if(name === 'gallon' || name === 'gallons') {
             this.name = 'gallon';

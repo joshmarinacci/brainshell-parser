@@ -2,6 +2,7 @@ var test = require('tape');
 require('tape-approximately')(test);
 var Parser = require('../src/parser.js');
 var Literal = require('../src/Literal').Literal;
+var moment = require('moment');
 
 
 function tests(msg,arr) {
@@ -33,7 +34,8 @@ tests('parsing 42 in different formats', [
 	['4.2',4.2],
 	['0x42',0x42],
 	['4.2e2',420],
-    ['42e2',4200]
+    ['42e2',4200],
+    ['42_000_000',42*1000*1000]
 ]);
 
 tests("simple math 2", [
@@ -42,7 +44,10 @@ tests("simple math 2", [
 	['4-2',2],
 	['4*2',8],
 	['4/2',2],
-    ['4^2',16]
+    ['4^2',16],
+    ['1+2*3',7],
+    ['1+(2*3)',7],
+    ['(1+2)*3',9]
 ]);
 
 tests("big numbers", [
@@ -64,9 +69,25 @@ unittests("simple units", [
     ['3 teaspoons as tablespoons', new Literal(1,'tablespoon')],
     ['2 ft * 2 ft', new Literal(4,'foot',2)],
     ['2 sqft', new Literal(2,'foot',2)],
-    //['2 ft^2', new Literal(2, 'foot',2)],
+    ['2 ft^2', new Literal(2, 'foot',2)],
+    ['2 ft^3', new Literal(2, 'foot',3)],
+    ['2 cuft', new Literal(2, 'foot',3)],
+    ['2 TB as GB',new Literal(2*1000,'gigabyte')],
+    ['2 TiB as GiB',new Literal(2*1024,'gibibyte')],
+    ['2 MiB as KiB',new Literal(2*1024,'kibibyte')],
+    ['2 KiB as MiB',new Literal(2/1024,'mebibyte')],
+    ['2 MB as KB',new Literal(2*1000,'kilobyte')],
+    ['2 KB as MB',new Literal(2/1000,'megabyte')],
+    ['1 GiB as Gibit', new Literal(8, 'gibibit')],
+    ['1 GB as Gbit', new Literal(8, 'gigabit')]
 ]);
 
+unittests('complex units', [
+    ['2ft * 2ft', new Literal(4,'feet',2)],
+    ['2ft * 2ft * 2ft', new Literal(8,'feet',3)],
+    ['2ft * 2ft * 2ft as gallons', new Literal(2,'gallon',1)],
+    ['2 feet / second', new Literal(1,'knot')]
+]);
 
 test("crashed",(t)=>{
     t.throws(()=>{  Parser.parseString("1.2.3"); });
@@ -87,4 +108,24 @@ unittests("duration units", [
     ['90 days as months', new Literal(3, 'month')],
     ['730 days as years', new Literal(2, 'year')],
     ['5 years as seconds', new Literal(157680000,'second')]
+]);
+
+tests("constants", [
+    ['Pi',Math.PI],
+    ['pi',Math.PI],
+    ['earth.radius as mi',new Literal(3959,'miles')],
+    ['jupiter.radius as km', new Literal(69911,'kilometers')]
+]);
+
+tests("function calls", [
+    ['"foo"', "foo"], //string literal
+    ['Date("8/31/75")', moment('August 31st, 1975')],
+    ['Date("1975-08-31")', moment('August 31st, 1975')],
+    ['Year(Date("August 31st 1975"))', 1975],
+    ['WeekDay(Date("August 31st 1975"))', 'Sunday']
+]);
+
+test("lists", [
+    ['List(4,5,6)',[4,5,6]],
+    ['[4,5,6]',[4,5,6]],
 ]);

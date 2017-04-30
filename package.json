@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "decimal.js": "^7.2.0",
+    "moment": "^2.18.1",
     "numeral": "^2.0.6",
     "ohm-js": "^0.13.1",
     "react": "^15.5.4",
