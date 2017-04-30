@@ -16,16 +16,17 @@ function makeTime(dr) {
     dr.abbr.forEach((abbr) =>  UNITS[abbr] = unit);
 }
 makeTime({name:'second',abbr:['s','sec','seconds'], ratio:1});
-makeTime({name:'minute',abbr:['min','minutes'], ratio:1/60.0});
-makeTime({name:'hour',  abbr:['hr','hours'],ratio: 1/(60*60)});
-makeTime({name:'day',   abbr:['day','days'],ratio: 1/(60*60*24)});
-makeTime({name:'month', abbr:['months'],ratio: 1/(60*60*24*30)});
-makeTime({name:'year',  abbr:['yr','years'],ratio: 1/(60*60*24*365)});
+makeTime({name:'minute',abbr:['min','minutes'], ratio:60.0});
+makeTime({name:'hour',  abbr:['hr','hours'],ratio: 60*60});
+makeTime({name:'day',   abbr:['day','days'],ratio: 60*60*24});
+makeTime({name:'month', abbr:['months'],ratio: 60*60*24*30});
+makeTime({name:'year',  abbr:['yr','years'],ratio: 60*60*24*365});
 
-function make(name,dim,type,base,ratio,abbr) {
+function make(name,dim,type,base,ratio,...abbr) {
     var unit = { name:name, dimension:dim, type:type,base:base,ratio:ratio};
     UNITS[unit.name] = unit;
-    UNITS[abbr] = unit;
+    UNITS[unit.name+'s'] = unit;
+    abbr.forEach((abbr)=>UNITS[abbr]=unit);
     console.log('added',unit.name, abbr, unit.ratio);
 }
 
@@ -48,9 +49,10 @@ metric_prefixes.forEach((prefix,i)=>{
 make('meter',1,'distance','meter',1,'m');
 make('decameter',1,'distance','meter',10,'dam');
 make('hectometer',1,'distance','meter',100,'hm');
-metric_prefixes.forEach((prefix,i)=>{
+make('kilometer',1,'distance','meter',1000,'km');
+metric_prefixes.slice(1).forEach((prefix,i)=>{
     let abbr1 = prefix[0].toUpperCase()+'m';
-    make(prefix+'meter',1,'distance','meter',Math.pow(1000,i+1),abbr1);
+    make(prefix+'meter',1,'distance','meter',Math.pow(1000,i+2),abbr1);
 });
 
 make('decimeter',1,'distance','meter',1/10,'dm');
@@ -60,6 +62,14 @@ metric_sub_prefixes.forEach((prefix,i) => {
     make(prefix+'meter',1,'distance','meter',Math.pow(1000,-(i+1)),prefix[0]+'m');
 });
 
+make('mile',1,'distance','meter',1609.344,'mi');
+make('foot',1,'distance','meter',0.3048,'feet','ft');
+make('gallon',1,'volume','gallon',1,'gallons','gal');
+make('quart',1,'volume','gallon',1/4,'quarts','qt');
+make('pint',1,'volume','gallon',1/8,'pints');
+make('cup',1,'volume','gallon',1/16,'cups');
+make('tablespoon',1,'volume','gallon',1/256,'tablespoons','tbs');
+make('teaspoon',1,'volume','gallon',1/(256*3),'teaspoons','tsp');
 
 class Unit {
     constructor(name, dimension) {
@@ -71,48 +81,6 @@ class Unit {
             this.base = unit.base;
             this.ratio = unit.ratio;
         }
-        if(name === 'feet' || name === 'foot' || name === 'ft') {
-            this.name = 'foot';
-            this.dimension = 1;
-            this.type = 'distance';
-            this.base = 'meter';
-            this.ratio = 1/0.3048;
-        }
-        if(name === 'gallon' || name === 'gallons') {
-            this.name = 'gallon';
-            this.dimension = 1;
-            this.type = 'volume';
-            this.base = 'gallon';
-            this.ratio = 1;
-        }
-        if(name === 'cup' || name === 'cups') {
-            this.name = 'cup';
-            this.dimension = 1;
-            this.type = 'volume';
-            this.base = 'gallon';
-            this.ratio = 16;
-        }
-        if(name === 'teaspoon' || name === 'teaspoons') {
-            this.name = 'teaspoon';
-            this.dimension = 1;
-            this.type = 'volume';
-            this.base = 'gallon';
-            this.ratio = 768;
-        }
-        if(name === 'tablespoon' || name === 'tablespoons') {
-            this.name = 'tablespoon';
-            this.type = 'volume';
-            this.base = 'gallon';
-            this.ratio = 256;
-        }
-        if(name === 'quarts' || name === 'quart') {
-            this.name = 'quart';
-            this.dimension = 1;
-            this.type = 'volume';
-            this.base = 'gallon';
-            this.ratio = 4;
-        }
-
 
         if(name === 'sqft') {
             this.name = 'foot';
@@ -133,7 +101,7 @@ class Unit {
         if(this.type !== unit.type) {
             throw new Error(`'${this.type}' and '${unit.type}' are incompatible types. Cannot convert between them.`);
         }
-        return val / this.ratio * unit.ratio;
+        return val * this.ratio / unit.ratio;
     }
     multiply(unit) {
         return new Unit(this.name, this.dimension + unit.dimension);

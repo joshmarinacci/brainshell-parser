@@ -14,8 +14,8 @@ BrainShell {
     Literal = Number unit?
 	Number = hex | float | integer
 	hex = "0x" hexDigit+
-	float = digit+ "." digit+ exp?
+	float = (digit|"_")+ "." digit+ exp?
 	exp = "e" "-"? digit+
-	integer = digit+ exp?
+	integer = (digit|"_")+ exp?
 	unit = (~"as" letter+)
 }

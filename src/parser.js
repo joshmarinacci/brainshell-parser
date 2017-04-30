@@ -21,7 +21,7 @@ function generateSemantics(grammar) {
         unit: function(_) {  return this.sourceString;  },
         Number: (a) => a.calc(),
         integer: function(a,b) {
-            var v = parseInt(this.sourceString, 10);
+            var v = parseInt(this.sourceString.replace(/_/g,''), 10);
             if(b) return v * Math.pow(10, b.calc());
             return v;
         },
@@ -65,7 +65,7 @@ module.exports = {
     parseString: function(str) {
         if(!grammar) init();
         var m = grammar.match(str);
-        if(m.failed()) throw new Error("match failed");
+        if(m.failed()) throw new Error("match failed on: " + str);
         var js = sem(m).calc();
         console.log("parsing",str, "->", js.toString());
         return js;
