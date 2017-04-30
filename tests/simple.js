@@ -63,6 +63,9 @@ unittests("simple units", [
     ['40m as feet', new Literal(131.234,'foot')],
     ['4 ft',new Literal(4,'feet')],
     ['4 ft + 5 ft', new Literal(9,'feet')],
+    ['4 yards',new Literal(4,'yard')],
+    ['4 yd',new Literal(4,'yard')],
+
     ['5 km',new Literal(5,'kilometer')],
     ['5 km as meters',new Literal(5000,'meter')],
     ['5 miles as meters',new Literal(8046.72,'meter')],
@@ -73,7 +76,7 @@ unittests("simple units", [
     ['2 sqft', new Literal(2,'foot',2)],
     //['2 ft^2', new Literal(2, 'foot',2)],
     //['2 ft^3', new Literal(2, 'foot',3)],
-    //['2 cuft', new Literal(2, 'foot',3)],
+    ['2 cuft', new Literal(2, 'foot',3)],
     ['2 TB as GB',new Literal(2*1000,'gigabyte')],
     //['2 TiB as GiB',new Literal(2*1024,'gibibyte')],
     //['2 MiB as KiB',new Literal(2*1024,'kibibyte')],

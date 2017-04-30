@@ -64,6 +64,12 @@ metric_sub_prefixes.forEach((prefix,i) => {
 
 make('mile',1,'distance','meter',1609.344,'mi');
 make('foot',1,'distance','meter',0.3048,'feet','ft');
+make('yard',1,'distance','meter',0.3048*3,'yards','yd');
+
+make('foot',2,'area','meter',0.3048,'sqft','squarefeet');
+make('foot',3,'volume','meter',0.3048,'cuft','cubicfeet');
+
+
 make('gallon',1,'volume','gallon',1,'gallons','gal');
 make('quart',1,'volume','gallon',1/4,'quarts','qt');
 make('pint',1,'volume','gallon',1/8,'pints');
@@ -80,14 +86,6 @@ class Unit {
             this.type = unit.type;
             this.base = unit.base;
             this.ratio = unit.ratio;
-        }
-
-        if(name === 'sqft') {
-            this.name = 'foot';
-            this.dimension = 2;
-            this.type = 'area';
-            this.base = 'meter';
-            this.ratio = 1/0.3048;
         }
 
         if(dimension) this.dimension = dimension;
