@@ -21,9 +21,9 @@ function unittests(msg,arr) {
             let str = tcase[0];
             let ans = tcase[1];
             let res = Parser.parseString(str);
-            t.approximately(res.value,ans.value,0.001);
-            t.equal(res.unit.name,ans.unit.name);
-            t.equal(res.unit.dimension, ans.unit.dimension);
+            t.approximately(res.value,ans.value,0.001,'value');
+            t.equal(res.unit.name,ans.unit.name,'name');
+            t.equal(res.unit.dimension, ans.unit.dimension,'dimension');
         });
         t.end();
     });
@@ -73,10 +73,10 @@ unittests("simple units", [
     ['16 cups as gallons', new Literal(1,'gallon')],
     ['3 teaspoons as tablespoons', new Literal(1,'tablespoon')],
     ['2 ft * 2 ft', new Literal(4,'foot',2)],
-    ['2 sqft', new Literal(2,'foot',2)],
+    ['2 sqft', new Literal(2,'squarefoot',2)],
     //['2 ft^2', new Literal(2, 'foot',2)],
     //['2 ft^3', new Literal(2, 'foot',3)],
-    ['2 cuft', new Literal(2, 'foot',3)],
+    ['2 cuft', new Literal(2, 'cubicfoot',3)],
     ['2 TB as GB',new Literal(2*1000,'gigabyte')],
     //['2 TiB as GiB',new Literal(2*1024,'gibibyte')],
     //['2 MiB as KiB',new Literal(2*1024,'kibibyte')],
@@ -89,6 +89,7 @@ unittests("simple units", [
 
 unittests('complex units', [
     ['2ft * 2ft', new Literal(4,'feet',2)],
+    ['2ft * 2ft as sqft', new Literal(4,'squarefeet')],
     ['2ft * 2ft * 2ft', new Literal(8,'feet',3)],
     //['2ft * 2ft * 2ft as gallons', new Literal(2,'gallon',1)],
     //['2 feet / second', new Literal(1,'knot')]

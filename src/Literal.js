@@ -66,8 +66,8 @@ make('mile',1,'distance','meter',1609.344,'mi');
 make('foot',1,'distance','meter',0.3048,'feet','ft');
 make('yard',1,'distance','meter',0.3048*3,'yards','yd');
 
-make('foot',2,'area','meter',0.3048,'sqft','squarefeet');
-make('foot',3,'volume','meter',0.3048,'cuft','cubicfeet');
+make('squarefoot',2,'area','meter',0.3048,'sqft','squarefeet');
+make('cubicfoot',3,'volume','meter',0.3048,'cuft','cubicfeet');
 
 
 make('gallon',1,'volume','gallon',1,'gallons','gal');
@@ -94,8 +94,15 @@ class Unit {
     }
     convertTo(val,name) {
         var unit = new Unit(name);
-        console.log('converting', val.toString(), this.name,'to',name);
-        console.log("types", this.type, unit.type, this.ratio, unit.ratio);
+        //console.log('converting', val.toString(), this.name,'to',name);
+        //console.log("types", this.type, unit.type);
+        //console.log("ratios", this.ratio, unit.ratio);
+        //console.log("dimension",this.dimension, unit.dimension);
+
+        if(this.type === 'distance' && unit.type === 'area' && this.dimension === 2) {
+            //console.log("we can convert from distance to area");
+            return val * this.ratio / unit.ratio;
+        }
         if(this.type !== unit.type) {
             throw new Error(`'${this.type}' and '${unit.type}' are incompatible types. Cannot convert between them.`);
         }
@@ -150,6 +157,7 @@ class Literal {
             return new Literal(this.value * b.value, this.unit);
         }
         //both have a unit
+        //console.log('multiplying', this.value.toString(), 'times' , b.toString());
         return new Literal(this.value.mul(b.value), this.unit.multiply(b.unit));
     }
     divide(b) {
