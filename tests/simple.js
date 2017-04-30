@@ -91,7 +91,7 @@ unittests('complex units', [
     ['2ft * 2ft', new Literal(4,'feet',2)],
     ['2ft * 2ft as sqft', new Literal(4,'squarefeet')],
     ['2ft * 2ft * 2ft', new Literal(8,'feet',3)],
-    //['2ft * 2ft * 2ft as gallons', new Literal(2,'gallon',1)],
+    ['2ft * 2ft * 2ft as gallons', new Literal(59.8442,'gallon',1)],
     //['2 feet / second', new Literal(1,'knot')]
 ]);
 

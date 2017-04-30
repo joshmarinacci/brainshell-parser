@@ -100,7 +100,11 @@ class Unit {
         //console.log("dimension",this.dimension, unit.dimension);
 
         if(this.type === 'distance' && unit.type === 'area' && this.dimension === 2) {
-            //console.log("we can convert from distance to area");
+            //console.log("we can convert from distance^2 to area");
+            return val * this.ratio / unit.ratio;
+        }
+        if(this.type === 'distance' && unit.type === 'volume' && this.dimension === 3) {
+            //console.log("we can convert from distance^3 to volume");
             return val * this.ratio / unit.ratio;
         }
         if(this.type !== unit.type) {
