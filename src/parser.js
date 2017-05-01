@@ -13,7 +13,7 @@ class FunCall {
         return "Function Call"
     }
     invoke() {
-        return this.fun(this.arg.string);
+        return this.fun(this.arg);
     }
 }
 
@@ -35,7 +35,21 @@ const SYMBOLS = {
     'pi': new Literal(Math.PI),
     'earth.radius':new Literal(6371.008,'km'),
     'jupiter.radius':new Literal(69911,'km'),
-    'date': moment,
+    'date': function(arg) {
+        console.log("doing date on arg " + arg, arg.string);
+        return moment(arg.string);
+    },
+    'year': function(arg) {
+        if(arg.type === 'funcall') arg = arg.invoke();
+        if(!moment.isMoment(arg)) throw new Error("not a valid date object");
+        return new Literal(arg.year());
+    },
+    'weekday': function(arg) {
+        if(arg.type === 'funcall') arg = arg.invoke();
+        if(!moment.isMoment(arg)) throw new Error("not a valid date object");
+        console.log('real weekday is', arg.day());
+        return new Literal(arg.day());
+    }
 };
 function resolveSymbol(name) {
     var ref = name.toLowerCase();

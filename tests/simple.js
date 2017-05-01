@@ -157,10 +157,9 @@ tests("constants", [
 
 tests("function calls", [
     ["'foo'", "foo"], //string literal
-    //["Date('31 Aug 1975')", moment('1975-08-31').toString()],
-    ['Date("1975-08-31")', moment('1975-08-31').toString()]
-    //['Year(Date("August 31st 1975"))', 1975],
-    //['WeekDay(Date("August 31st 1975"))', 'Sunday']
+    ['Date("1975-08-31")', moment('1975-08-31').toString()],
+    ['Year(Date("1975-08-31"))', 1975],
+    ['WeekDay(Date("1975-08-31"))', 0] //0 is Sunday
 ]);
 
 tests("lists", [
