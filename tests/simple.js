@@ -95,6 +95,7 @@ unittests("simple units", [
     ['40m as feet', new Literal(131.234,'foot')],
     ['4 ft',new Literal(4,'feet')],
     ['4 ft + 5 ft', new Literal(9,'feet')],
+    ['4 ft - 5 ft', new Literal(-1,'feet')],
     ['4 yards',new Literal(4,'yard')],
     ['4 yd',new Literal(4,'yard')],
 
