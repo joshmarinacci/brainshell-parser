@@ -11,7 +11,11 @@ function tests(msg,arr) {
             let str = tcase[0];
             let ans = tcase[1];
             let res = Parser.parseString(str);
-            t.approximately(res.value.toFixed(5),ans,0.00001);
+            if(res.type === 'string') {
+                t.equal(res.string,ans);
+            } else {
+                t.approximately(res.value.toFixed(5), ans, 0.00001);
+            }
         });
         t.end();
     });
@@ -145,7 +149,7 @@ tests("constants", [
 ]);
 
 tests("function calls", [
-    //['"foo"', "foo"], //string literal
+    ["'foo'", "foo"], //string literal
     //['Date("8/31/75")', moment('August 31st, 1975')],
     //['Date("1975-08-31")', moment('August 31st, 1975')],
     //['Year(Date("August 31st 1975"))', 1975],

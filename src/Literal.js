@@ -119,6 +119,7 @@ class Unit {
 
 class Literal {
     constructor(value, unit, dimension) {
+        this.type = 'number';
         if(!(value instanceof Decimal)) {
             this.value = new Decimal(value);
         } else {
@@ -198,6 +199,16 @@ class Literal {
     }
 }
 
+class LiteralString {
+    constructor(str) {
+        this.type = 'string';
+        this.string = str;
+    }
+    toString() {
+        return "String:"+this.string;
+    }
+}
 module.exports = {
-    Literal: Literal
+    Literal: Literal,
+    LiteralString:LiteralString
 }

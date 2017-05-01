@@ -1,5 +1,6 @@
 var ohm = require('ohm-js');
 var Literal = require('./Literal').Literal;
+var LiteralString = require('./Literal').LiteralString;
 
 var grammar;
 var sem;
@@ -47,6 +48,7 @@ function generateSemantics(grammar) {
         PriExpr_paren: ((p1,a,p2) => a.calc()),
         AsExpr: (a,_,u) => a.calc().as(u.calc()),
         identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
+        String:function(_a,str,_c) { return new LiteralString(str.calc().join(""))},
         _terminal: function() {
             return this.sourceString;
         }
