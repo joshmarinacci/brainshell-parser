@@ -1,6 +1,21 @@
 var ohm = require('ohm-js');
 var Literal = require('./Literal').Literal;
 var LiteralString = require('./Literal').LiteralString;
+var moment = require('moment');
+
+class FunCall {
+    constructor(fun, arg) {
+        this.type = 'funcall';
+        this.fun = fun;
+        this.arg = arg;
+    }
+    toString() {
+        return "Function Call"
+    }
+    invoke() {
+        return this.fun(this.arg.string);
+    }
+}
 
 var grammar;
 var sem;
@@ -19,7 +34,8 @@ function GET(url) {
 const SYMBOLS = {
     'pi': new Literal(Math.PI),
     'earth.radius':new Literal(6371.008,'km'),
-    'jupiter.radius':new Literal(69911,'km')
+    'jupiter.radius':new Literal(69911,'km'),
+    'date': moment,
 };
 function resolveSymbol(name) {
     var ref = name.toLowerCase();
@@ -48,7 +64,9 @@ function generateSemantics(grammar) {
         PriExpr_paren: ((p1,a,p2) => a.calc()),
         AsExpr: (a,_,u) => a.calc().as(u.calc()),
         identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
-        String:function(_a,str,_c) { return new LiteralString(str.calc().join(""))},
+        String_single:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
+        String_double:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
+        FunCall:(ident,_1,expr,_2) => new FunCall(ident.calc(),expr.calc()),
         _terminal: function() {
             return this.sourceString;
         }

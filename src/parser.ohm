@@ -1,5 +1,5 @@
 BrainShell {
-	Expr    = AsExpr | AddExpr | Symbol | String
+	Expr    = AsExpr | AddExpr | FunCall | Symbol | String
 	AsExpr = Expr "as" unit
 	AddExpr = AddExpr "+" MulExpr --plus
         | AddExpr "-" MulExpr --minus
@@ -18,7 +18,11 @@ BrainShell {
 	exp = "e" "-"? digit+
 	integer = (digit|"_")+ exp?
 	unit = (~"as" letter+)
+	FunCall = identifier "(" Expr ")"
 	Symbol = identifier
 	identifier = letter (letter | digit | "." | "_")+
-	String = "'" (~"'" any)+ "'"
+	String = q (~q any)+ q    -- single
+	       | qq (~qq any)+ qq -- double
+	q = "'"
+	qq = "\""
 }

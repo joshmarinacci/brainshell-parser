@@ -11,11 +11,18 @@ function tests(msg,arr) {
             let str = tcase[0];
             let ans = tcase[1];
             let res = Parser.parseString(str);
-            if(res.type === 'string') {
-                t.equal(res.string,ans);
-            } else {
-                t.approximately(res.value.toFixed(5), ans, 0.00001);
+            console.log("result is",res.type);
+            if(res.type === 'funcall') {
+                res = res.invoke();
             }
+            if(res.type === 'string') {
+                return t.equal(res.string, ans);
+            }
+            if(res.type === 'number') {
+                return t.approximately(res.value.toFixed(5), ans, 0.00001);
+            }
+            console.log('not a known type');
+            return t.equal(res.toString(),ans);
         });
         t.end();
     });
@@ -150,8 +157,8 @@ tests("constants", [
 
 tests("function calls", [
     ["'foo'", "foo"], //string literal
-    //['Date("8/31/75")', moment('August 31st, 1975')],
-    //['Date("1975-08-31")', moment('August 31st, 1975')],
+    //["Date('31 Aug 1975')", moment('1975-08-31').toString()],
+    ['Date("1975-08-31")', moment('1975-08-31').toString()]
     //['Year(Date("August 31st 1975"))', 1975],
     //['WeekDay(Date("August 31st 1975"))', 'Sunday']
 ]);
