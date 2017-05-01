@@ -10,7 +10,8 @@ function tests(msg,arr) {
         arr.forEach((tcase) => {
             let str = tcase[0];
             let ans = tcase[1];
-            t.approximately(Parser.parseString(str).value.toFixed(5),ans,0.00001);
+            let res = Parser.parseString(str);
+            t.approximately(res.value.toFixed(5),ans,0.00001);
         });
         t.end();
     });
@@ -137,10 +138,10 @@ unittests("duration units", [
 ]);
 
 tests("constants", [
-    //['Pi',Math.PI],
-    //['pi',Math.PI],
-    //['earth.radius as mi',new Literal(3959,'miles')],
-    //['jupiter.radius as km', new Literal(69911,'kilometers')]
+    ['Pi',Math.PI],
+    ['pi',Math.PI],
+    ['earth.radius as mi',3958.76084],
+    ['jupiter.radius as km', 69911]
 ]);
 
 tests("function calls", [

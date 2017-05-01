@@ -9,10 +9,21 @@ function GET(url) {
         xhr.addEventListener("load",function(){
             //console.log("got event",this.responseText);
             res(this.responseText);
-        })
+        });
         xhr.open("GET",url);
         xhr.send();
     });
+}
+
+const SYMBOLS = {
+    'pi': new Literal(Math.PI),
+    'earth.radius':new Literal(6371.008,'km'),
+    'jupiter.radius':new Literal(69911,'km')
+};
+function resolveSymbol(name) {
+    var ref = name.toLowerCase();
+    if(!SYMBOLS[ref]) throw Error("Symbol not found " + name);
+    return SYMBOLS[ref];
 }
 
 function generateSemantics(grammar) {
@@ -35,6 +46,7 @@ function generateSemantics(grammar) {
         ExpExpr_power: ((a,_,b) => a.calc().exponent(b.calc())),
         PriExpr_paren: ((p1,a,p2) => a.calc()),
         AsExpr: (a,_,u) => a.calc().as(u.calc()),
+        identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
         _terminal: function() {
             return this.sourceString;
         }
