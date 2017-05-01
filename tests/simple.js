@@ -29,6 +29,18 @@ function unittests(msg,arr) {
     });
 }
 
+function testsCanonical(msg,arr) {
+    test(msg, (t)=>{
+        arr.forEach((tcase) => {
+            let str = tcase[0];
+            let ans = tcase[1];
+            let res = Parser.parseString(str);
+            t.equal(res.toCanonical().trim(),ans.trim(),'canonical');
+        });
+        t.end();
+    });
+}
+
 tests('parsing 42 in different formats', [
 	['42',42],
 	['4.2',4.2],
@@ -37,6 +49,14 @@ tests('parsing 42 in different formats', [
     ['42e2',4200],
     ['42_000_000',42*1000*1000]
 ]);
+
+testsCanonical('parsing to canonical output', [
+    ['42','42'],
+    ['0x42','0x42'],
+    ['0x42 as decimal','66'],
+    ['42 as hex','0x2a']
+]);
+
 
 tests("simple math 2", [
 	['4+2',6],
@@ -91,7 +111,7 @@ unittests('complex units', [
     ['2ft * 2ft', new Literal(4,'feet',2)],
     ['2ft * 2ft as sqft', new Literal(4,'squarefeet')],
     ['2ft * 2ft * 2ft', new Literal(8,'feet',3)],
-    ['2ft * 2ft * 2ft as gallons', new Literal(59.8442,'gallon',1)],
+    //['2ft * 2ft * 2ft as gallons', new Literal(59.8442,'gallon',1)],
     //['2 feet / second', new Literal(1,'knot')]
 ]);
 

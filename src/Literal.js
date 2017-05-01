@@ -131,6 +131,17 @@ class Literal {
                 this.unit = new Unit(unit,dimension);
             }
         }
+        this.format = 'none';
+    }
+    withUnit(unit) {
+        var lt = new Literal(this.value, unit);
+        lt.format = this.format;
+        return lt;
+    }
+    withPreferredFormat(format) {
+        var lt = new Literal(this.value, this.unit);
+        lt.format = format;
+        return lt;
     }
     toString() {
         var u = "";
@@ -138,6 +149,12 @@ class Literal {
             u = this.unit.name;
         }
         return this.value.toString() + " " + u;
+    }
+    toCanonical() {
+        if(this.format === 'hex') {
+            return this.value.toHex();
+        }
+        return this.toString();
     }
 
     add(b) {
@@ -174,6 +191,8 @@ class Literal {
         return new Literal(this.value.pow(b.value), this.unit);
     }
     as(unit) {
+        if(unit === 'decimal') return this.withPreferredFormat('decimal');
+        if(unit === 'hex') return this.withPreferredFormat('hex');
         var v2 = this.unit.convertTo(this.value,unit);
         return new Literal(v2,unit);
     }

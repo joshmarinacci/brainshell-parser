@@ -17,17 +17,17 @@ function GET(url) {
 
 function generateSemantics(grammar) {
     var sem = grammar.createSemantics().addOperation('calc', {
-        Literal: (num, unit) => new Literal(num.calc(), unit.calc()[0]),
+        Literal: (num, unit) => num.calc().withUnit(unit.calc()[0]),
         unit: function(_) {  return this.sourceString;  },
         Number: (a) => a.calc(),
         integer: function(a,b) {
             var v = parseInt(this.sourceString.replace(/_/g,''), 10);
-            if(b) return v * Math.pow(10, b.calc());
-            return v;
+            if(b) v = v * Math.pow(10, b.calc());
+            return new Literal(v);
         },
-        float: function(a,b,c,e) {  return parseFloat(this.sourceString);  },
-        hex:  function(a,b) {       return parseInt(this.sourceString);    },
-        exp: (_,sign,exp) => parseFloat(exp.calc()),
+        float: function(a,b,c,e) {  return new Literal(parseFloat(this.sourceString));  },
+        hex:  function(a,b) {       return new Literal(parseInt(this.sourceString)).withPreferredFormat('hex'); },
+        exp: (_,sign,exp) => new Literal(parseFloat(exp.calc())),
         AddExpr_plus: ((a,_,b) => a.calc().add(b.calc())),
         AddExpr_minus: ((a,_,b) => a.calc().subtract(b.calc())),
         MulExpr_multiply: ((a,_,b) => a.calc().multiply(b.calc())),
