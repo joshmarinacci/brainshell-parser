@@ -69,6 +69,7 @@ make('yard',1,'distance','meter',0.3048*3,'yards','yd');
 
 make('squarefoot',1,'area','meter',0.092903,'sqft','squarefeet');
 make('cubicfoot',1,'volume','meter',0.0283168,'cuft','cubicfeet');
+make('acre',1,'area','meter',4046.86,'acres');
 
 
 make('gallon',1,'volume','meter',0.00378541,'gallons','gal');

@@ -181,3 +181,33 @@ tests("lists", [
     //['List(4,5,6)',[4,5,6]],
     //['[4,5,6]',[4,5,6]],
 ]);
+
+
+unittests("master tests",[
+    ['200ft * 600ft as acres',new Literal(2.75482094).withComplexUnit(['acre'],[])],
+    //['10ft * 15ft * 8ft as gallons',new Literal(8976.62760).withComplexUnit(['gallon'],[])],
+    //['0xCAFEBABE as decimal',new Literal(0xCAFEBABE)],
+//4. pick a random winner from these four people: Random(List('Alice','Bob','Carl','Dan'))
+//'1_000_000 / 26',   // (shows in the canonical form (1 million divided by 26))
+//6. ex: how long will it take superman to go around the world?  earth.radius / (4000 feet / second) =
+
+    ['(4000 ft/s)',new Literal(4000).withComplexUnit(['feet'],['second'])],
+    ['(4 ft/s) * 6',new Literal(4).withComplexUnit(['feet'],['second'])],
+    ['6*(4 ft/s)',new Literal(4).withComplexUnit(['feet'],['second'])],
+    //['earth.radius * 5',new Literal(4).withComplexUnit(['feet'],['second'])],
+
+    //['6371.008km / (4000 ft/s)',new Literal(1000).withComplexUnit(['hour'],[])],
+    //['6371.008km / (4000 ft/s) as hours',new Literal(1000).withComplexUnit(['hour'],[])],
+    //['earth.radius / (4000 ft/s) as hours',new Literal(1000).withComplexUnit(['hour'],[])],
+
+//    7. how long does it take light to get from the sun to the earth?  92_000_000 miles / lightspeed = 8 minutes
+//8. how long does it take to drive around the world at 60 mph if there was a road that went all around the world? use pi * radius to find circumference in miles, divide by 60mph
+//    ['earth.radius * pi / (60 mi/hr)',''],
+//9. How many earths could fit inside jupiter? (4/3 * pi * jupiter_radius^2) / (4/3 * pi * earth_radius)
+//    ['(4/3*pi*jupiter.radius^3)/(4/3*pi*earth.radius^3)',''],
+    //10. what day of the week was I born on? WeekDay(Date("August 31st, 1975"))
+    //['WeekDay(Date("1975-08-31"))', 0], //0 is Sunday
+//    11. how many songs can I fit on a 1 TB drive? 1 terabyte / average(List(2350kb, 6000kb, 3864kb, 4023kb))
+//12. compare the radius of all planets. needs table of planet info. compare(planets.radius) which does the right thing.
+//13. compare the population of US states vs their date entering the union
+]);

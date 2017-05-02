@@ -38,11 +38,10 @@ class Literal {
         return lt;
     }
     toString() {
-        var u = "";
-        if( this.unit && this.unit.name) {
-            u = this.unit.name;
+        if( this.unit ) {
+            return this.value.toString() + " " + this.unit.toString();
         }
-        return this.value.toString() + " " + u;
+        return this.value.toString();
     }
     toCanonical() {
         if(this.format === 'hex') {
@@ -66,11 +65,9 @@ class Literal {
     }
     multiply(b) {
         //if zero or one has a unit
-        if((!this.unit && !b.unit)
-            || (this.unit && !b.unit)
-            || (!this.unit && b.unit)) {
-            return new Literal(this.value * b.value, this.unit);
-        }
+        if(!this.unit && !b.unit) return new Literal(this.value * b.value);
+        if(!this.unit && b.unit)  return new Literal(this.value * b.value, b.unit);
+        if(this.unit && !b.unit)  return new Literal(this.value * b.value, this.unit);
         //both have a unit
         //console.log('multiplying', this.value.toString(), 'times' , b.toString());
         return new Literal(this.value.mul(b.value), this.unit.multiply(b.unit));
