@@ -34,8 +34,7 @@ function unittests(msg,arr) {
             let ans = tcase[1];
             let res = Parser.parseString(str);
             t.approximately(res.value,ans.value,0.001,'value');
-            t.equal(res.unit.name,ans.unit.name,'name');
-            t.equal(res.unit.dimension, ans.unit.dimension,'dimension');
+            t.equal(res.unit.equal(ans.unit),true);
         });
         t.end();
     });
@@ -87,29 +86,26 @@ tests("big numbers", [
 ]);
 
 unittests("simple units", [
-	['6 feet', new Literal(6,'feet')],
-	['6 meter', new Literal(6, 'meter')],
-    ['6 cups', new Literal(6, 'cups')],
-    ['40 m', new Literal(40, 'meter')],
-    ['40m', new Literal(40, 'meter')],
-    ['40m as feet', new Literal(131.234,'foot')],
+	['6 feet', new Literal(6).withUnit('feet')],
+	['6 meter', new Literal(6).withUnit('meter')],
+    ['6 cups', new Literal(6).withUnit('cups')],
+    ['40 m', new Literal(40).withUnit('meter')],
+    ['40m', new Literal(40).withUnit('meter')],
+    ['40m as feet', new Literal(131.234).withUnit('foot')],
     ['4 ft',new Literal(4,'feet')],
     ['4 ft + 5 ft', new Literal(9,'feet')],
     ['4 ft - 5 ft', new Literal(-1,'feet')],
     ['4 yards',new Literal(4,'yard')],
     ['4 yd',new Literal(4,'yard')],
-
     ['5 km',new Literal(5,'kilometer')],
     ['5 km as meters',new Literal(5000,'meter')],
     ['5 miles as meters',new Literal(8046.72,'meter')],
     ['4 quart as gallon', new Literal(1,'gallon')],
     ['16 cups as gallons', new Literal(1,'gallon')],
     ['3 teaspoons as tablespoons', new Literal(1,'tablespoon')],
-    ['2 ft * 2 ft', new Literal(4,'foot',2)],
-    ['2 sqft', new Literal(2,'squarefoot',2)],
-    //['2 ft^2', new Literal(2, 'foot',2)],
-    //['2 ft^3', new Literal(2, 'foot',3)],
-    ['2 cuft', new Literal(2, 'cubicfoot',3)],
+    ['2 ft * 2 ft', new Literal(4).withComplexUnit(['foot','foot'],[])],
+    ['2 sqft', new Literal(2).withComplexUnit(['squarefoot'],[])],
+    ['2 cuft', new Literal(2, 'cubicfoot')],
     ['2 TB as GB',new Literal(2*1000,'gigabyte')],
     //['2 TiB as GiB',new Literal(2*1024,'gibibyte')],
     //['2 MiB as KiB',new Literal(2*1024,'kibibyte')],
@@ -121,11 +117,29 @@ unittests("simple units", [
 ]);
 
 unittests('complex units', [
-    ['2ft * 2ft', new Literal(4,'feet',2)],
-    ['2ft * 2ft as sqft', new Literal(4,'squarefeet')],
-    ['2ft * 2ft * 2ft', new Literal(8,'feet',3)],
-    //['2ft * 2ft * 2ft as gallons', new Literal(59.8442,'gallon',1)],
-    //['2 feet / second', new Literal(1,'knot')]
+    ['2ft * 2ft', new Literal(4).withComplexUnit(['foot','foot'],[])],
+    ['2ft * 2ft as sqft', new Literal(4).withComplexUnit(['squarefoot'],[])],
+    ['2 ft^2', new Literal(2).withComplexUnit(['foot','foot'],[])],
+    ['2 ft^2 as sqft', new Literal(2).withComplexUnit(['squarefoot'],[])],
+
+    ['2ft * 2ft * 2 feet', new Literal(8).withComplexUnit(['foot','foot','foot'])],
+    ['2 ft^3', new Literal(2).withComplexUnit(['foot','foot','foot'],[])],
+    ['2 ft^3 as cuft', new Literal(2).withComplexUnit(['cubicfoot'],[])],
+    ['2ft * 2ft * 2 feet', new Literal(8).withComplexUnit(['foot','foot','foot'])],
+    ['2ft * 2ft * 2ft as gallons', new Literal(59.8442).withComplexUnit(['gallon'],[])],
+
+
+
+    ['50 mile', new Literal(50).withComplexUnit(['mile'])],
+    ['60 miles / hour', new Literal(60).withComplexUnit(['mile'],['hour'])],
+    ['60mi/hr', new Literal(60).withComplexUnit(['mi'],['hr'])],
+    ['9.8m/s^2', new Literal(9.8).withComplexUnit(['meter'],['second','second'])],
+
+
+    //['2 feet / second', new Literal(2,'knot',1)],
+    //['60 minutes * 60 miles / hour', new Literal(60,'mile',1)],
+    //['10 seconds * 9.8m/s^2', new Literal(98).withComplexUnit(['meter'],['second'])],
+
 ]);
 
 test("crashed",(t)=>{
