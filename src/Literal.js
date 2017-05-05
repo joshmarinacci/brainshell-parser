@@ -73,7 +73,11 @@ class Literal {
         return new Literal(this.value.mul(b.value), this.unit.multiply(b.unit));
     }
     divide(b) {
-        return new Literal(this.value / b.value, this.unit);
+        if(!this.unit && !b.unit) return new Literal(this.value / b.value);
+        if(!this.unit && b.unit)  return new Literal(this.value / b.value, b.unit);
+        if(this.unit && !b.unit)  return new Literal(this.value / b.value, this.unit);
+        return new Literal(this.value.div(b.value), this.unit.divide(b.unit));
+        //return new Literal(this.value / b.value, this.unit);
     }
     exponent(b) {
         console.log('exponent', this.value.toString(),

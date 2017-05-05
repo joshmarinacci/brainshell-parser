@@ -136,7 +136,7 @@ class ComplexUnit {
         //console.log('converted to canonical names',this.numer, this.denom);
     }
     toString() {
-        return "ComplexUnit: " + this.numer.join(",") + " " + this.denom.join(",");
+        return "ComplexUnit: " + this.numer.join("*") + " / " + this.denom.join("*");
     }
     convertTo(val,B) {
         var A = this;
@@ -158,27 +158,30 @@ class ComplexUnit {
         //console.log("BB = ", BB);
 
 
-        //we can convert length ^3 to volume
+        //length^3 => volume
         if(AA.type === 'distance' &&  AA.dimension === 3 && BB.type === 'volume') {
             var nval = val.mul(Math.pow(AA.ratio,AA.dimension)).div(BB.ratio);
             return nval;
         }
-
+        //distance ^2 => area
         if(AA.type === 'distance' && AA.dimension === 2 && BB.type === 'area') {
             var nval = val.mul(Math.pow(AA.ratio,AA.dimension)).div(BB.ratio);
             return nval;
         }
 
+        //fully compatible types, dimensions, and bases
         if(AA.type === BB.type && AA.dimension === BB.dimension && AA.base == BB.base) {
             var nval = val.mul(Math.pow(AA.ratio,AA.dimension)).div(BB.ratio);
             return nval;
         }
 
+        //if B.name is the A.base
         if(AA.type === BB.type && AA.dimension === BB.dimension && AA.base == BB.name) {
             var nval = val.mul(Math.pow(AA.ratio,AA.dimension)).div(1);
             return nval;
         }
 
+        //no possible conversion
         throw new Error("cannot do this kind of conversion");
 
     }
@@ -191,6 +194,10 @@ class ComplexUnit {
         //console.log("muliplying",this,'times',B);
         var A = this;
         return new ComplexUnit(A.numer.concat(B.numer), A.denom.concat(B.denom));
+    }
+    divide(B) {
+        var A = this;
+        return new ComplexUnit(A.numer.concat(B.denom), A.denom.concat(B.numer));
     }
 }
 

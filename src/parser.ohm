@@ -11,6 +11,7 @@ BrainShell {
 	    | PriExpr
 	PriExpr = "(" Expr ")" --paren
 		| Literal
+		| Symbol
     Literal = Number Unit?
 	Number = hex | float | integer
 	hex = "0x" hexDigit+
