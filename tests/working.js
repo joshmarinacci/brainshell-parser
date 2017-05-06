@@ -87,27 +87,6 @@ var units = {
 };
 
 
-// 6km as meter = 6000 meters
-//console.log("6km as meter = 6000 meter => ", calculate([
-//    { nv:6, nu:['kilometer'], dv:1, du:[] },
-//],'meter'));
-//console.log("10s * 5m/s =  50 m => ", calculate([
-//    { nv:10, nu:['second'], dv:1, du:[] },
-//    { nv:5, nu:['meter'],   dv:1, du:['second'] }
-//]));
-//console.log("10s * 9.8m/s^2 = 98m/s => ", calculate([
-//    { nv:10, nu:['second'], dv:1, du:[] },
-//    { nv:9.8, nu:['meter'], dv:1, du:['second','second'] }
-//]));
-//console.log("4000 mi / (40mi/hr) = 100hr =>", calculate([
-//    { nv:4000,nu:['mile'], dv:1,du:[]},
-//    { nv:1,nu:['hour'], dv:[40], du:['mile']}
-//]));
-//console.log("600000 meter / (40mi/hr)", calculate([
-//    { nv:600000,nu:['meter'], dv:1,du:[]},
-//    { nv:1,nu:['hour'], dv:[40], du:['mile']},
-//    { nv:1, nu:['mile'], dv:1609.34, du:['meter']}
-//]));
 
 function flatten(fract) {
     var start = fract.nv + "";
@@ -119,7 +98,6 @@ function flatten(fract) {
         after = "/" + fract.du.join(" ");
     }
     if(fract.du.length === 0 && fract.dv === 1) {
-        console.log("no fract");
         after = "";
     }
     return `${start}${fract.nu.join(" ")}${after}`;
@@ -157,7 +135,6 @@ test("new test",(t) => {
         { nv:1,nu:['hour'], dv:[40], du:['mile']},
     ])),'9.32hour');
 });
-
 //console.log("---------------");
 //console.log("3ft * 3ft * 3ft as gallons", calculate([
 //    { nv:3, nu:['foot'], dv:1,du:[]},
@@ -165,13 +142,10 @@ test("new test",(t) => {
 //    { nv:3, nu:['foot'], dv:1,du:[]},
 //    { nv:1, nu:['gallon'], dv:1,du:[]},
 //]));
-
-
 /*
 then add dimension support to the conversion search to look for
 foot^3.length to meter^3.length to gallon^1.volume
  */
-
 
 
 function calculate(parts, target) {
@@ -202,20 +176,14 @@ function lookupConversion(conv) {
 }
 
 function canBeConverted(val) {
-    //console.log("can I convert?", val);
     //if both n & d contain an item of the same type
     var dist = ((a)=> a === 'meter' || a === 'mile');
     if(val.nu.find(dist) && val.du.find(dist)) {
-        //console.log("should convert a distance",
-        //    val.nu.find(dist),
-        //    val.du.find(dist)
-        //);
         return {
             from:val.nu.find(dist),
             to:val.du.find(dist)
         }
     }
-    //console.log(val);
     return false;
 }
 
@@ -260,9 +228,7 @@ function searchConversions(from,to) {
     var solutions = [];
     for(let i=0; i<conversions.length; i++) {
         let cv = conversions[i];
-        if(cv.inside===true) {
-            continue;
-        }
+        if(cv.inside===true) continue; // don't get into a loop
         if(cv.du === from) {
             if(cv.nu === to) {
                 solutions.push([cv]);
@@ -270,18 +236,12 @@ function searchConversions(from,to) {
                 cv.inside = true;
                 var res = searchConversions(cv.nu,to);
                 cv.inside = false;
-                if(res.length > 0) {
-                    var f = [cv].concat(res);
-                    solutions.push(f);//return f;
-                }
+                if(res.length > 0) solutions.push([cv].concat(res));
             }
         }
     }
     if(solutions.length === 0) return [];
-    var shortest = solutions.shift();
-    solutions.forEach((s)=>{
-        if(s.length < shortest.length) shortest = s;
-    });
-    return shortest;
+    //return the shortest solution
+    return solutions.reduce((a,b)=> (a.length < b.length) ? a:b);
 }
 
