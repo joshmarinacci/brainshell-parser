@@ -43,11 +43,7 @@ const u = {
 
 };
 
-var conversions = [
-    //{  nv:3.28084, nu:'foot',  dv:1, du:'meter' },
-    //{  dv:3.28084, du:'foot',  nv:1, nu:'meter' },
-
-];
+var conversions = [];
 function nc(fv,fu, tv,tu) {
     conversions.push({
         nv:tv,
@@ -149,30 +145,18 @@ foot^3.length to meter^3.length to gallon^1.volume
 
 
 function calculate(parts, target) {
-    //console.log("calculating",parts,target);
     var fin = cancel(condense(parts));
     var conv = canBeConverted(fin);
     if(conv) {
-        //console.log('can be converted',conv);
-        let fin2 = [fin].concat(lookupConversion(conv));
-        //console.log('condensing',fin2);
-        //var fin3 = cancel(condense(fin2));
-        //console.log("condensed",fin3);
+        let fin2 = [fin].concat(searchConversions(conv.from, conv.to));
         return calculate(fin2);
     }
     if(target) {
-        //console.log("must convert to",target,fin);
         var from = fin.nu[0];
-        //console.log('converting from',from);
-        let fin2 = [fin].concat(lookupConversion({from:from, to:target}));
-        //console.log('final to convert',fin2);
+        let fin2 = [fin].concat(searchConversions(from, target));
         return calculate(fin2);
     }
     return fin;
-}
-
-function lookupConversion(conv) {
-    return searchConversions(conv.from,conv.to);
 }
 
 function canBeConverted(val) {
@@ -201,12 +185,13 @@ function cancel(part){
             nu_done.push(a);
         }
     }
-    var du_done = part.du.slice();
-    part.nu = nu_done;
-    part.du = du_done;
-    part.nv = part.nv/part.dv;
-    part.dv = 1;
-    return part;
+    //var du_done = part.du.slice();
+    return {
+        nv: part.nv/part.dv,
+        nu: nu_done,
+        dv: 1,
+        du: part.du.slice()
+    };
 }
 
 function condense(parts) {
@@ -226,20 +211,19 @@ function condense(parts) {
 
 function searchConversions(from,to) {
     var solutions = [];
-    for(let i=0; i<conversions.length; i++) {
-        let cv = conversions[i];
-        if(cv.inside===true) continue; // don't get into a loop
+    conversions.forEach((cv)=>{
+        if(cv.inside===true) return; // don't get into a loop
         if(cv.du === from) {
-            if(cv.nu === to) {
+            if(cv.nu === to) { //add a matching solution
                 solutions.push([cv]);
-            } else {
+            } else { //or else recurse
                 cv.inside = true;
                 var res = searchConversions(cv.nu,to);
                 cv.inside = false;
                 if(res.length > 0) solutions.push([cv].concat(res));
             }
         }
-    }
+    });
     if(solutions.length === 0) return [];
     //return the shortest solution
     return solutions.reduce((a,b)=> (a.length < b.length) ? a:b);
