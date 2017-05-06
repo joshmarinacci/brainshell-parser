@@ -103,53 +103,59 @@ var units = {
 //    { nv:4000,nu:['mile'], dv:1,du:[]},
 //    { nv:1,nu:['hour'], dv:[40], du:['mile']}
 //]));
-console.log("600000 meter / (40mi/hr)", calculate([
-    { nv:600000,nu:['meter'], dv:1,du:[]},
-    { nv:1,nu:['hour'], dv:[40], du:['mile']},
-    //{ nv:1, nu:['mile'], dv:1609.34, du:['meter']}
-]));
+//console.log("600000 meter / (40mi/hr)", calculate([
+//    { nv:600000,nu:['meter'], dv:1,du:[]},
+//    { nv:1,nu:['hour'], dv:[40], du:['mile']},
+//    { nv:1, nu:['mile'], dv:1609.34, du:['meter']}
+//]));
 
 function flatten(fract) {
     var start = fract.nv + "";
     if(Math.floor(fract.nv) - fract.nv < 0) {
-        console.log("has fractional part");
         start = fract.nv.toFixed(2);
     }
-    return start + ""+ fract.nu.join(" ")
-        + "/" + fract.dv + "" +    fract.du.join(" ");
+    var after = "/"+fract.dv;
+    if(fract.dv === 1) {
+        after = "/" + fract.du.join(" ");
+    }
+    if(fract.du.length === 0 && fract.dv === 1) {
+        console.log("no fract");
+        after = "";
+    }
+    return `${start}${fract.nu.join(" ")}${after}`;
 }
 
 test("new test",(t) => {
     t.equal(flatten(calculate([
             { nv:10, nu:['meter'], dv:1, du:[]}
         ])),
-        "10meter/1");
+        "10meter");
     t.equal(flatten(calculate([
             { nv:6, nu:['kilometer'], dv:1, du:[] },
         ],'meter')),
-        "6000meter/1");
+        "6000meter");
 
     t.equal(flatten(calculate([
             { nv:10, nu:['second'], dv:1, du:[] },
             { nv:5, nu:['meter'],   dv:1, du:['second'] }
         ])),
-        '50meter/1');
+        '50meter');
     t.equal(flatten(calculate([
         { nv:10, nu:['second'], dv:1, du:[] },
         { nv:9.8, nu:['meter'], dv:1, du:['second','second'] }
         ])),
-        '98meter/1second');
+        '98meter/second');
     t.equal(flatten(calculate([
         { nv:4000,nu:['mile'], dv:1,du:[]},
         { nv:1,nu:['hour'], dv:[40], du:['mile']}
         ])),
-        '100hour/1');
+        '100hour');
     t.end();
 
     t.equal(flatten(calculate([
         { nv:600000,nu:['meter'], dv:1,du:[]},
         { nv:1,nu:['hour'], dv:[40], du:['mile']},
-    ])),'9.32hour/1');
+    ])),'9.32hour');
 });
 
 //console.log("---------------");
@@ -169,7 +175,6 @@ foot^3.length to meter^3.length to gallon^1.volume
 
 
 function calculate(parts, target) {
-    console.log('===========');
     //console.log("calculating",parts,target);
     var fin = cancel(condense(parts));
     var conv = canBeConverted(fin);
@@ -193,27 +198,7 @@ function calculate(parts, target) {
 }
 
 function lookupConversion(conv) {
-    console.log("looking up",conv);
-    var cv = searchConversions(conv.from,conv.to);
-    console.log("found " + cv.length + "   " + cv);
-    return cv;
-
-    if(conv.from === 'meter') {
-        if(conv.to === 'mile') {
-            return {
-                nv:1, nu:['mile'],
-                dv:1609.34, du:['meter']
-            }
-        }
-    }
-    if(conv.from === 'kilometer') {
-        if(conv.to === 'meter') {
-            return {
-                nv:1000, nu:['meter'],
-                dv:1, du:['kilometer']
-            }
-        }
-    }
+    return searchConversions(conv.from,conv.to);
 }
 
 function canBeConverted(val) {
@@ -240,14 +225,11 @@ function cancel(part){
 
     var nu_done = [];
     while(part.nu.length > 0) {
-        //console.log("loop", part.nu, part.du);
         const a = part.nu.shift();
         var n = part.du.findIndex((b)=> a === b);
         if(n >= 0) {
-            //console.log("canceling",a);
             part.du.splice(n,1);
         } else {
-            //console.log("passing");
             nu_done.push(a);
         }
     }
@@ -260,9 +242,7 @@ function cancel(part){
 }
 
 function condense(parts) {
-    //console.log("parts",parts);
     if(parts.length <= 1) return parts[0];
-
     var a = parts.shift();
     var b = parts.shift();
     var c = {
@@ -277,55 +257,31 @@ function condense(parts) {
 
 
 function searchConversions(from,to) {
-    u.p('searching',from,'->',to);
     var solutions = [];
     for(let i=0; i<conversions.length; i++) {
         let cv = conversions[i];
         if(cv.inside===true) {
-            //u.p("skiping",cv.du, '=>',cv.nu);
             continue;
         }
         if(cv.du === from) {
-            //u.p("found denom",cv.du, '=>',cv.nu);
             if(cv.nu === to) {
-                //u.p("matched to ", cv.nu);
                 solutions.push([cv]);
             } else {
-                //u.p("not a direct match. recursing");
                 cv.inside = true;
-                u.indent();
                 var res = searchConversions(cv.nu,to);
-                u.outdent();
-                //u.p("result = ", res,cv);
                 cv.inside = false;
                 if(res.length > 0) {
                     var f = [cv].concat(res);
-                    //u.p("returning a match",f);
                     solutions.push(f);//return f;
                 }
             }
         }
     }
-    //console.log("final solutions",solutions.join("   "));
     if(solutions.length === 0) return [];
     var shortest = solutions.shift();
     solutions.forEach((s)=>{
         if(s.length < shortest.length) shortest = s;
     });
-
-    console.log("the shortest solution is", shortest.toString());
     return shortest;
 }
-
-
-//test("conversion",(t)=>{
-    //t.equal(searchConversions("meter","foot")[0].nv, 3.28084);
-    //t.equal(searchConversions("foot","meter")[0].nv, 1);
-    //t.equal(searchConversions("foot","meter")[0].dv, 3.28084);
-    //t.equal(searchConversions("quart","gallon")[0].dv, 4);
-    //t.equal(searchConversions("quart","pint")[0].nv, 2);
-    //t.equal(searchConversions("pint","gallon")[0].dv, 2);
-    //t.equal(searchConversions("gallon","tablespoon")[0].nv, 4);
-    //t.end();
-//});
 
