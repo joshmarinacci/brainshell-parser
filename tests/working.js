@@ -1,3 +1,10 @@
+/*
+next up:
+detect possible conversions using better code
+implement ft^3 to gallons via a special conversion. make the other ones be dimension 1
+merge into the regular literal and units code
+ */
+
 /**
  * Created by josh on 5/2/17.
  */
@@ -44,7 +51,7 @@ const u = {
 };
 
 var conversions = [];
-function nc(fv,fu, tv,tu) {
+function addConversion(fv,fu, tv,tu) {
     conversions.push({
         nv:tv,
         nu:tu,
@@ -65,20 +72,32 @@ function nc(fv,fu, tv,tu) {
     });
 }
 
-nc(4,'quart',1,'gallon');
-nc(2,'pint',1,'quart');
-nc(2,'cup',1,'pint');
-nc(1,'cup',16,'tablespoon');
-nc(1,'kilometer',1000,'meter');
-nc(1,'mile',1609.344,'meter');
+addConversion(4,'quart',1,'gallon');
+addConversion(2,'pint',1,'quart');
+addConversion(2,'cup',1,'pint');
+addConversion(1,'cup',16,'tablespoon');
+addConversion(1,'kilometer',1000,'meter');
+addConversion(1,'mile',1609.344,'meter');
 
 
 var units = {
     'meter' : {
-        type:'length'
+        type:'distance'
     },
     'kilometer': {
-        type:'length'
+        type:'distance'
+    },
+    'mile': {
+        type:'distance'
+    },
+    'foot': {
+        type:'distance'
+    },
+    'second': {
+        type:'duration'
+    },
+    'hour': {
+        type:'duration'
     }
 };
 
@@ -130,6 +149,12 @@ test("new test",(t) => {
         { nv:600000,nu:['meter'], dv:1,du:[]},
         { nv:1,nu:['hour'], dv:[40], du:['mile']},
     ])),'9.32hour');
+
+    t.equal(flatten(calculate([
+        { nv:3,nu:['foot'], dv:1,du:[]},
+        { nv:3,nu:['foot'], dv:1,du:[]},
+        { nv:3,nu:['foot'], dv:1,du:[]},
+    ],'gallon')),'3 gallon');
 });
 //console.log("---------------");
 //console.log("3ft * 3ft * 3ft as gallons", calculate([
@@ -161,13 +186,14 @@ function calculate(parts, target) {
 
 function canBeConverted(val) {
     //if both n & d contain an item of the same type
-    var dist = ((a)=> a === 'meter' || a === 'mile');
+    var dist = ((a)=> units[a].type === 'distance');
     if(val.nu.find(dist) && val.du.find(dist)) {
         return {
             from:val.nu.find(dist),
             to:val.du.find(dist)
         }
     }
+    //if val contains three distances and du contains volume
     return false;
 }
 
