@@ -81,6 +81,22 @@ addConversion(1,'cup',16,'tablespoon');
 addConversion(1,'kilometer',1000,'meter');
 addConversion(1,'mile',1609.344,'meter');
 
+conversions.push({
+    nv:1,
+    nu:'foot',
+    nd:3,
+    dv:7.48052,
+    du:'gallon',
+    dd:1
+});
+conversions.push({
+    nv:7.48052,
+    nu:'gallon',
+    nd:1,
+    dv:1,
+    du:'foot',
+    dd:3
+});
 
 var units = {
     'meter' : {
@@ -100,90 +116,35 @@ var units = {
     },
     'hour': {
         type:'duration'
+    },
+    'gallon': {
+        type:'volume'
     }
 };
-
-
-
-function flatten(fract) {
-    var start = fract.nv + "";
-    if(Math.floor(fract.nv) - fract.nv < 0) {
-        start = fract.nv.toFixed(2);
-    }
-    var after = "/"+fract.dv;
-    if(fract.dv === 1) {
-        after = "/" + fract.du.join(" ");
-    }
-    if(fract.du.length === 0 && fract.dv === 1) {
-        after = "";
-    }
-    return `${start}${fract.nu.join(" ")}${after}`;
-}
-
-test("new test",(t) => {
-    t.equal(flatten(calculate([
-            { nv:10, nu:['meter'], dv:1, du:[]}
-        ])),
-        "10meter");
-    t.equal(flatten(calculate([
-            { nv:6, nu:['kilometer'], dv:1, du:[] },
-        ],'meter')),
-        "6000meter");
-
-    t.equal(flatten(calculate([
-            { nv:10, nu:['second'], dv:1, du:[] },
-            { nv:5, nu:['meter'],   dv:1, du:['second'] }
-        ])),
-        '50meter');
-    t.equal(flatten(calculate([
-        { nv:10, nu:['second'], dv:1, du:[] },
-        { nv:9.8, nu:['meter'], dv:1, du:['second','second'] }
-        ])),
-        '98meter/second');
-    t.equal(flatten(calculate([
-        { nv:4000,nu:['mile'], dv:1,du:[]},
-        { nv:1,nu:['hour'], dv:[40], du:['mile']}
-        ])),
-        '100hour');
-    t.end();
-
-    t.equal(flatten(calculate([
-        { nv:600000,nu:['meter'], dv:1,du:[]},
-        { nv:1,nu:['hour'], dv:[40], du:['mile']},
-    ])),'9.32hour');
-
-    //t.equal(flatten(calculate([
-    //    { nv:3,nu:['foot'], dv:1,du:[]},
-    //    { nv:3,nu:['foot'], dv:1,du:[]},
-    //    { nv:3,nu:['foot'], dv:1,du:[]},
-    //],'gallon')),'3 gallon');
-});
-//console.log("---------------");
-//console.log("3ft * 3ft * 3ft as gallons", calculate([
-//    { nv:3, nu:['foot'], dv:1,du:[]},
-//    { nv:3, nu:['foot'], dv:1,du:[]},
-//    { nv:3, nu:['foot'], dv:1,du:[]},
-//    { nv:1, nu:['gallon'], dv:1,du:[]},
-//]));
-/*
-then add dimension support to the conversion search to look for
-foot^3.length to meter^3.length to gallon^1.volume
- */
-
 
 function calculate(parts, target) {
     var fin = cancel(condense(parts));
     var conv = canBeConverted(fin);
     if(conv) {
-        let fin2 = [fin].concat(searchConversions(conv.from, conv.to));
+        let fin2 = [fin].concat(searchConversions(conv.from, conv.fromd, conv.to));
         return calculate(fin2);
     }
     if(target) {
-        var from = fin.nu[0];
-        let fin2 = [fin].concat(searchConversions(from, target));
+        var from = collapsePowers(fin);
+        let fin2 = [fin].concat(searchConversions(from.nu[0], from.nd, target));
         return calculate(fin2);
     }
     return fin;
+}
+
+function collapsePowers(val) {
+    if(val.nu[0] === val.nu[1]) {
+        val.nu.shift();
+        if(!val.nd) val.nd = 1;
+        val.nd++;
+        return collapsePowers(val);
+    }
+    return val;
 }
 
 function canBeConverted(val) {
@@ -237,19 +198,26 @@ function condense(parts) {
 }
 
 
-function searchConversions(from,to) {
+function searchConversions(from,fromd,to) {
     var solutions = [];
     conversions.forEach((cv)=>{
         if(cv.inside===true) return; // don't get into a loop
         if(cv.du === from) {
-            if(cv.nu === to) { //add a matching solution
-                solutions.push([cv]);
-            } else { //or else recurse
-                cv.inside = true;
-                var res = searchConversions(cv.nu,to);
-                cv.inside = false;
-                if(res.length > 0) solutions.push([cv].concat(res));
+            if(fromd) {
+                if(cv.nu === to && cv.dd === fromd) {
+                    solutions.push([cv]);
+                    return;
+                }
+            } else {
+                if(cv.nu === to) {
+                    solutions.push([cv]);
+                    return;
+                }
             }
+            cv.inside = true;
+            var res = searchConversions(cv.nu,cv.nd,to);
+            cv.inside = false;
+            if(res.length > 0) solutions.push([cv].concat(res));
         }
     });
     if(solutions.length === 0) return [];
@@ -294,5 +262,6 @@ test("new test 2", (t) => {
     t.equal(new Num(10,['second']).multiply(new Num(9.8,['meter'],1,['second','second'])).toString(),'98meter/second');
     t.equal(new Num(4000,['mile']).multiply(new Num(1,['hour'],40,['mile'])).toString(),'100hour');
     t.equal(new Num(600*1000,['meter']).multiply(new Num(1,['hour'],40,['mile'])).toString(),'9.32hour');
+    t.equal(new Num(3,['foot']).multiply(new Num(3,['foot'])).multiply(new Num(3,['foot'])).as('gallon').toString(),'201.97gallon');
     t.end();
 });
