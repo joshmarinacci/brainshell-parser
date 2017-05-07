@@ -281,10 +281,18 @@ function Num(nv, nu, dv, du) {
         var ret = calculate([this],target);
         return new Num(ret.nv, ret.nu, ret.dv, ret.du);
     };
+    this.multiply = function(b) {
+        var ret = calculate([this,b]);
+        return new Num(ret.nv, ret.nu, ret.dv, ret.du);
+    }
 }
 
 test("new test 2", (t) => {
     t.equal(new Num(10,['meter']).toString(),'10meter');
     t.equal(new Num(6,['kilometer']).as('meter').toString(),'6000meter');
+    t.equal(new Num(10,['second']).multiply(new Num(5,['meter'],1,['second'])).toString(),'50meter');
+    t.equal(new Num(10,['second']).multiply(new Num(9.8,['meter'],1,['second','second'])).toString(),'98meter/second');
+    t.equal(new Num(4000,['mile']).multiply(new Num(1,['hour'],40,['mile'])).toString(),'100hour');
+    t.equal(new Num(600*1000,['meter']).multiply(new Num(1,['hour'],40,['mile'])).toString(),'9.32hour');
     t.end();
 });
