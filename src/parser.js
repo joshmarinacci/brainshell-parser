@@ -1,6 +1,5 @@
 var ohm = require('ohm-js');
 var Literal = require('./Literal').Literal;
-var ComplexUnit = require('./units').ComplexUnit;
 var LiteralString = require('./Literal').LiteralString;
 var moment = require('moment');
 
@@ -77,11 +76,7 @@ function generateSemantics(grammar) {
             return [name];
         },
         Unit: function(numer, div, denom) {
-            //console.log("parsed a unit",
-            //    numer.calc(),
-            //    div.calc(),
-            //    denom.calc()[0])
-            return new ComplexUnit(numer.calc(),denom.calc()[0]);
+            return [numer.calc(),denom.calc()[0]];
         },
         Number: (a) => a.calc(),
         integer: function(a,b) {
@@ -98,7 +93,7 @@ function generateSemantics(grammar) {
         MulExpr_divide: ((a,_,b) => a.calc().divide(b.calc())),
         ExpExpr_power: ((a,_,b) => a.calc().exponent(b.calc())),
         PriExpr_paren: ((p1,a,p2) => a.calc()),
-        AsExpr: (a,_,u) => a.calc().as(u.calc()),
+        AsExpr: (a,_,u) => a.calc().as(u.calc()[0][0]),
         identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
         String_single:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
         String_double:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
