@@ -1,6 +1,7 @@
 var ohm = require('ohm-js');
 var Literal = require('./Literal').Literal;
 var LiteralString = require('./Literal').LiteralString;
+var UNIT = require('./Literal').UNIT;
 var moment = require('moment');
 
 class FunCall {
@@ -63,10 +64,9 @@ function generateSemantics(grammar) {
         unitchunk : function(a,b,c) {
             var name = a.calc().join("");
             var power = c.calc().join("");
-            //console.log("unit chunk", name, b.calc().join(""), power);
+            name = UNIT.getCanonicalName(name);
             if(power){
                 var pow = parseInt(power);
-                //console.log("to the power",pow);
                 var ret = [];
                 for(var i=0; i<pow; i++) {
                     ret.push(name);

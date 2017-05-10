@@ -72,7 +72,22 @@ var units = {
     }
 };
 
+var abbrevations = {
+    'ft':'foot',
+    'feet':'foot',
+    's':'second',
+    'seconds':'second',
+    'm':'meter',
+    'meters':'meter'
+};
+
 const UNIT = {
+    getCanonicalName(name) {
+        if(units[name]) return name;
+        if(abbrevations[name]) return abbrevations[name];
+        console.log("WARNING. no canonical name found for unit " + name);
+        return null;
+    },
     calculate:function(parts, target) {
         var fin = UNIT.cancel(UNIT.condense(parts));
         var conv = UNIT.canBeConverted(fin);
@@ -240,5 +255,6 @@ class LiteralString {
 }
 module.exports = {
     Literal: Literal,
-    LiteralString:LiteralString
+    LiteralString:LiteralString,
+    UNIT: UNIT
 };

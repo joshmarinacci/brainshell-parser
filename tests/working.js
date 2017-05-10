@@ -44,5 +44,9 @@ test("master tests",(t) => {
     t.equal(Parser.parseString('4000 mile / (40 mile/hour)').toString(),'100hour');
     t.equal(Parser.parseString('600000 meter / (40 mile/hour)').toString(),'9.32hour');
     t.equal(Parser.parseString('3 foot * 3 foot * 3 foot as gallon').toString(),'201.97gallon');
+    t.equal(Parser.parseString('3 ft * 3 ft * 3 ft as gallon').toString(),'201.97gallon');
+    t.equal(Parser.parseString('3ft / 1ft/s').toString(),'3second');
+    t.equal(Parser.parseString('3ft * 1ft/s').toString(),'3foot foot/second');
+    //crashes the stack t.equal(Parser.parseString('1m/(1ft/s)').toString(),'1second');
     t.end();
 });
