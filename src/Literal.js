@@ -29,8 +29,26 @@ addConversion(4,'quart',1,'gallon');
 addConversion(2,'pint',1,'quart');
 addConversion(2,'cup',1,'pint');
 addConversion(1,'cup',16,'tablespoon');
+addConversion(1,'tablespoon',3,'teaspoon');
 addConversion(1,'kilometer',1000,'meter');
 addConversion(1,'mile',1609.344,'meter');
+addConversion(1,'meter',3.28084,'foot');
+
+addConversion(1,'terabyte',1000,'gigabyte');
+addConversion(1,'tibibyte',1024,'gibibyte');
+addConversion(1,'gigabyte',1000,'megabyte');
+addConversion(1,'gibibyte',1024,'mebibyte');
+addConversion(1,'megabyte',1000,'kilobyte');
+addConversion(1,'mebibyte',1024,'kibibyte');
+addConversion(1,'kilobyte',1000,'byte');
+addConversion(1,'gigabyte',8,'gigabit');
+addConversion(1,'gibibyte',8,'gibibit');
+
+addConversion(1,'year',365,'day');
+addConversion(1,'month',30,'day');
+addConversion(1,'day',24,'hour');
+addConversion(1,'hour',60,'minute');
+addConversion(1,'minute',60,'second');
 
 conversions.push({
     nv:1,
@@ -61,24 +79,94 @@ var units = {
     'foot': {
         type:'distance'
     },
-    'second': {
-        type:'duration'
-    },
-    'hour': {
-        type:'duration'
-    },
+    'yard': {  type:'distance' },
+
+    'second': { type:'duration' },
+    'minute': { type:'duration' },
+    'hour': { type:'duration' },
+    'day': { type:'duration' },
+    'month': { type:'duration' },
+    'year': { type:'duration' },
+
     'gallon': {
         type:'volume'
-    }
+    },
+    'quart': {
+        type:'volume'
+    },
+    'cup': {
+        type:'volume'
+    },
+    'teaspoon': {
+        type:'volume'
+    },
+    'tablespoon': {
+        type:'volume'
+    },
+
+    'tibibyte': { type: 'storage'},
+    'gibibyte': { type: 'storage'},
+    'mebibyte': { type: 'storage'},
+    'kibibyte': { type: 'storage'},
+    'terabyte': { type: 'storage'},
+    'gigabyte': { type: 'storage'},
+    'megabyte': { type: 'storage'},
+    'kilobyte': { type: 'storage'},
+    'byte': { type: 'storage'},
+
+    'tibibit': { type: 'storage'},
+    'gibibit': { type: 'storage'},
+    'mebibit': { type: 'storage'},
+    'kibibit': { type: 'storage'},
+    'terabit': { type: 'storage'},
+    'gigabit': { type: 'storage'},
+    'megabit': { type: 'storage'},
+    'kilobit': { type: 'storage'},
+    'bit': { type: 'storage'},
+
+    'hex': { type:'format'},
+    'decimal': { type:'format'}
 };
 
 var abbrevations = {
     'ft':'foot',
     'feet':'foot',
+    'yards':'yard',
+    'yd':'yard',
+    'miles':'mile',
+    'mi':'mile',
+
     's':'second',
     'seconds':'second',
+    'min':'minute',
+    'minutes':'minute',
+    'hr':'hour',
+    'hours':'hour',
+    'days':'day',
+    'months':'month',
+    'years':'year',
+
     'm':'meter',
-    'meters':'meter'
+    'meters':'meter',
+    'km':'kilometer',
+
+    'gallons':'gallon',
+    'cups':'cup',
+    'tablespoons':'tablespoon',
+    'teaspoons':'teaspoon',
+
+    'TB':'terabyte',
+    'GB':'gigabyte',
+    'MB':'megabyte',
+    'KB':'kilobyte',
+    'TiB':'tibibyte',
+    'GiB':'gibibyte',
+    'MiB':'mebibyte',
+    'KiB':'kibibyte',
+    'Gibit':'gibibit',
+    'TBit':'terabit',
+    'Gbit':'gigabit',
+    'Mbit':'megabit',
 };
 
 const UNIT = {
@@ -196,12 +284,20 @@ class Literal {
         this.type = 'number';
         this.format = 'none';
         this.nv = nv?nv:1;
+        if(typeof nu === 'string')  nu = [nu];
         this.nu = nu?nu:[];
+        this.nu = this.nu.map((u)=>UNIT.getCanonicalName(u));
         this.dv = dv?dv:1;
         this.du = du?du:[];
+        this.du = this.du.map((u)=>UNIT.getCanonicalName(u));
     }
     withUnit(parts) {
+        if(!parts) return this;
+        if(typeof parts === 'string') return new Literal(this.nv,[UNIT.getCanonicalName(parts)]);
         return new Literal(this.nv,parts[0],1,parts[1]);
+    }
+    withComplexUnit(parts1, parts2) {
+        return new Literal(this.nv,parts1,1,parts2);
     }
     toString () {
         var start = this.nv + "";
@@ -218,6 +314,9 @@ class Literal {
         return `${start}${this.nu.join(" ")}${after}`;
     }
     as(target) {
+        if(units[target].type === 'format') {
+            return this.withPreferredFormat(target);
+        }
         var ret = UNIT.calculate([this],target);
         return new Literal(ret.nv, ret.nu, ret.dv, ret.du);
     };
@@ -228,19 +327,57 @@ class Literal {
     divide(b) {
         return this.multiply(b.invert());
     }
+    add(b) {
+        //can add when there are no units
+        if(this.nu.length == 0 && b.nu.length == 0) {
+            return new Literal(this.nv + b.nv);
+        }
+        if(this.sameUnits(b)) {
+            return new Literal(this.nv + b.nv, this.nu, this.dv, this.du);
+        }
+        if(this.nu.length === b.nu.length) {
+            console.log('adding with the same length');
+        }
+    }
+    subtract(b) {
+        //can add when there are no units
+        if(this.nu.length == 0 && b.nu.length == 0) {
+            return new Literal(this.nv - b.nv);
+        }
+        if(this.sameUnits(b)) {
+            return new Literal(this.nv - b.nv, this.nu, this.dv, this.du);
+        }
+    }
+    exponent(b) {
+        if(this.nu.length == 0 && b.nu.length == 0) {
+            return new Literal(Math.pow(this.nv,b.nv));
+        } else {
+            throw new Error("can't do exponent with units yet");
+        }
+    }
     invert() {
         return new Literal(this.dv, this.du, this.nv, this.nu);
     }
+    sameUnits(b) {
+        if(this.nu.length !== b.nu.length) return false;
+        for(var i=0; i<this.nu.length; i++) {
+            if(this.nu[i] !== b.nu[i]) return false;
+        }
+        return true;
+    }
     withPreferredFormat(format) {
-        var lt = new Literal(this.value, this.unit);
+        var lt = new Literal(this.nv);//, this.unit);
         lt.format = format;
         return lt;
     }
     toCanonical() {
         if(this.format === 'hex') {
-            return this.value.toHex();
+            return '0x'+this.nv.toString(16);
         }
         return this.toString();
+    }
+    getValue() {
+        return this.nv/this.dv;
     }
 }
 
