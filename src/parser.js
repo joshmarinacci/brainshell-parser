@@ -34,8 +34,8 @@ function GET(url) {
 
 const SYMBOLS = {
     'pi': new Literal(Math.PI),
-    'earth.radius':new Literal(6371.008,'km'),
-    'jupiter.radius':new Literal(69911,'km'),
+    'earth.radius':new Literal(6371.008).withUnit('kilometer'),
+    'jupiter.radius':new Literal(69911).withUnit('km'),
     'date': function(arg) {
         console.log("doing date on arg " + arg, arg.string);
         return moment(arg.string);

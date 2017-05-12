@@ -182,10 +182,11 @@ tests("lists", [
 ]);
 
 
+const ER = 6371.008;
 unittests("master tests",[
     ['200ft * 600ft as acres',new Literal(2.75482094).withComplexUnit(['acre'],[])],
-    //['10ft * 15ft * 8ft as gallons',new Literal(8976.62760).withComplexUnit(['gallon'],[])],
-    //['0xCAFEBABE as decimal',new Literal(0xCAFEBABE)],
+    ['10ft * 15ft * 8ft as gallons',new Literal(8976.624).withComplexUnit(['gallon'],[])],
+    ['0xCAFEBABE as decimal',new Literal(0xCAFEBABE)],
 //4. pick a random winner from these four people: Random(List('Alice','Bob','Carl','Dan'))
 //'1_000_000 / 26',   // (shows in the canonical form (1 million divided by 26))
 //6. ex: how long will it take superman to go around the world?  earth.radius / (4000 feet / second) =
@@ -193,7 +194,7 @@ unittests("master tests",[
     ['(4000 ft/s)',new Literal(4000).withComplexUnit(['feet'],['second'])],
     ['(4 ft/s) * 6',new Literal(24).withComplexUnit(['feet'],['second'])],
     ['6*(4 ft/s)',new Literal(24).withComplexUnit(['feet'],['second'])],
-    //['earth.radius * 5',new Literal(4).withComplexUnit(['feet'],['second'])],
+    ['earth.radius',new Literal(ER).withComplexUnit(['kilometer'],[])],
 
     //['6371.008km / (4000 ft/s)',new Literal(1000).withComplexUnit(['hour'],[])],
     //['6371.008km / (4000 ft/s) as hours',new Literal(1000).withComplexUnit(['hour'],[])],

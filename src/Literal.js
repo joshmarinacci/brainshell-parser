@@ -123,15 +123,10 @@ var units = {
     'quart': {
         type:'volume'
     },
-    'cup': {
-        type:'volume'
-    },
-    'teaspoon': {
-        type:'volume'
-    },
-    'tablespoon': {
-        type:'volume'
-    },
+    'pint': {       type:'volume' },
+    'cup': {        type:'volume' },
+    'teaspoon': {   type:'volume' },
+    'tablespoon': { type:'volume' },
 
     'tibibyte': { type: 'storage'},
     'gibibyte': { type: 'storage'},
@@ -208,6 +203,7 @@ const UNIT = {
         return null;
     },
     calculate:function(parts, target) {
+        parts = parts.map((pt)=>pt.clone());
         var fin = UNIT.cancel(UNIT.condense(parts));
         var conv = UNIT.canBeConverted(fin);
         if(conv) {
@@ -236,23 +232,23 @@ const UNIT = {
             }
         }
         //var du_done = part.du.slice();
-        return {
-            nv: part.nv/part.dv,
-            nu: nu_done,
-            dv: 1,
-            du: part.du.slice()
-        };
+        return new Literal(
+            part.nv/part.dv,
+            nu_done,
+            1,
+            part.du.slice()
+        );
     },
     condense:function(parts) {
         if(parts.length <= 1) return parts[0];
         var a = parts.shift();
         var b = parts.shift();
-        var c = {
-            nv: a.nv* b.nv,
-            nu: a.nu.concat(b.nu),
-            dv: a.dv* b.dv,
-            du: a.du.concat(b.du)
-        };
+        var c = new Literal(
+            a.nv* b.nv,
+            a.nu.concat(b.nu),
+            a.dv* b.dv,
+            a.du.concat(b.du)
+        );
         parts.unshift(c);
         return UNIT.condense(parts);
     },
@@ -286,6 +282,9 @@ const UNIT = {
         }
         return val;
     },
+    conversionToLiteral(cv) {
+        return new Literal(cv.nv,[cv.nu],cv.dv,[cv.du]);
+    },
     searchConversions:function(from,fromd,to) {
         var solutions = [];
         conversions.forEach((cv)=>{
@@ -293,19 +292,19 @@ const UNIT = {
             if(cv.du === from) {
                 if(fromd) {
                     if(cv.nu === to && cv.dd === fromd) {
-                        solutions.push([cv]);
+                        solutions.push([this.conversionToLiteral(cv)]);
                         return;
                     }
                 } else {
                     if(cv.nu === to) {
-                        solutions.push([cv]);
+                        solutions.push([this.conversionToLiteral(cv)]);
                         return;
                     }
                 }
                 cv.inside = true;
                 var res = UNIT.searchConversions(cv.nu,cv.nd,to);
                 cv.inside = false;
-                if(res.length > 0) solutions.push([cv].concat(res));
+                if(res.length > 0) solutions.push([this.conversionToLiteral(cv)].concat(res));
             }
         });
         if(solutions.length === 0) return [];
@@ -328,6 +327,11 @@ class Literal {
         this.dv = dv?dv:1;
         this.du = du?du:[];
         this.du = this.du.map((u)=>UNIT.getCanonicalName(u));
+    }
+    clone() {
+        var lit =  new Literal(this.nv,this.nu,this.dv,this.du);
+        lit.format = this.format;
+        return lit;
     }
     withUnit(parts) {
         if(!parts) return this;
@@ -376,6 +380,7 @@ class Literal {
         if(this.nu.length === b.nu.length) {
             console.log('adding with the same length');
         }
+        throw new Error("bad add");
     }
     subtract(b) {
         //can add when there are no units
@@ -385,6 +390,7 @@ class Literal {
         if(this.sameUnits(b)) {
             return new Literal(this.nv - b.nv, this.nu, this.dv, this.du);
         }
+        throw new Error("bad subtract");
     }
     exponent(b) {
         if(this.nu.length == 0 && b.nu.length == 0) {
@@ -404,7 +410,7 @@ class Literal {
         return true;
     }
     withPreferredFormat(format) {
-        var lt = new Literal(this.nv);//, this.unit);
+        var lt = this.clone();
         lt.format = format;
         return lt;
     }
