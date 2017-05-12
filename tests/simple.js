@@ -138,7 +138,7 @@ unittests('complex units', [
 
 
     //['2 feet / second', new Literal(2,'knot',1)],
-    //['60 minutes * 60 miles / hour', new Literal(60,'mile',1)],
+    ['60 minutes * 60 miles / hour', new Literal(60).withComplexUnit('mile')],
     ['10 seconds * 9.8m/s^2', new Literal(98).withComplexUnit(['meter'],['second'])],
 
 ]);
@@ -169,13 +169,13 @@ tests("constants", [
     ['earth.radius as mi',3958.76084],
     ['jupiter.radius as km', 69911]
 ]);
-return;
 tests("function calls", [
     ["'foo'", "foo"], //string literal
     ['Date("1975-08-31")', moment('1975-08-31').toString()],
     ['Year(Date("1975-08-31"))', 1975],
-    ['WeekDay(Date("1975-08-31"))', 0] //0 is Sunday
+    ['WeekDay(Date("1975-08-31"))', 1] //0 is Sunday
 ]);
+return;
 
 tests("lists", [
     //['List(4,5,6)',[4,5,6]],

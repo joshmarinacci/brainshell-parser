@@ -1,5 +1,5 @@
 BrainShell {
-	Expr    = AsExpr | AddExpr | FunCall | Symbol | String
+	Expr    = FunCall | AsExpr | AddExpr | Symbol | String
 	AsExpr = Expr "as" Unit
 	AddExpr = AddExpr "+" MulExpr --plus
         | AddExpr "-" MulExpr --minus
