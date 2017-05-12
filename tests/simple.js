@@ -194,11 +194,11 @@ unittests("master tests",[
     ['(4000 ft/s)',new Literal(4000).withComplexUnit(['feet'],['second'])],
     ['(4 ft/s) * 6',new Literal(24).withComplexUnit(['feet'],['second'])],
     ['6*(4 ft/s)',new Literal(24).withComplexUnit(['feet'],['second'])],
-    ['earth.radius',new Literal(ER).withComplexUnit(['kilometer'],[])],
+    ['earth.radius*5',new Literal(ER*5).withComplexUnit(['kilometer'],[])],
 
-    //['6371.008km / (4000 ft/s)',new Literal(1000).withComplexUnit(['hour'],[])],
-    //['6371.008km / (4000 ft/s) as hours',new Literal(1000).withComplexUnit(['hour'],[])],
-    //['earth.radius / (4000 ft/s) as hours',new Literal(1000).withComplexUnit(['hour'],[])],
+    ['6371.008km / (4000 m/s)',new Literal(6371.008*1000/4000).withComplexUnit(['second'],[])],
+    ['6371.008 km / (4000 m/s) as hours',new Literal(6371.008*1000/4000/(60*60)).withComplexUnit(['hour'],[])],
+    ['earth.radius / (4000 m/s) as hours',new Literal(6371.008*1000/4000/(60*60)).withComplexUnit(['hour'],[])],
 
 //    7. how long does it take light to get from the sun to the earth?  92_000_000 miles / lightspeed = 8 minutes
 //8. how long does it take to drive around the world at 60 mph if there was a road that went all around the world? use pi * radius to find circumference in miles, divide by 60mph
