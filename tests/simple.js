@@ -175,7 +175,6 @@ tests("function calls", [
     ['Year(Date("1975-08-31"))', 1975],
     ['WeekDay(Date("1975-08-31"))', 1] //0 is Sunday
 ]);
-return;
 
 tests("lists", [
     //['List(4,5,6)',[4,5,6]],
@@ -192,8 +191,8 @@ unittests("master tests",[
 //6. ex: how long will it take superman to go around the world?  earth.radius / (4000 feet / second) =
 
     ['(4000 ft/s)',new Literal(4000).withComplexUnit(['feet'],['second'])],
-    ['(4 ft/s) * 6',new Literal(4).withComplexUnit(['feet'],['second'])],
-    ['6*(4 ft/s)',new Literal(4).withComplexUnit(['feet'],['second'])],
+    ['(4 ft/s) * 6',new Literal(24).withComplexUnit(['feet'],['second'])],
+    ['6*(4 ft/s)',new Literal(24).withComplexUnit(['feet'],['second'])],
     //['earth.radius * 5',new Literal(4).withComplexUnit(['feet'],['second'])],
 
     //['6371.008km / (4000 ft/s)',new Literal(1000).withComplexUnit(['hour'],[])],

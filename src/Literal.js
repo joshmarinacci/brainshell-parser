@@ -66,20 +66,49 @@ conversions.push({
     du:'foot',
     dd:3
 });
+
+conversions.push({
+    nv:1,
+    nu:'acre',
+    nd:1,
+    dv:4045.86,
+    du:'meter',
+    dd:2
+});
+conversions.push({
+    nv:4045.86,
+    nu:'meter',
+    nd:2,
+    dv:1,
+    du:'acre',
+    dd:1
+});
+conversions.push({
+    nv:1,
+    nu:'acre',
+    nd:1,
+    dv:43560 ,
+    du:'foot',
+    dd:2
+});
+conversions.push({
+    nv:43560 ,
+    nu:'foot',
+    nd:2,
+    dv:1,
+    du:'acre',
+    dd:1
+});
+
+
 var units = {
-    'meter' : {
-        type:'distance'
-    },
-    'kilometer': {
-        type:'distance'
-    },
-    'mile': {
-        type:'distance'
-    },
-    'foot': {
-        type:'distance'
-    },
-    'yard': {  type:'distance' },
+    'meter' :   { type:'distance' },
+    'kilometer':{ type:'distance' },
+    'mile': {     type:'distance' },
+    'foot': {     type:'distance' },
+    'yard': {     type:'distance' },
+
+    'acre': {     type:'area'},
 
     'second': { type:'duration' },
     'minute': { type:'duration' },
@@ -167,6 +196,8 @@ var abbrevations = {
     'TBit':'terabit',
     'Gbit':'gigabit',
     'Mbit':'megabit',
+
+    'acres':'acre',
 };
 
 const UNIT = {
@@ -230,10 +261,17 @@ const UNIT = {
         var dist = ((a)=> {
             return units[a].type === 'distance'
         });
+        var dur = ((a)=> units[a].type === 'duration');
         if(val.nu.find(dist) && val.du.find(dist)) {
             return {
                 from:val.nu.find(dist),
                 to:val.du.find(dist)
+            }
+        }
+        if(val.nu.find(dur) && val.du.find(dur)) {
+            return {
+                from:val.nu.find(dur),
+                to:val.du.find(dur)
             }
         }
         //if val contains three distances and du contains volume
