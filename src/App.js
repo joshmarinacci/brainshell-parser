@@ -38,7 +38,7 @@ class App extends Component {
         return (
             <div className="vbox center">
                 <h1>Jesse Calculator</h1>
-                <div className="hbox">
+                <div className="hbox line">
                     <input type="text" value={this.state.text} ref="input"
                            onChange={this.changed.bind(this)}
                            onKeyDown={this.keydown.bind(this)}/>
@@ -55,9 +55,9 @@ class App extends Component {
             return "error";
         }
         var lit = this.state.result;
-        if(!lit.value.isFinite()) {
-            return "\u221E";
-        }
+        //if(!lit.value.isFinite()) {
+        //    return "\u221E";
+        //}
         return lit.toString();
     }
 }
