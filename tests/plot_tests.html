@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        body { margin: auto; padding: 0;
+            display: flex;
+            flex-direction: row;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" width="1024" height="700"></canvas>
+<ul>
+    <li><a href="#" class="eq" data-value="1">sin(th), cos(th)</a></li>
+    <li><a href="#" class="eq" data-value="1">sin(th*3), cos(th*3)</a></li>
+    <li><a href="#" class="eq" data-value="1">sin(th*2), cos(th)</a></li>
+    <li><a href="#" class="eq" data-value="1">sin(th*4), cos(th*9)</a></li>
+</ul>
+<script type="text/javascript">
+    var th = 0;
+
+    var types = [
+        [
+            function(th) { return Math.sin(th) },
+            function(th) { return Math.cos(th) },
+        ],
+        [
+            function(th) { return Math.sin(th*3) },
+            function(th) { return Math.cos(th*3) },
+        ],
+        [
+            function(th) { return Math.sin(th*2) },
+            function(th) { return Math.cos(th) },
+        ],
+        [
+            function(th) { return Math.sin(th*4) },
+            function(th) { return Math.cos(th*9) },
+        ],
+    ];
+    var eqs = types[0];
+    document.querySelectorAll('a.eq').forEach(function(a,i) {
+        console.log(a,i, types[i]);
+        a.addEventListener("click",function() {
+            eqs = types[i];
+            th = 0;
+        })
+    });
+
+    var T = 1*1000*1000*1000;
+    function eq(th) {
+        //return Math.sin(th*3/3)*5 + Math.sin(th*2/3)*5;
+        //return -Math.tan(th/5)*5;
+        //return Math.tan(Math.sin(th))*5;
+        return Math.sin(Math.sin(th*2)+Math.sin(th*3))*5;
+    }
+
+    function eqx(th) {
+        return Math.sin(th*4)+Math.sin(th*3);
+    }
+    function eqy(th) {
+        return Math.cos(th*9);
+    }
+
+    var canvas = document.getElementById('canvas');
+    var c = canvas.getContext('2d');
+    c.fillStyle = 'lightBlue';
+    var w = canvas.width;
+    var h = canvas.height;
+    c.fillRect(0,0,w,h);
+    function drawGrid() {
+        c.fillStyle = 'darkblue';
+        c.fillRect(w/2,0,1,h);
+        c.fillRect(0,h/2,w,1);
+    }
+//    drawGrid();
+    let sc = 250;
+    function drawEq() {
+        c.beginPath();
+        c.moveTo(w/2,h/2);
+        for(var th = 0; th<Math.PI*2; th+=0.01) {
+            var x = eqs[0](th)*sc;
+            var y = eqs[1](th)*sc;
+            c.lineTo(x+w/2,y+h/2);
+        }
+        c.strokeStyle = 'black';
+        c.lineWidth = 0.5;
+        c.stroke();
+    }
+//    drawEq();
+
+    function drawBall() {
+        c.fillStyle = 'lightblue';
+        c.save();
+        c.fillStyle = 'white';
+        c.globalAlpha = 0.01;
+//        c.fillRect(0,0,w,h);
+        c.restore();
+//        drawGrid();
+//        drawEq();
+        th += 0.005;
+        var x = eqs[0](th)*sc;
+        var y = eqs[1](th)*sc;
+        c.fillStyle = 'red';
+        c.save();
+        c.translate(w/2,h/2);
+        c.beginPath();
+        c.moveTo(x,y);
+        c.arc(x,y, 5, 0, 360,false);
+        c.fill();
+        c.restore();
+        requestAnimationFrame(drawBall);
+    }
+    drawBall();
+</script>
+</body>
+</html>

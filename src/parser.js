@@ -59,7 +59,8 @@ function resolveSymbol(name) {
 }
 
 function generateSemantics(grammar) {
-    var sem = grammar.createSemantics().addOperation('calc', {
+    var sem = grammar.createSemantics();
+    sem.addOperation('calc', {
         Literal: (num, unit) => num.calc().withUnit(unit.calc()[0]),
         unitchunk : function(a,b,c) {
             var name = a.calc().join("");
@@ -103,6 +104,40 @@ function generateSemantics(grammar) {
         }
 
     });
+    sem.addOperation('style',{
+        Literal: (num, unit) => "Literal " + num.style() + " " + unit.style(),
+        float: function(a,b,c,e) {  return new Literal(parseFloat(this.sourceString));  },
+        integer: function(a,b) {
+            var v = parseInt(this.sourceString.replace(/_/g,''), 10);
+            //if(b) v = v * Math.pow(10, b.calc());
+            return new Literal(v);
+        },
+        Unit: function(numer, div, denom) {
+            return numer.style() + " / " + denom.style()[0];
+        },
+        unitchunk : function(a,b,c) {
+            var name = a.style().join("");
+            var power = c.style().join("");
+            name = UNIT.getCanonicalName(name);
+            if(power){
+                var pow = parseInt(power);
+                var ret = [];
+                for(var i=0; i<pow; i++) {
+                    ret.push(name);
+                }
+                return name + "^" + pow;
+            }
+            return [name];
+        },
+        _terminal: function() {
+            return this.sourceString;
+        }
+    });
+
+    sem.addOperation('tree',{
+        FunCall:(ident,_1,expr,_2) => ['funcall',ident.tree(),expr.tree()],
+        identifier:function(_a,_b) { return this.sourceString.toLowerCase()},
+    });
     return sem;
 }
 function init() {
@@ -125,12 +160,32 @@ module.exports = {
     init: function() {
         init();
     },
-    parseString: function(str) {
+    get: function() {
         if(!grammar) init();
+        return grammar;
+    },
+    parseString: function(str) {
+        var grammar = this.get();
         var m = grammar.match(str);
         if(m.failed()) throw new Error("match failed on: " + str);
         var js = sem(m).calc();
         console.log("parsing",str, "->", js.toString());
+        return js;
+    },
+    styleString: function(str) {
+        var grammar = this.get();
+        var m = grammar.match(str);
+        if(m.failed()) throw new Error("match failed on: " + str);
+        var js = sem(m).style();
+        console.log("styling",str, "->", js.toString());
+        return js;
+    },
+    parseTree: function(str) {
+        var grammar = this.get();
+        var m = grammar.match(str);
+        if(m.failed()) throw new Error("match failed on: " + str);
+        var js = sem(m).tree();
+        console.log("styling",str, "->", js.toString());
         return js;
     }
 }
