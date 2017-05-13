@@ -30,9 +30,17 @@ addConversion(2,'pint',1,'quart');
 addConversion(2,'cup',1,'pint');
 addConversion(1,'cup',16,'tablespoon');
 addConversion(1,'tablespoon',3,'teaspoon');
+addConversion(1,'milliliter',1/1000,'liter');
+addConversion(1,'gallon',3.78541,'liter');
+
+addConversion(453.592,'gram',1,'pound');
+addConversion(16,'ounce',1,'pound');
+
 addConversion(1,'kilometer',1000,'meter');
-addConversion(1,'mile',1609.344,'meter');
 addConversion(1,'meter',3.28084,'foot');
+addConversion(1,'centimeter',1/100,'meter');
+addConversion(1,'millimeter',1/1000,'meter');
+addConversion(1,'mile',1609.344,'meter');
 
 addConversion(1,'terabyte',1000,'gigabyte');
 addConversion(1,'tibibyte',1024,'gibibyte');
@@ -100,13 +108,52 @@ conversions.push({
     dd:1
 });
 
+//meter to liter
+conversions.push({
+    nv:1,
+    nu:'meter',
+    nd:3,
+    dv:1000,
+    du:'liter',
+    dd:1
+});
+conversions.push({
+    nv:1000,
+    nu:'liter',
+    nd:1,
+    dv:1,
+    du:'meter',
+    dd:3
+});
+//cm^3 => ml
+conversions.push({
+    nv:1,
+    nu:'centimeter',
+    nd:3,
+    dv:1,
+    du:'milliliter',
+    dd:1
+});
+conversions.push({
+    nv:3,
+    nu:'milliliter',
+    nd:1,
+    dv:1,
+    du:'centimeter',
+    dd:3
+});
+
 
 var units = {
+    'centimeter': { type:'distance'},
+    'millimeter': { type:'distance'},
     'meter' :   { type:'distance' },
     'kilometer':{ type:'distance' },
     'mile': {     type:'distance' },
+    'inch': {     type:'distance' },
     'foot': {     type:'distance' },
     'yard': {     type:'distance' },
+    'league': {   type:'distance' },
 
     'acre': {     type:'area'},
 
@@ -116,6 +163,12 @@ var units = {
     'day': { type:'duration' },
     'month': { type:'duration' },
     'year': { type:'duration' },
+
+
+    'pound':{type:'mass'},
+    'gram':{type:'mass'},
+    'kilogram':{type:'mass'},
+    'ounce':{type:'mass'},
 
     'gallon': {
         type:'volume'
@@ -127,6 +180,8 @@ var units = {
     'cup': {        type:'volume' },
     'teaspoon': {   type:'volume' },
     'tablespoon': { type:'volume' },
+    'liter':      { type:'volume' },
+    'milliliter': { type:'volume' },
 
     'tibibyte': { type: 'storage'},
     'gibibyte': { type: 'storage'},
@@ -153,6 +208,8 @@ var units = {
 };
 
 var abbrevations = {
+    'in':'inch',
+    'inches':'inch',
     'ft':'foot',
     'feet':'foot',
     'yards':'yard',
@@ -173,11 +230,32 @@ var abbrevations = {
     'm':'meter',
     'meters':'meter',
     'km':'kilometer',
+    'cm':'centimeter',
+    'mm':'millimeter',
+    'millimeters':'millimeter',
 
+    'gal':'gallon',
     'gallons':'gallon',
+    'qt':'quart',
+    'pt':'pint',
     'cups':'cup',
     'tablespoons':'tablespoon',
+    'tbsp':'tablespoon',
     'teaspoons':'teaspoon',
+    'tsp':'teaspoon',
+    'l':'liter',
+    'liters':'liter',
+    'ml':'milliliter',
+    'milliliters':'milliliter',
+
+    'grams':'gram',
+    'g':'gram',
+    'kg':'kilogram',
+    'kilograms':'kilogram',
+    'oz':'ounce',
+    'ounces':'ounce',
+    'pounds':'pound',
+    'lbs':'pound',
 
     'TB':'terabyte',
     'GB':'gigabyte',
@@ -193,6 +271,8 @@ var abbrevations = {
     'Mbit':'megabit',
 
     'acres':'acre',
+    'ac':'acre',
+
 };
 
 const UNIT = {
@@ -337,6 +417,13 @@ class Literal {
         if(!parts) return this;
         if(typeof parts === 'string') return new Literal(this.nv,[UNIT.getCanonicalName(parts)]);
         return new Literal(this.nv,parts[0],1,parts[1]);
+    }
+    withPowerUnit(name,dim) {
+        var units = [];
+        for(var i=0; i<dim; i++) {
+            units.push(name);
+        }
+        return new Literal(this.nv, units,1,[]);
     }
     withComplexUnit(parts1, parts2) {
         return new Literal(this.nv,parts1,1,parts2);
