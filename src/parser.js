@@ -61,23 +61,25 @@ function resolveSymbol(name) {
 function generateSemantics(grammar) {
     var sem = grammar.createSemantics();
     sem.addOperation('calc', {
-        Literal: (num, unit) => num.calc().withUnit(unit.calc()[0]),
+        Literal: (num, unit) => {
+            var num_t = num.calc();
+            var unit_t = unit.calc()[0];
+            return num_t.withUnit(unit_t.unit,unit_t.dim);
+        },
         unitchunk : function(a,b,c) {
             var name = a.calc().join("");
             var power = c.calc().join("");
             name = UNIT.getCanonicalName(name);
-            if(power){
-                var pow = parseInt(power);
-                var ret = [];
-                for(var i=0; i<pow; i++) {
-                    ret.push(name);
-                }
-                return ret;
-            }
-            return [name];
+            if(power) return [name,parseInt(power)];
+            return [name,1];
         },
         Unit: function(numer, div, denom) {
-            return [numer.calc(),denom.calc()[0]];
+            var n  = numer.calc()[0];
+            var p = numer.calc()[1];
+            return {
+                unit:n,
+                dim:p
+            }
         },
         Number: (a) => a.calc(),
         integer: function(a,b) {
@@ -94,7 +96,7 @@ function generateSemantics(grammar) {
         MulExpr_divide: ((a,_,b) => a.calc().divide(b.calc())),
         ExpExpr_power: ((a,_,b) => a.calc().exponent(b.calc())),
         PriExpr_paren: ((p1,a,p2) => a.calc()),
-        AsExpr: (a,_,u) => a.calc().as(u.calc()[0][0]),
+        AsExpr: (a,_,u) => a.calc().as(u.calc()),
         identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
         String_single:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
         String_double:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
@@ -169,7 +171,7 @@ module.exports = {
         var m = grammar.match(str);
         if(m.failed()) throw new Error("match failed on: " + str);
         var js = sem(m).calc();
-        console.log("parsing",str, "->", js.toString());
+        console.log("parsing",str, "->"+ js.toString());
         return js;
     },
     styleString: function(str) {
@@ -177,7 +179,7 @@ module.exports = {
         var m = grammar.match(str);
         if(m.failed()) throw new Error("match failed on: " + str);
         var js = sem(m).style();
-        console.log("styling",str, "->", js.toString());
+        console.log("styling",str, "->"+ js.toString());
         return js;
     },
     parseTree: function(str) {
@@ -185,7 +187,7 @@ module.exports = {
         var m = grammar.match(str);
         if(m.failed()) throw new Error("match failed on: " + str);
         var js = sem(m).tree();
-        console.log("styling",str, "->", js.toString());
+        console.log("styling",str, "->"+js);
         return js;
     }
 }

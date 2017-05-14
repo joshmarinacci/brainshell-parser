@@ -170,18 +170,15 @@ var units = {
     'kilogram':{type:'mass'},
     'ounce':{type:'mass'},
 
-    'gallon': {
-        type:'volume'
-    },
-    'quart': {
-        type:'volume'
-    },
-    'pint': {       type:'volume' },
-    'cup': {        type:'volume' },
-    'teaspoon': {   type:'volume' },
-    'tablespoon': { type:'volume' },
-    'liter':      { type:'volume' },
-    'milliliter': { type:'volume' },
+    'gallon': {     type:'volume', base:'gallon', ratio: 1 },
+    'quart': {      type:'volume', base:'gallon', ratio: 4 },
+    'pint': {       type:'volume', base:'gallon', ratio: 8 },
+    'cup': {        type:'volume', base:'gallon', ratio: 16 },
+    'teaspoon': {   type:'volume', base:'gallon', ratio:768 },
+    'tablespoon': { type:'volume', base:'gallon', ratio:256 },
+
+    'liter':      { type:'volume', base:'liter', ratio:1    },
+    'milliliter': { type:'volume', base:'liter', ratio:1000 },
 
     'tibibyte': { type: 'storage'},
     'gibibyte': { type: 'storage'},
@@ -279,6 +276,7 @@ const UNIT = {
     getCanonicalName(name) {
         if(units[name]) return name;
         if(abbrevations[name]) return abbrevations[name];
+        if(!name) return null;
         console.log("WARNING. no canonical name found for unit " + name);
         return null;
     },
@@ -393,65 +391,160 @@ const UNIT = {
     }
 };
 
+var cvs = {
+    units: {
+        'cup': {
+            name:'cup',
+            base:'gallon',
+            ratio:16,
+            type:'volume',
+        },
+        'liter': {
+            name:'liter',
+            base:'liter',
+            ratio:1,
+            type:'volume'
+        },
+        'gallon': {
+            name:'gallon',
+            base:'gallon',
+            ratio:1,
+            type:'volume'
+        },
+        'milliliter': {
+            name:'milliliter',
+            base:'liter',
+            ratio:1000,
+            type:'volume'
+        },
+        'quart': {
+            name:'quart',
+            base:'gallon',
+            ratio:4,
+            type:'volume'
+        },
+        'pint': {
+            name:'pint',
+            base:'gallon',
+            ratio:8,
+            type:'volume'
+        },
+        'tablespoon': {
+            name:'tablespoon',
+            base:'gallon',
+            ratio:256,
+            type:'volume'
+        },
+        'teaspoon': {
+            name:'teaspoon',
+            base:'gallon',
+            ratio:256*3,
+            type:'volume'
+        },
+        'centimeter': {
+            name:'centimeter',
+            base:'meter',
+            ratio:1/100,
+            type:'length'
+        }
+    },
+    bases: [
+        {
+            from:'gallon',
+            ratio: 3.78541,
+            to:'liter'
+        },
+        {
+            from:'liter',
+            ratio: 0.264172,
+            to:'gallon'
+        }
+    ],
+    dims: [
+        {
+            from: {
+                name:'foot',
+                dim:3,
+                type:'length'
+            },
+            ratio:0.133681,
+            to: {
+                name:'gallon',
+                dim:1,
+                type:'volume'
+            }
+        }
+    ]
+};
+
+function lookupUnit(name) {
+    return cvs.units[name];
+}
+function newCalc(from,to) {
+    //console.log("doing",from,'to',to);
+    var fu = lookupUnit(from.unit);
+    var tu = lookupUnit(to.unit);
+    //console.log("got from ",fu);
+    //console.log("got   to ",tu);
+    if(fu.base == tu.base) {
+        return new Literal(from.value*tu.ratio/fu.ratio, to.unit);
+    }
+    if(fu.base !== tu.base) {
+        var cvv = cvs.bases.find((cv)=> {
+            return (cv.from == fu.base && cv.to == tu.base);
+        });
+        if(cvv) return new Literal(from.value/fu.ratio*cvv.ratio*tu.ratio,to.unit);
+    }
+    console.log('no answer');
+}
 
 
 
 class Literal {
-    constructor(nv, nu, dv, du) {
+    constructor(value, unit, dimension) {
         this.type = 'number';
         this.format = 'none';
-        this.nv = nv?nv:1;
-        if(typeof nu === 'string')  nu = [nu];
-        this.nu = nu?nu:[];
-        this.nu = this.nu.map((u)=>UNIT.getCanonicalName(u));
-        this.dv = dv?dv:1;
-        this.du = du?du:[];
-        this.du = this.du.map((u)=>UNIT.getCanonicalName(u));
+        this.value = value;
+        this.unit = UNIT.getCanonicalName(unit);
+        this.dimension = dimension;
+        if(!dimension) {
+            if (!unit) {
+                this.dimension = 0;
+            } else {
+                this.dimension = 1;
+            }
+        }
+        //console.log("created final literal:",this.toString());
     }
     clone() {
-        var lit =  new Literal(this.nv,this.nu,this.dv,this.du);
+        var lit = new Literal(this.value,this.unit,this.dimension);
         lit.format = this.format;
         return lit;
     }
-    withUnit(parts) {
-        if(!parts) return this;
-        if(typeof parts === 'string') return new Literal(this.nv,[UNIT.getCanonicalName(parts)]);
-        return new Literal(this.nv,parts[0],1,parts[1]);
+    withUnit(u,dim) {
+        if(!u) return this;
+        if(!dim) dim = 1;
+        if(typeof u === 'string') return new Literal(this.value,u,dim);
+        console.log("other form");
+        return new Literal(this.nv,u[0],1,u[1]);
     }
     withPowerUnit(name,dim) {
-        var units = [];
-        for(var i=0; i<dim; i++) {
-            units.push(name);
-        }
-        return new Literal(this.nv, units,1,[]);
+        return new Literal(this.value,name,dim);
     }
     withComplexUnit(parts1, parts2) {
         return new Literal(this.nv,parts1,1,parts2);
     }
     toString () {
-        var start = this.nv + "";
-        if(Math.floor(this.nv) - this.nv < 0) {
-            start = this.nv.toFixed(2);
-        }
-        var after = "/"+this.dv;
-        if(this.dv === 1) {
-            after = "/" + this.du.join(" ");
-        }
-        if(this.du.length === 0 && this.dv === 1) {
-            after = "";
-        }
-        return `${start}${this.nu.join(" ")}${after}`;
+        return this.value + " " + this.unit;
     }
     as(target) {
-        if(units[target].type === 'format') {
-            return this.withPreferredFormat(target);
-        }
-        var ret = UNIT.calculate([this],target);
-        return new Literal(ret.nv, ret.nu, ret.dv, ret.du);
+        //if(units[target].type === 'format') {
+        //    return this.withPreferredFormat(target);
+        //}
+        return newCalc(this,target);
     };
     multiply(b) {
-        var ret = UNIT.calculate([this,b]);
-        return new Literal(ret.nv, ret.nu, ret.dv, ret.du);
+        return newCalc(this,b);
     }
     divide(b) {
         return this.multiply(b.invert());
@@ -490,11 +583,8 @@ class Literal {
         return new Literal(this.dv, this.du, this.nv, this.nu);
     }
     sameUnits(b) {
-        if(this.nu.length !== b.nu.length) return false;
-        for(var i=0; i<this.nu.length; i++) {
-            if(this.nu[i] !== b.nu[i]) return false;
-        }
-        return true;
+        if(this.unit == b.unit && this.dimension == b.dimension) return true;
+        return false;
     }
     withPreferredFormat(format) {
         var lt = this.clone();
@@ -508,7 +598,7 @@ class Literal {
         return this.toString();
     }
     getValue() {
-        return this.nv/this.dv;
+        return this.value;
     }
 }
 
