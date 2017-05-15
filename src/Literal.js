@@ -213,6 +213,7 @@ var abbrevations = {
     'yd':'yard',
     'miles':'mile',
     'mi':'mile',
+    'leagues':'league',
 
     's':'second',
     'seconds':'second',
@@ -227,6 +228,7 @@ var abbrevations = {
     'm':'meter',
     'meters':'meter',
     'km':'kilometer',
+    'kilometers':'kilometer',
     'cm':'centimeter',
     'mm':'millimeter',
     'millimeters':'millimeter',
@@ -450,6 +452,12 @@ var cvs = {
             ratio:100,
             type:'length'
         },
+        'millimeter': {
+            name:'millimeter',
+            base:'meter',
+            ratio:1000,
+            type:'length'
+        },
         'kilometer': {
             name:'kilometer',
             base:'meter',
@@ -462,6 +470,12 @@ var cvs = {
             ratio:1,
             type:'length'
         },
+        inch: {
+            name:'inch',
+            base:'foot',
+            ratio:12,
+            type:'length'
+        },
         mile: {
             name:'mile',
             base:'foot',
@@ -472,6 +486,12 @@ var cvs = {
             name:'meter',
             base:'meter',
             ratio:1,
+            type:'length'
+        },
+        league: {
+            name:'league',
+            base:'meter',
+            ratio:1/4000,
             type:'length'
         },
 
