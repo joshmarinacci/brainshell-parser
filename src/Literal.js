@@ -447,6 +447,12 @@ var cvs = {
             ratio:100,
             type:'length'
         },
+        'kilometer': {
+            name:'kilometer',
+            base:'meter',
+            ratio:1/1000,
+            type:'length'
+        },
         foot: {
             name:'foot',
             base:'foot',
@@ -458,6 +464,12 @@ var cvs = {
             base:'meter',
             ratio:1,
             type:'length'
+        },
+        acre: {
+            name:'acre',
+            base:'acre',
+            ratio:1,
+            type:'area'
         }
     },
     bases: [
@@ -508,6 +520,32 @@ var cvs = {
                 dim:1,
                 type:'volume'
             }
+        },
+        {
+            from: {
+                name:'meter',
+                dim:2,
+                type:'length'
+            },
+            ratio:4046.86,
+            to: {
+                name:'acre',
+                dim:1,
+                type:'area'
+            }
+        },
+        {
+            from: {
+                name:'foot',
+                dim:2,
+                type:'length'
+            },
+            ratio:43560,
+            to: {
+                name:'acre',
+                dim:1,
+                type:'area'
+            }
         }
     ]
 };
@@ -515,6 +553,16 @@ var cvs = {
 function lookupUnit(name) {
     if(!cvs.units[name]) console.log("WARNING. No unit for name",name);
     return cvs.units[name];
+}
+function newDimensionConversion(from,to,fu) {
+    let ret = newCalc(from, {unit:fu.base});
+    let toliter = cvs.dims.find((cv) => {
+        if(cv.from.name == ret.unit && cv.from.dim == ret.dimension) {
+            return true;
+        }
+    });
+    let ret2 =  new Literal(ret.value/toliter.ratio, toliter.to.name, toliter.to.dim);
+    return newCalc(ret2,to);
 }
 function newCalc(from,to) {
     //console.log("new calc doing",from,'to',to);
@@ -530,20 +578,16 @@ function newCalc(from,to) {
         return (cv.from == fu.base && cv.to == tu.base);
     });
     if(cvv) return new Literal(from.value/fu.ratio/cvv.ratio*tu.ratio,to.unit);
-    if(!cvv) console.log("WARNIGN. couldn't convert from ",fu.base,'to',tu.base);
+    if(!cvv) console.log("WARNING. couldn't convert from ",fu.base,'to',tu.base);
 
 
 
     //if length^3 to volume, then search dimensional conversion
     if(fu.type == 'length' && from.dimension == 3 && tu.type == 'volume') {
-        var ret = newCalc(from, {unit:fu.base});
-        var toliter = cvs.dims.find((cv) => {
-            if(cv.from.name == ret.unit && cv.from.dim == ret.dimension) {
-                return true;
-            }
-        });
-        var ret2 =  new Literal(ret.value/toliter.ratio, toliter.to.name, toliter.to.dim);
-        return newCalc(ret2,to);
+        return newDimensionConversion(from,to,fu);
+    }
+    if(fu.type == 'length' && from.dimension == 2 && tu.type == 'area') {
+        return newDimensionConversion(from,to,fu);
     }
     //look for dimensional conversions
     var ccv2 = cvs.dims.find((cv)=>{

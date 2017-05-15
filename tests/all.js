@@ -1,9 +1,9 @@
 console.log("running all tests");
 
-require('./simple.js');
-require('./parsing-old');
+//require('./simple.js');
+//require('./parsing-old');
 require('./area');
-require('./duration');
+//require('./duration');
 require('./length');
-require('./mass');
+//require('./mass');
 require('./volume');

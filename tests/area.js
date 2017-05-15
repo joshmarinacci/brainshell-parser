@@ -5,11 +5,11 @@ var test = require('tape');
 var compareUnit = require('./common').compareUnit;
 
 test("area units", function(t) {
-    //compareUnit(t,'8ft^2',8,'foot',2);
+    compareUnit(t,'8ft^2',8,'foot',2);
     //compareUnit(t,'(8ft)^2',64,'foot',1);
     //compareUnit(t,"1 square miles as acres",1*640,"acre");
     compareUnit(t,"200ft * 300ft as acres",1.3774105,"acre");
-    //compareUnit(t,"42 mi^2",42,'mile',2);
+    compareUnit(t,"42 mi^2",42,'mile',2);
     //compareUnit(t,'10 square miles',10,'mile',2);
     //compareUnit(t,'10 sq mi',10,'mile',2);
     //compareUnit(t,'10 square meters',10,'meter',2);
@@ -27,7 +27,7 @@ test("area units", function(t) {
 
     compareUnit(t,'8 acres',8,'acre');
     compareUnit(t,'1m * 2m as acre',0.000494211,'acre');
-    //compareUnit(t,'1km * 2km as acre',494.211,'acre');
+    compareUnit(t,'1km * 2km as acre',494.211,'acre');
     //compareUnit(t,'4 cu ft as tsp',22980.2,'tsp');
     //compareUnit(t,'1m * 2m as squared feet',21.5278,'feet',2);
     //compareUnit(t,'1m * 2m as sq ft',21.5278,'feet',2);

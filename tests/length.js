@@ -5,7 +5,9 @@ var test = require('tape');
 var compareUnit = require('./common').compareUnit;
 test("length units", function(t) {
     compareUnit(t,'40m',40,'meter');
+    compareUnit(t,'40km',40,'kilometer');
     compareUnit(t,"40m as feet",131.234,'foot');
+    compareUnit(t,'40km as m',40*1000,'m');
     //compareUnit(t,"42 square miles",42,'mile',2);
     //compareUnit(t,"42 sq mi",42,'mile',2);
     compareUnit(t,"50mm", 50,'millimeters',1);
