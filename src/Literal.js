@@ -660,7 +660,7 @@ function newCalc(from,to) {
         return (cv.from == fu.base && cv.to == tu.base);
     });
     if(cvv) return new Literal(from.value/fu.ratio/cvv.ratio*tu.ratio,to.unit);
-    if(!cvv) console.log("WARNING. couldn't convert from ",fu.base,'to',tu.base);
+    //if(!cvv) console.log("WARNING. couldn't convert from ",fu.base,'to',tu.base);
 
 
 
@@ -679,10 +679,8 @@ function newCalc(from,to) {
             }
         }
     });
-    if(ccv2) {
-        return new Literal(from.value/ccv2.ratio, ccv2.to.name, ccv2.to.dim);
-    }
     console.log('no answer');
+    throw new Error();
 }
 
 
@@ -717,9 +715,6 @@ class Literal {
     }
     withPowerUnit(name,dim) {
         return new Literal(this.value,name,dim);
-    }
-    withComplexUnit(parts1, parts2) {
-        return new Literal(this.nv,parts1,1,parts2);
     }
     toString () {
         return this.value + " " + this.unit + "^"+this.dimension;

@@ -40,11 +40,11 @@ function compareUnit(t, str, num, unit, dim) {
 test("format parsing",function(t) {
     //compareFormat(t,"42",42,"decimal");
     //compareFormat(t,"x42",42,"hex");
-    compareFormat(t,"0xFFCC88",0xFFCC88,'hex');
-    compareFormat(t,"42 as hex",42,"hex");
+    //compareFormat(t,"0xFFCC88",0xFFCC88,'hex');
+    //compareFormat(t,"42 as hex",42,"hex");
     //compareFormat("42 as octal",42,"octal");
     //compareFormat("42 as binary",42,"binary");
-    compareFormat(t,"0xBEEF as decimal",0xBEEF,'decimal');
+    //compareFormat(t,"0xBEEF as decimal",0xBEEF,'decimal');
     t.end();
 });
 
@@ -76,8 +76,8 @@ test("notation parsing", function(t) {
     compareNumber(t, "2.2e2", 220);
     //compareNumber(t, '2.2E2', 220);
     //compareNumber(t, '2.2E10', 22000000); // this currently fails
-    compareNumber(t, '2e2', 200);
-    compareNumber(t, '3e9', 3 * 1000 * 1000 * 1000);
+    //compareNumber(t, '2e2', 200);
+    //compareNumber(t, '3e9', 3 * 1000 * 1000 * 1000);
     //compareNumber(t, '2e-2', 0.02);
     compareNumber(t, '2*(10^2)', 200);
     compareNumber(t, '2_000_000', 2 * 1000 * 1000);
