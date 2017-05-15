@@ -253,6 +253,7 @@ var abbrevations = {
     'ounces':'ounce',
     'pounds':'pound',
     'lbs':'pound',
+    'lb':'pound',
 
     'TB':'terabyte',
     'GB':'gigabyte',
@@ -470,6 +471,31 @@ var cvs = {
             base:'acre',
             ratio:1,
             type:'area'
+        },
+
+        gram: {
+            name:'gram',
+            base:'gram',
+            ratio:1,
+            type:'mass'
+        },
+        kilogram: {
+            name:'gram',
+            base:'gram',
+            ratio:1/1000,
+            type:'mass'
+        },
+        pound: {
+            name:'pound',
+            base:'pound',
+            ratio:1,
+            type:'mass'
+        },
+        ounce: {
+            name:'ounce',
+            base:'pound',
+            ratio:16,
+            type:'mass'
         }
     },
     bases: [
@@ -492,6 +518,11 @@ var cvs = {
             from:'foot',
             ratio:3.28084,
             to:'meter'
+        },
+        {
+            from:'pound',
+            ratio:1/453.592,
+            to:'gram'
         }
     ],
     dims: [
