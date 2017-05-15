@@ -496,7 +496,32 @@ var cvs = {
             base:'pound',
             ratio:16,
             type:'mass'
-        }
+        },
+
+        second: {
+            name:'second',
+            base:'second',
+            ratio:1,
+            type:'duration'
+        },
+        minute: {
+            name:'minute',
+            base:'second',
+            ratio:1/(60),
+            type:'duration'
+        },
+        hour: {
+            name:'hour',
+            base:'second',
+            ratio:1/(60*60),
+            type:'duration'
+        },
+        day: {
+            name:'day',
+            base:'second',
+            ratio:1/(60*60*24),
+            type:'duration'
+        },
     },
     bases: [
         {
