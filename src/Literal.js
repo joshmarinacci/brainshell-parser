@@ -446,6 +446,18 @@ var cvs = {
             base:'meter',
             ratio:1/100,
             type:'length'
+        },
+        foot: {
+            name:'foot',
+            base:'foot',
+            ratio:1,
+            type:'length'
+        },
+        meter: {
+            name:'meter',
+            base:'meter',
+            ratio:1,
+            type:'length'
         }
     },
     bases: [
@@ -473,6 +485,19 @@ var cvs = {
                 dim:1,
                 type:'volume'
             }
+        },
+        {
+            from: {
+                name:'meter',
+                dim:3,
+                type:'length'
+            },
+            ratio:1/1000,
+            to: {
+                name:'liter',
+                dim:1,
+                type:'volume'
+            }
         }
     ]
 };
@@ -494,6 +519,19 @@ function newCalc(from,to) {
             return (cv.from == fu.base && cv.to == tu.base);
         });
         if(cvv) return new Literal(from.value/fu.ratio*cvv.ratio*tu.ratio,to.unit);
+
+
+        //look for dimensional conversions
+        var ccv2 = cvs.dims.find((cv)=>{
+            if(cv.from.name == fu.name && cv.from.dim == from.dimension) {
+                if(cv.to.name == tu.name && cv.to.dim == to.dim) {
+                    return true;
+                }
+            }
+        });
+        if(ccv2) {
+            return new Literal(from.value/ccv2.ratio, ccv2.to.name, ccv2.to.dim);
+        }
     }
     console.log('no answer');
 }
@@ -544,6 +582,12 @@ class Literal {
         return newCalc(this,target);
     };
     multiply(b) {
+        //multiply the same units
+        if(this.unit == b.unit) {
+            return new Literal(this.value * b.value,
+                this.unit,
+                this.dimension + b.dimension)
+        }
         return newCalc(this,b);
     }
     divide(b) {
