@@ -64,6 +64,7 @@ function generateSemantics(grammar) {
         Literal: (num, unit) => {
             var num_t = num.calc();
             var unit_t = unit.calc()[0];
+            if(!unit_t) return num_t;
             return num_t.withUnit(unit_t.unit,unit_t.dim);
         },
         unitchunk : function(a,b,c) {

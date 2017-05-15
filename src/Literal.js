@@ -463,13 +463,23 @@ var cvs = {
     bases: [
         {
             from:'gallon',
-            ratio: 3.78541,
+            ratio: 1/3.78541,
             to:'liter'
         },
         {
             from:'liter',
-            ratio: 0.264172,
+            ratio: 1/0.264172,
             to:'gallon'
+        },
+        {
+            from:'meter',
+            ratio:1/3.28084,
+            to:'foot'
+        },
+        {
+            from:'foot',
+            ratio:3.28084,
+            to:'meter'
         }
     ],
     dims: [
@@ -503,6 +513,7 @@ var cvs = {
 };
 
 function lookupUnit(name) {
+    if(!cvs.units[name]) console.log("WARNING. No unit for name",name);
     return cvs.units[name];
 }
 function newCalc(from,to) {
@@ -518,7 +529,8 @@ function newCalc(from,to) {
     var cvv = cvs.bases.find((cv)=> {
         return (cv.from == fu.base && cv.to == tu.base);
     });
-    if(cvv) return new Literal(from.value/fu.ratio*cvv.ratio*tu.ratio,to.unit);
+    if(cvv) return new Literal(from.value/fu.ratio/cvv.ratio*tu.ratio,to.unit);
+    if(!cvv) console.log("WARNIGN. couldn't convert from ",fu.base,'to',tu.base);
 
 
 
@@ -594,6 +606,12 @@ class Literal {
     };
     multiply(b) {
         //multiply the same units
+        if(this.unit && !b.unit) {
+            return new Literal(this.value* b.value,this.unit,this.dimension);
+        }
+        if(!this.unit && b.unit) {
+            return new Literal(this.value* b.value,b.unit,b.dimension);
+        }
         if(this.unit == b.unit) {
             return new Literal(this.value * b.value,
                 this.unit,
