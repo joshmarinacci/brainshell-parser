@@ -58,17 +58,18 @@ tests('parsing 42 in different formats', [
 	['4.2',4.2],
 	['0x42',0x42],
 	['4.2e2',420],
-    //['42e2',4200],
+    ['42e2',4200],
     ['42_000_000',42*1000*1000]
 ]);
 
-/*testsCanonical('parsing to canonical output', [
-    ['42','42'],
-    ['0x42','0x42'],
-    ['0x42 as decimal','66'],
-    ['42 as hex','0x2a']
+
+testsCanonical('parsing to canonical output', [
+    //['42','42'],
+    //['0x42','0x42'],
+    //['0x42 as decimal','66'],
+    //['42 as hex','0x2a']
 ]);
-*/
+
 
 
 tests("simple math 2", [
@@ -105,7 +106,7 @@ unittests("simple units", [
     ['4 quart as gallon', new Literal(1).withUnit('gallon')],
     ['16 cups as gallons', new Literal(1).withUnit('gallon')],
     ['3 teaspoons as tablespoons', new Literal(1).withUnit('tablespoon')],
-    //['2 ft * 2 ft', new Literal(4).withUnit([['foot','foot'],[]])],
+    ['2 ft * 2 ft', new Literal(4).withUnit('foot',2)],
     //['2 sqft', new Literal(2).withUnit([['squarefoot'],[]])],
     //['2 cuft', new Literal(2, 'cubicfoot')],
     //['2 TB as GB',new Literal(2*1000).withUnit('gigabyte')],

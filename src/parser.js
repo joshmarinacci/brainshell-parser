@@ -84,13 +84,14 @@ function generateSemantics(grammar) {
         },
         Number: (a) => a.calc(),
         integer: function(a,b) {
-            var v = parseInt(this.sourceString.replace(/_/g,''), 10);
-            if(b) v = v * Math.pow(10, b.calc());
+            var v = parseInt(a.calc().join("").replace(/_/g,''), 10);
+            var exp = b.calc();
+            if(exp && exp.length >= 1) v = v* Math.pow(10, exp[0].getValue());
             return new Literal(v);
         },
         float: function(a,b,c,e) {  return new Literal(parseFloat(this.sourceString));  },
         hex:  function(a,b) {       return new Literal(parseInt(this.sourceString)).withPreferredFormat('hex'); },
-        exp: (_,sign,exp) => new Literal(parseFloat(exp.calc())),
+        exp: (_,sign,exp) => new Literal(parseFloat(exp.calc()[0])),
         AddExpr_plus: ((a,_,b) => a.calc().add(b.calc())),
         AddExpr_minus: ((a,_,b) => a.calc().subtract(b.calc())),
         MulExpr_multiply: ((a,_,b) => a.calc().multiply(b.calc())),
