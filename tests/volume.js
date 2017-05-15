@@ -18,7 +18,9 @@ test("volume units", function(t) {
     compareUnit(t,'3tbsp as teaspoons',9,'teaspoons');
     //compareUnit(t,'21 cu ft',21,'cubicfoot');
     compareUnit(t,'3 cm^3',3,'cm',3);
-    //compareUnit(t,'3 cm^3 as ml',3,'milliliter');
+    compareUnit(t,'1000000 cm^3 as m^3',1,'m',3);
+    compareUnit(t,' 1m^3 as cm^3',1000000,'cm',3);
+    compareUnit(t,'3 cm^3 as ml',3,'milliliter');
     compareUnit(t,'3ft * 3ft * 3ft',27,'foot',3);
     compareUnit(t,'(3ft * 3ft * 3ft) as gallon',201.974,'gallon');
     compareUnit(t,'1ft^3',1,'foot',3);
@@ -45,7 +47,7 @@ test("volume units", function(t) {
     //compareUnit(t,'1/2 cups',0.5,'cups');
     //compareUnit(t,'3 cups + (1/2cups)',3.5,'cups');
     compareUnit(t,'1ft * 2ft * 3ft', 6,'feet',3);
-    //compareUnit(t,'1ft * 2ft * 3ft as liter', 169.901,'liter');
+    compareUnit(t,'1ft * 2ft * 3ft as liter', 169.901,'liter');
     compareUnit(t,'1m * 2m * 3m as liter', 6000,'liter');
     compareUnit(t,'4ft * 5ft * 6ft as gallon',897.659,'gallon');
     //compareUnit(t,'4 cuft', 4,'feet',3);

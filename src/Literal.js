@@ -444,7 +444,7 @@ var cvs = {
         'centimeter': {
             name:'centimeter',
             base:'meter',
-            ratio:1/100,
+            ratio:100,
             type:'length'
         },
         foot: {
@@ -512,26 +512,37 @@ function newCalc(from,to) {
     //console.log("got from ",fu);
     //console.log("got   to ",tu);
     if(fu.base == tu.base) {
-        return new Literal(from.value*tu.ratio/fu.ratio, to.unit);
+        var f =Math.pow(tu.ratio/fu.ratio,from.dimension);
+        return new Literal(from.value*f,to.unit,from.dimension);
     }
-    if(fu.base !== tu.base) {
-        var cvv = cvs.bases.find((cv)=> {
-            return (cv.from == fu.base && cv.to == tu.base);
-        });
-        if(cvv) return new Literal(from.value/fu.ratio*cvv.ratio*tu.ratio,to.unit);
+    var cvv = cvs.bases.find((cv)=> {
+        return (cv.from == fu.base && cv.to == tu.base);
+    });
+    if(cvv) return new Literal(from.value/fu.ratio*cvv.ratio*tu.ratio,to.unit);
 
 
-        //look for dimensional conversions
-        var ccv2 = cvs.dims.find((cv)=>{
-            if(cv.from.name == fu.name && cv.from.dim == from.dimension) {
-                if(cv.to.name == tu.name && cv.to.dim == to.dim) {
-                    return true;
-                }
+
+    //if length^3 to volume, then search dimensional conversion
+    if(fu.type == 'length' && from.dimension == 3 && tu.type == 'volume') {
+        var ret = newCalc(from, {unit:fu.base});
+        var toliter = cvs.dims.find((cv) => {
+            if(cv.from.name == ret.unit && cv.from.dim == ret.dimension) {
+                return true;
             }
         });
-        if(ccv2) {
-            return new Literal(from.value/ccv2.ratio, ccv2.to.name, ccv2.to.dim);
+        var ret2 =  new Literal(ret.value/toliter.ratio, toliter.to.name, toliter.to.dim);
+        return newCalc(ret2,to);
+    }
+    //look for dimensional conversions
+    var ccv2 = cvs.dims.find((cv)=>{
+        if(cv.from.name == fu.name && cv.from.dim == from.dimension) {
+            if(cv.to.name == tu.name && cv.to.dim == to.dim) {
+                return true;
+            }
         }
+    });
+    if(ccv2) {
+        return new Literal(from.value/ccv2.ratio, ccv2.to.name, ccv2.to.dim);
     }
     console.log('no answer');
 }
@@ -573,7 +584,7 @@ class Literal {
         return new Literal(this.nv,parts1,1,parts2);
     }
     toString () {
-        return this.value + " " + this.unit;
+        return this.value + " " + this.unit + "^"+this.dimension;
     }
     as(target) {
         //if(units[target].type === 'format') {
