@@ -598,30 +598,19 @@ class Literal {
             return new Literal(this.value + b.value, this.unit, this.dimension);
         }
 
-        //console.log("trying to add",this);
-        //console.log('to           ',b);
-        var fu = lookupUnit(this.unit);
-        var tu = lookupUnit(b.unit);
-
-        //console.log("units = ", fu);
-        //console.log('        ', tu);
-
-
-        if(fu.type == tu.type) {
-            //console.log('we can add of the same types');
-            var newthis = newCalc(this,{unit:tu.name,dim:this.dimension});
-            //console.log("new this = ", newthis);
-            return new Literal(newthis.value + b.value, newthis.unit, newthis.dimension);
+        if(this.sameUnitTypes(b)) {
+            var a = newCalc(this,{unit: b.unit,dim:this.dimension});
+            return a.add(b);
         }
         throw new Error("bad add");
     }
     subtract(b) {
-        //can add when there are no units
-        if(this.nu.length == 0 && b.nu.length == 0) {
-            return new Literal(this.nv - b.nv);
-        }
         if(this.sameUnits(b)) {
-            return new Literal(this.nv - b.nv, this.nu, this.dv, this.du);
+            return new Literal(this.value - b.value, this.unit, this.dimension);
+        }
+        if(this.sameUnitTypes(b)) {
+            var a = newCalc(this,{unit: b.unit, dim:this.dimension});
+            return a.subtract(b);
         }
         throw new Error("bad subtract");
     }
@@ -637,6 +626,12 @@ class Literal {
     }
     sameUnits(b) {
         if(this.unit == b.unit && this.dimension == b.dimension) return true;
+        return false;
+    }
+    sameUnitTypes(b) {
+        var fu = lookupUnit(this.unit);
+        var tu = lookupUnit(b.unit);
+        if(fu.type == tu.type) return true;
         return false;
     }
     withPreferredFormat(format) {

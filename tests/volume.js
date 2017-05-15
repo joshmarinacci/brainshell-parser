@@ -41,6 +41,7 @@ test("volume units", function(t) {
     compareUnit(t,'4ml as tsp',0.811537,'tsp');
     compareUnit(t,'4ml as tbsp',0.270512,'tbsp');
     compareUnit(t,'3 cups + 1 cups',4,'cups');
+    compareUnit(t,'3 cups - 1 cups',2,'cups');
     //compareUnit(t,'1/2 cups',0.5,'cups');
     //compareUnit(t,'3 cups + (1/2cups)',3.5,'cups');
     compareUnit(t,'1ft * 2ft * 3ft', 6,'feet',3);
