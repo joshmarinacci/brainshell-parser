@@ -8,7 +8,7 @@ var Literal = require('../src/Literal').Literal;
 var moment = require('moment');
 function compareUnit(t, str, num, unit, dim) {
     let res = Parser.parseString(str);
-    t.approximately(res.getValue(),num, 0.001);
+    t.approximately(res.getValue(),num, 0.01);
     let ans = new Literal(num).withUnit(unit);
     if(unit === 'none') {
 

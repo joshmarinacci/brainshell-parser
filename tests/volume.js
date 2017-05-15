@@ -31,7 +31,7 @@ test("volume units", function(t) {
     compareUnit(t,'1l as gal',0.264172,'gal');
     compareUnit(t,'4l + 3gal',3+1.05669,'gal');
     compareUnit(t,'1l + 15l as ml',16*1000,'ml');
-    //compareUnit(t,'(4l + 3gal) as ml',(4+3*3.7854118)*1000,'millilitre');
+    compareUnit(t,'(4l + 3gal) as ml',(4+3*3.78541)*1000,'milliliter');
     compareUnit(t,'48tsp as cups',1,'cup');
     compareUnit(t,'16tbsp as cups',1,'cup');
     compareUnit(t,'16cups as gal',1,'gal');
