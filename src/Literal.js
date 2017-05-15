@@ -506,7 +506,7 @@ function lookupUnit(name) {
     return cvs.units[name];
 }
 function newCalc(from,to) {
-    //console.log("doing",from,'to',to);
+    //console.log("new calc doing",from,'to',to);
     var fu = lookupUnit(from.unit);
     var tu = lookupUnit(to.unit);
     //console.log("got from ",fu);
@@ -594,15 +594,24 @@ class Literal {
         return this.multiply(b.invert());
     }
     add(b) {
-        //can add when there are no units
-        if(this.nu.length == 0 && b.nu.length == 0) {
-            return new Literal(this.nv + b.nv);
-        }
         if(this.sameUnits(b)) {
-            return new Literal(this.nv + b.nv, this.nu, this.dv, this.du);
+            return new Literal(this.value + b.value, this.unit, this.dimension);
         }
-        if(this.nu.length === b.nu.length) {
-            console.log('adding with the same length');
+
+        //console.log("trying to add",this);
+        //console.log('to           ',b);
+        var fu = lookupUnit(this.unit);
+        var tu = lookupUnit(b.unit);
+
+        //console.log("units = ", fu);
+        //console.log('        ', tu);
+
+
+        if(fu.type == tu.type) {
+            //console.log('we can add of the same types');
+            var newthis = newCalc(this,{unit:tu.name,dim:this.dimension});
+            //console.log("new this = ", newthis);
+            return new Literal(newthis.value + b.value, newthis.unit, newthis.dimension);
         }
         throw new Error("bad add");
     }
