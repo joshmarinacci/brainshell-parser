@@ -1,6 +1,6 @@
 console.log("running all tests");
 
-//require('./simple.js');
+require('./simple.js');
 //require('./parsing-old');
 require('./area');
 require('./duration');

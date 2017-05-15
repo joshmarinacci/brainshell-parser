@@ -442,6 +442,8 @@ var cvs = {
             ratio:256*3,
             type:'volume'
         },
+
+
         'centimeter': {
             name:'centimeter',
             base:'meter',
@@ -460,18 +462,28 @@ var cvs = {
             ratio:1,
             type:'length'
         },
+        mile: {
+            name:'mile',
+            base:'foot',
+            ratio:1/5280,
+            type:'length'
+        },
         meter: {
             name:'meter',
             base:'meter',
             ratio:1,
             type:'length'
         },
+
+
         acre: {
             name:'acre',
             base:'acre',
             ratio:1,
             type:'area'
         },
+
+
 
         gram: {
             name:'gram',
@@ -498,6 +510,8 @@ var cvs = {
             type:'mass'
         },
 
+
+
         second: {
             name:'second',
             base:'second',
@@ -520,6 +534,18 @@ var cvs = {
             name:'day',
             base:'second',
             ratio:1/(60*60*24),
+            type:'duration'
+        },
+        month: {
+            name:'month',
+            base:'second',
+            ratio:1/(60*60*24*30),
+            type:'duration'
+        },
+        year: {
+            name:'year',
+            base:'second',
+            ratio:1/(60*60*24*365),
             type:'duration'
         },
     },
@@ -744,14 +770,10 @@ class Literal {
         throw new Error("bad subtract");
     }
     exponent(b) {
-        if(this.nu.length == 0 && b.nu.length == 0) {
-            return new Literal(Math.pow(this.nv,b.nv));
-        } else {
-            throw new Error("can't do exponent with units yet");
-        }
+        return new Literal(Math.pow(this.value, b.value));
     }
     invert() {
-        return new Literal(this.dv, this.du, this.nv, this.nu);
+        return new Literal(1/this.value);
     }
     sameUnits(b) {
         if(this.unit == b.unit && this.dimension == b.dimension) return true;
@@ -776,6 +798,9 @@ class Literal {
     }
     getValue() {
         return this.value;
+    }
+    equal(b) {
+        return this.value == b.value;
     }
 }
 
