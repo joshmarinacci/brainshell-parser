@@ -15,8 +15,8 @@ test("area units", function(t) {
     //compareUnit(t,'10 square meters',10,'meter',2);
     //compareUnit(t,'10 sq m',10,'meter',2);
     //compareUnit(t,'9 sqft',9,'feet',2);
-    //compareUnit(t,'9ft * 9m',24.6888,'meter',2);
-    //compareUnit(t,'8m * 9ft',236.2204724,'foot',2);
+    compareUnit(t,'9ft * 9m',24.6888,'meter',2);
+    compareUnit(t,'8m * 9ft',236.2204724,'foot',2);
     compareUnit(t,'3ft * 6ft',18,'foot',2);
     //compareUnit(t,'(3ft * 6ft) as sq mi',6.4566e-7,'miles',2);
     compareUnit(t,'1000ac',1000,'acres');

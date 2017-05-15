@@ -22,7 +22,7 @@ test("length units", function(t) {
     compareUnit(t,'3 mi',3,"mile");
     compareUnit(t,'3 miles',3,"mile");
     compareUnit(t,'3 mi as km',4.82803,'kilometers');
-    //compareUnit(t,'2ft/2',1,"feet");
+    compareUnit(t,'2ft/2',1,"feet");
     //compareUnit(t,'2/2ft',1,"feet");
     compareUnit(t,'2ft*2',4,"feet");
     compareUnit(t,'2*2ft',4,"feet");
@@ -42,7 +42,7 @@ test("length units", function(t) {
     compareUnit(t,'4ft as meters',1.2192,'meter');
     compareUnit(t,'4ft as inch',4*12,'inch');
     compareUnit(t,'4ft', 4,'ft');
-    //compareUnit(t,'4ft/2ft',2,'none');
+    compareUnit(t,'4ft/2ft',2,'none');
     //compareUnit(t,'4ft/2m',0.6096,'none');
     //compareUnit(t,'4ft/2gal',3,'none');//should error
     compareUnit(t,'(4+5)*6',(4+5)*6,'none');

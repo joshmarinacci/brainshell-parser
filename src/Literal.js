@@ -758,7 +758,7 @@ class Literal {
                 this.unit,
                 this.dimension + b.dimension)
         }
-        return newCalc(this,b);
+        return newCalc(this,b).multiply(b);
     }
     divide(b) {
         return this.multiply(b.invert());
