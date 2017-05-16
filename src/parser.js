@@ -3,6 +3,7 @@ var Literal = require('./Literal').Literal;
 var LiteralString = require('./Literal').LiteralString;
 var UNIT = require('./Literal').UNIT;
 var SimpleUnit = require('./Literal').SimpleUnit;
+var ComplexUnit = require('./Literal').ComplexUnit;
 var moment = require('moment');
 
 class FunCall {
@@ -76,6 +77,12 @@ function generateSemantics(grammar) {
             return [name,1];
         },
         Unit: function(mod, numer, div, denom) {
+            var numers = numer.calc();
+            var denoms = denom.calc();
+            if(denoms.length > 0) {
+                //console.log("doing a complex unit",numers,denoms[0]);
+                return new ComplexUnit(numers,denoms[0]);
+            }
             var n  = numer.calc()[0];
             var p = numer.calc()[1];
             var md = mod.calc();

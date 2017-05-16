@@ -358,6 +358,28 @@ class SimpleUnit {
     }
 }
 
+class ComplexUnit {
+    constructor(numers,denoms) {
+        console.log('making a complex unit', numers, denoms);
+        this.numers = numers;
+        this.denoms = denoms;
+        if(!numers) this.numers = [];
+        if(!denoms) this.denoms = [];
+    }
+    toString() {
+        return "complex: "+this.numers.join("^")+ ' / ' +this.denoms.join("^");
+    }
+    equal(b) {
+        console.log("comapring",this,'to',b);
+        if(this.numers.length !== b.numers.length) return false;
+        if(this.denoms.length !== b.denoms.length) return false;
+        for(let i=0; i<this.numers.length; i++) {
+            if(this.numers[i] !== b.numers[i]) return false;
+        }
+        return true;
+    }
+}
+
 
 class Literal {
     constructor(value, unit) {
@@ -383,6 +405,9 @@ class Literal {
     }
     withSimpleUnit(unit) {
         return new Literal(this.value,unit);
+    }
+    withComplexUnit(nums,denoms) {
+        return new Literal(this.value, new ComplexUnit(nums,denoms));
     }
     toString () {
         return this.value + " " + this._unit;
@@ -475,5 +500,6 @@ module.exports = {
     Literal: Literal,
     LiteralString:LiteralString,
     UNIT: UNIT,
-    SimpleUnit: SimpleUnit
+    SimpleUnit: SimpleUnit,
+    ComplexUnit: ComplexUnit
 };
