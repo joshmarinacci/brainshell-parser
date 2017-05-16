@@ -201,7 +201,13 @@ var units = {
     'bit': { type: 'storage'},
 
     'hex': { type:'format'},
-    'decimal': { type:'format'}
+    'decimal': { type:'format'},
+
+    'sqft': {
+        type:'area',
+        dimension:2,
+        name:'foot'
+    }
 };
 
 var abbrevations = {
@@ -281,6 +287,14 @@ const UNIT = {
         if(abbrevations[name]) return abbrevations[name];
         if(!name) return null;
         console.log("WARNING. no canonical name found for unit " + name);
+        return null;
+    },
+    hasCanonicalDimension(name) {
+        if(units[name] && units[name].dimension === 2) return true;
+        return false;
+    },
+    getCanonicalDimension(name) {
+        if(units[name] && units[name].dimension === 2) return units[name];
         return null;
     },
     calculate:function(parts, target) {
@@ -718,6 +732,12 @@ class Literal {
             } else {
                 this.dimension = 1;
             }
+        }
+
+        if(UNIT.hasCanonicalDimension(this.unit)) {
+            var u = UNIT.getCanonicalDimension(this.unit);
+            this.dimension = u.dimension;
+            this.unit = u.name;
         }
         //console.log("created final literal:",this.toString());
     }
