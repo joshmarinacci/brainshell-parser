@@ -52,8 +52,7 @@ test("volume units", function(t) {
     compareUnit(t,'4ft * 5ft * 6ft as gallon',897.659,'gallon');
     compareUnit(t,'4 cuft', 4,'feet',3);
     //compareUnit(t,'4 cu ft', 4,'feet',3);
-    //compareUnit(t,'4 sq ft', 4,'feet',2);
-    //compareUnit(t,'4 cubic feet', 4,'feet',3);
+    compareUnit(t,'4 cubic feet', 4,'feet',3);
     compareUnit(t,'4 ft^3', 4,'feet',3);
     compareUnit(t,'4 cuft as gal', 29.9221,'gal',1);
     t.end();

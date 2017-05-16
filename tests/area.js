@@ -30,6 +30,8 @@ test("area units", function(t) {
     compareUnit(t,'1km * 2km as acre',494.211,'acre');
     //compareUnit(t,'1m * 2m as squared feet',21.5278,'feet',2);
     //compareUnit(t,'1m * 2m as sq ft',21.5278,'feet',2);
-    //compareUnit(t,'1m * 2m as sqft' ,21.5278,'feet',2);
+    compareUnit(t,'1m * 2m as ft^2' ,21.5278,'feet',2);
+    compareUnit(t,'1m * 2m as sqft' ,21.5278,'feet',2);
+    //compareUnit(t,'1m * 2m as square feet' ,21.5278,'feet',2);
     t.end();
 });

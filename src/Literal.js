@@ -472,12 +472,14 @@ var cvs = {
 
         'sqft': {
             name:'foot',
+            base:'foot',
             ratio:1,
             type:'area',
             dimension:2
         },
         'cuft': {
             type:'area',
+            base:'foot',
             dimension:3,
             name:'foot',
             ratio:1
@@ -596,10 +598,12 @@ function newDimensionConversion(from,to,fu) {
             return true;
         }
     });
+    if(!toliter) throw new Error("no conversion found for " + from +" to " + JSON.stringify(to));
     let ret2 =  new Literal(ret.value/toliter.ratio, toliter.to.name, toliter.to.dim);
     return newCalc(ret2,to);
 }
 function newCalc(from,to) {
+    //console.log('-----');
     //console.log("new calc doing",from,'to',to);
     var fu = UNIT.lookupUnit(from.unit);
     var tu = UNIT.lookupUnit(to.unit);
@@ -612,7 +616,12 @@ function newCalc(from,to) {
     var cvv = cvs.bases.find((cv)=> {
         return (cv.from == fu.base && cv.to == tu.base);
     });
-    if(cvv) return new Literal(from.value/fu.ratio/cvv.ratio*tu.ratio,to.unit);
+    //console.log("got a cvv",cvv);
+    if(cvv) return new Literal(
+        from.value/fu.ratio/Math.pow(cvv.ratio,from.dimension)*tu.ratio,
+        to.unit,
+        from.dimension
+    );
 
     if(fu.type == 'length' && from.dimension == 3 && tu.type == 'volume') {
         return newDimensionConversion(from,to,fu);
@@ -620,7 +629,7 @@ function newCalc(from,to) {
     if(fu.type == 'length' && from.dimension == 2 && tu.type == 'area') {
         return newDimensionConversion(from,to,fu);
     }
-    throw new Error();
+    throw new Error("no conversion found");
 }
 
 
