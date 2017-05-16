@@ -3,7 +3,7 @@
  */
 //var Decimal = require('decimal.js');
 
-var conversions = [];
+/*var conversions = [];
 function addConversion(fv,fu, tv,tu) {
     conversions.push({
         nv:tv,
@@ -57,7 +57,8 @@ addConversion(1,'month',30,'day');
 addConversion(1,'day',24,'hour');
 addConversion(1,'hour',60,'minute');
 addConversion(1,'minute',60,'second');
-
+*/
+/*
 conversions.push({
     nv:1,
     nu:'foot',
@@ -143,7 +144,9 @@ conversions.push({
     dd:3
 });
 
+*/
 
+/*
 var units = {
     'centimeter': { type:'distance'},
     'millimeter': { type:'distance'},
@@ -219,6 +222,7 @@ var units = {
         name:'mile'
     }
 };
+*/
 
 var abbrevations = {
     'in':'inch',
@@ -289,133 +293,6 @@ var abbrevations = {
     'acres':'acre',
     'ac':'acre',
 
-};
-
-const UNIT = {
-    getCanonicalName(name) {
-        if(units[name]) return name;
-        if(abbrevations[name]) return abbrevations[name];
-        if(!name) return null;
-        console.log("WARNING. no canonical name found for unit " + name);
-        return null;
-    },
-    hasCanonicalDimension(name) {
-        if(units[name] && units[name].dimension) return true;
-        return false;
-    },
-    getCanonicalDimension(name) {
-        if(units[name] && units[name].dimension) return units[name];
-        return null;
-    },
-    calculate:function(parts, target) {
-        parts = parts.map((pt)=>pt.clone());
-        var fin = UNIT.cancel(UNIT.condense(parts));
-        var conv = UNIT.canBeConverted(fin);
-        if(conv) {
-            let fin2 = [fin].concat(UNIT.searchConversions(conv.from, conv.fromd, conv.to));
-            return UNIT.calculate(fin2);
-        }
-        if(target) {
-            var from = UNIT.collapsePowers(fin);
-            let fin2 = [fin].concat(UNIT.searchConversions(from.nu[0], from.nd, target));
-            return UNIT.calculate(fin2);
-        }
-        return fin;
-    },
-    cancel:function(part){
-        part.nu.sort();
-        part.du.sort();
-
-        var nu_done = [];
-        while(part.nu.length > 0) {
-            const a = part.nu.shift();
-            var n = part.du.findIndex((b)=> a === b);
-            if(n >= 0) {
-                part.du.splice(n,1);
-            } else {
-                nu_done.push(a);
-            }
-        }
-        //var du_done = part.du.slice();
-        return new Literal(
-            part.nv/part.dv,
-            nu_done,
-            1,
-            part.du.slice()
-        );
-    },
-    condense:function(parts) {
-        if(parts.length <= 1) return parts[0];
-        var a = parts.shift();
-        var b = parts.shift();
-        var c = new Literal(
-            a.nv* b.nv,
-            a.nu.concat(b.nu),
-            a.dv* b.dv,
-            a.du.concat(b.du)
-        );
-        parts.unshift(c);
-        return UNIT.condense(parts);
-    },
-    canBeConverted:function(val) {
-        //if both n & d contain an item of the same type
-        var dist = ((a)=> {
-            return units[a].type === 'distance'
-        });
-        var dur = ((a)=> units[a].type === 'duration');
-        if(val.nu.find(dist) && val.du.find(dist)) {
-            return {
-                from:val.nu.find(dist),
-                to:val.du.find(dist)
-            }
-        }
-        if(val.nu.find(dur) && val.du.find(dur)) {
-            return {
-                from:val.nu.find(dur),
-                to:val.du.find(dur)
-            }
-        }
-        //if val contains three distances and du contains volume
-        return false;
-    },
-    collapsePowers:function(val) {
-        if(val.nu[0] === val.nu[1]) {
-            val.nu.shift();
-            if(!val.nd) val.nd = 1;
-            val.nd++;
-            return UNIT.collapsePowers(val);
-        }
-        return val;
-    },
-    conversionToLiteral(cv) {
-        return new Literal(cv.nv,[cv.nu],cv.dv,[cv.du]);
-    },
-    searchConversions:function(from,fromd,to) {
-        var solutions = [];
-        conversions.forEach((cv)=>{
-            if(cv.inside===true) return; // don't get into a loop
-            if(cv.du === from) {
-                if(fromd) {
-                    if(cv.nu === to && cv.dd === fromd) {
-                        solutions.push([this.conversionToLiteral(cv)]);
-                        return;
-                    }
-                } else {
-                    if(cv.nu === to) {
-                        solutions.push([this.conversionToLiteral(cv)]);
-                        return;
-                    }
-                }
-                cv.inside = true;
-                var res = UNIT.searchConversions(cv.nu,cv.nd,to);
-                cv.inside = false;
-                if(res.length > 0) solutions.push([this.conversionToLiteral(cv)].concat(res));
-            }
-        });
-        if(solutions.length === 0) return [];
-        //return the shortest solution
-        return solutions.reduce((a,b)=> (a.length < b.length) ? a:b);
-    }
 };
 
 var cvs = {
@@ -592,6 +469,19 @@ var cvs = {
             ratio:1/(60*60*24*365),
             type:'duration'
         },
+
+        'sqft': {
+            name:'foot',
+            ratio:1,
+            type:'area',
+            dimension:2
+        },
+        'cuft': {
+            type:'area',
+            dimension:3,
+            name:'foot',
+            ratio:1
+        }
     },
     bases: [
         {
@@ -676,10 +566,29 @@ var cvs = {
     ]
 };
 
-function lookupUnit(name) {
-    if(!cvs.units[name]) console.log("WARNING. No unit for name",name);
-    return cvs.units[name];
-}
+
+const UNIT = {
+    getCanonicalName(name) {
+        if(cvs.units[name]) return name;
+        if(abbrevations[name]) return abbrevations[name];
+        if(!name) return null;
+        console.log("WARNING. no canonical name found for unit " + name);
+        return null;
+    },
+    hasCanonicalDimension(name) {
+        if(cvs.units[name] && cvs.units[name].dimension) return true;
+        return false;
+    },
+    getCanonicalDimension(name) {
+        if(cvs.units[name] && cvs.units[name].dimension) return cvs.units[name];
+        return null;
+    },
+    lookupUnit(name) {
+        if(!cvs.units[name]) console.log("WARNING. No unit for name",name);
+        return cvs.units[name];
+    }
+};
+
 function newDimensionConversion(from,to,fu) {
     let ret = newCalc(from, {unit:fu.base});
     let toliter = cvs.dims.find((cv) => {
@@ -692,8 +601,8 @@ function newDimensionConversion(from,to,fu) {
 }
 function newCalc(from,to) {
     //console.log("new calc doing",from,'to',to);
-    var fu = lookupUnit(from.unit);
-    var tu = lookupUnit(to.unit);
+    var fu = UNIT.lookupUnit(from.unit);
+    var tu = UNIT.lookupUnit(to.unit);
     //console.log("got from ",fu);
     //console.log("got   to ",tu);
     if(fu.base == tu.base) {
@@ -704,26 +613,13 @@ function newCalc(from,to) {
         return (cv.from == fu.base && cv.to == tu.base);
     });
     if(cvv) return new Literal(from.value/fu.ratio/cvv.ratio*tu.ratio,to.unit);
-    //if(!cvv) console.log("WARNING. couldn't convert from ",fu.base,'to',tu.base);
 
-
-
-    //if length^3 to volume, then search dimensional conversion
     if(fu.type == 'length' && from.dimension == 3 && tu.type == 'volume') {
         return newDimensionConversion(from,to,fu);
     }
     if(fu.type == 'length' && from.dimension == 2 && tu.type == 'area') {
         return newDimensionConversion(from,to,fu);
     }
-    //look for dimensional conversions
-    var ccv2 = cvs.dims.find((cv)=>{
-        if(cv.from.name == fu.name && cv.from.dim == from.dimension) {
-            if(cv.to.name == tu.name && cv.to.dim == to.dim) {
-                return true;
-            }
-        }
-    });
-    console.log('no answer');
     throw new Error();
 }
 
@@ -825,8 +721,8 @@ class Literal {
         return false;
     }
     sameUnitTypes(b) {
-        var fu = lookupUnit(this.unit);
-        var tu = lookupUnit(b.unit);
+        var fu = UNIT.lookupUnit(this.unit);
+        var tu = UNIT.lookupUnit(b.unit);
         if(fu.type == tu.type) return true;
         return false;
     }
