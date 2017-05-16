@@ -74,9 +74,12 @@ function generateSemantics(grammar) {
             if(power) return [name,parseInt(power)];
             return [name,1];
         },
-        Unit: function(numer, div, denom) {
+        Unit: function(mod, numer, div, denom) {
             var n  = numer.calc()[0];
             var p = numer.calc()[1];
+            var md = mod.calc();
+            if(md.length == 1 && md[0] === 'square') p = 2;
+            if(md.length == 1 && md[0] === 'cubic') p = 3;
             return {
                 unit:n,
                 dim:p
@@ -116,7 +119,7 @@ function generateSemantics(grammar) {
             //if(b) v = v * Math.pow(10, b.calc());
             return new Literal(v);
         },
-        Unit: function(numer, div, denom) {
+        Unit: function(mod, numer, div, denom) {
             return numer.style() + " / " + denom.style()[0];
         },
         unitchunk : function(a,b,c) {

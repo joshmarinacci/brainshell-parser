@@ -18,8 +18,9 @@ BrainShell {
 	float = (digit|"_")+ "." digit+ exp?
 	exp = "e" "-"? digit+
 	integer = (digit|"_")+ exp?
-	Unit =  unitchunk ("/" unitchunk)?
+	Unit =  unitmodifier? unitchunk ("/" unitchunk)?
 	unitchunk = (~"as" letter+) ("^" digit+)?
+	unitmodifier = "square" | "cubic"
 	FunCall = identifier "(" Expr ")"
 	Symbol = identifier
 	identifier = letter (letter | digit | "." | "_")+
