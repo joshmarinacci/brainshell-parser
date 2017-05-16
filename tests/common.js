@@ -14,7 +14,7 @@ function compareUnit(t, str, num, unit, dim) {
 
     } else {
         if(dim && dim !== 1) {
-            ans = new Literal(num).withPowerUnit(unit,dim);
+            ans = new Literal(num).withUnit(unit,dim);
         }
         if(!res.sameUnits(ans)) {
             console.log("units not equal: ", str, res.toString());
