@@ -5,6 +5,7 @@
   "devDependencies": {
     "react-scripts": "0.9.5"
   },
+  "homepage":"http://joshondesign.com/p/apps/jessecalc/",
   "dependencies": {
     "decimal.js": "^7.2.0",
     "moment": "^2.18.1",
