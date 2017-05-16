@@ -59,7 +59,8 @@ tests('parsing 42 in different formats', [
 	['0x42',0x42],
 	['4.2e2',420],
     ['42e2',4200],
-    ['42_000_000',42*1000*1000]
+    ['42_000_000',42*1000*1000],
+    //['42%',0.42],
 ]);
 
 
@@ -123,13 +124,13 @@ unittests("simple units", [
 
 unittests('complex units', [
     ['2ft * 2ft', new Literal(4).withUnit('foot',2)],
-    //['2ft * 2ft as sqft', new Literal(4).withComplexUnit(['squarefoot'],[])],
+    ['2ft * 2ft as sqft', new Literal(4).withUnit('foot',2)],
     ['2 ft^2', new Literal(2).withUnit('foot',2)],
-    //['2 ft^2 as sqft', new Literal(2).withComplexUnit(['squarefoot'],[])],
+    ['2 ft^2 as sqft', new Literal(2).withUnit('foot',2)],
 
     ['2ft * 2ft * 2 feet', new Literal(8).withUnit('foot',3)],
     ['2 ft^3', new Literal(2).withUnit('foot',3)],
-    //['2 ft^3 as cuft', new Literal(2).withComplexUnit(['cubicfoot'],[])],
+    ['2 ft^3 as cuft', new Literal(2).withUnit('foot',3)],
     ['2ft * 2ft * 2 feet', new Literal(8).withUnit('foot',3)],
     ['2ft * 2ft * 2ft as gallons', new Literal(59.8442).withUnit('gallon')],
 
@@ -147,7 +148,7 @@ unittests('complex units', [
 
 ]);
 
-/*
+
 test("crashed",(t)=>{
     t.throws(()=>{  Parser.parseString("1.2.3"); });
     t.throws(()=>{ Parser.parseString("4a5")});
@@ -155,7 +156,7 @@ test("crashed",(t)=>{
     //t.throws(()=>{ Parser.parseString('120m as hours')});
     t.end();
 });
-*/
+
 
 unittests("duration units", [
     ["1 second", new Literal(1,'second')],

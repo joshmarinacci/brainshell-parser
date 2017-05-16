@@ -8,7 +8,7 @@ test("length units", function(t) {
     compareUnit(t,'40km',40,'kilometer');
     compareUnit(t,"40m as feet",131.234,'foot');
     compareUnit(t,'40km as m',40*1000,'m');
-    //compareUnit(t,"42 square miles",42,'mile',2);
+    compareUnit(t,"42 square miles",42,'mile',2);
     //compareUnit(t,"42 sq mi",42,'mile',2);
     compareUnit(t,"50mm", 50,'millimeters',1);
     compareUnit(t,"50in", 50, 'inches');
@@ -49,7 +49,7 @@ test("length units", function(t) {
     compareUnit(t,'4+5*6',4+(5*6),'none');
     compareUnit(t,'4+(5*6)',4+(5*6),'none');
     //compareUnit(t,'4ft - 2gal');//should error
-    //compareUnit(t,'4ft * 2sqft',8,'feet',3);
+    compareUnit(t,'4ft * 2sqft',8,'feet',3);
     compareUnit(t,'4m + 12ft as m',4 + 3.6576,'m');
     compareUnit(t,'4mm + 12ft as mm',4 + (3.6576/0.001),'mm');
     compareUnit(t,'40mm + 40cm + 4m',4.440,'m');

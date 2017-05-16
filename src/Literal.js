@@ -3,8 +3,19 @@ new plan:
 
 * move replace literal.unit and literal.dimension with a single unit object
 * make unit objects be instances of a Unit class
+* make plans for the compound unit system using a CompoundUnit class w/ the same interface
 
- */
+
+ex: 60mi/hr
+ex: 60 min * 60 mi/hr
+ ex: 9.8 m/s^2  * 10 s
+
+
+if(unit.isCompound() || b.unit.isCompound()) {
+  return UNIT.compoundMultiply(this,b)
+}
+
+*/
 
 /**
  * Created by josh on 4/22/17.
