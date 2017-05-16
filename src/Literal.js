@@ -174,42 +174,6 @@ var abbrevations = {
 
 var cvs = {
     units: {
-        'liter': {
-            name:'liter',
-            base:'liter',
-            ratio:1,
-            type:'volume'
-        },
-        'milliliter': {
-            name:'milliliter',
-            base:'liter',
-            ratio:1000,
-            type:'volume'
-        },
-
-
-        pound: {
-            name:'pound',
-            base:'pound',
-            ratio:1,
-            type:'mass'
-        },
-        ounce: {
-            name:'ounce',
-            base:'pound',
-            ratio:16,
-            type:'mass'
-        },
-
-
-
-        second: {
-            name:'second',
-            base:'second',
-            ratio:1,
-            type:'duration'
-        },
-
         'sqft': {
             name:'foot',
             base:'foot',
@@ -320,12 +284,19 @@ function addUnit(name,base,ratio,type) {
 addUnit('meter','meter',1,'length');
 addUnit('foot','foot',1,'length');
 addUnit('gram','gram',1,'mass');
+addUnit('pound','pound',1,'mass');
 addUnit('acre','acre',1,'area');
 addUnit('gallon','gallon',1,'volume');
+addUnit('liter','liter',1,'volume');
+addUnit('second','second',1,'duration');
+addUnit('byte','byte',1,'storage');
+addUnit('bit','bit',1,'storage');
 
 addUnit('inch','foot',12,'length');
 addUnit('mile','foot',1/5280,'length');
 addUnit('kilogram','gram',1/1000,'mass');
+addUnit('milliliter','liter',1000,'volume');
+addUnit('ounce','pound',16,'mass');
 
 function addDuration(name,ratio) {
     addUnit(name,'second',ratio,'duration');
@@ -347,12 +318,19 @@ addMeterLength('league',1/4000);
 function addGallonVolume(name,ratio) {
     addUnit(name,'gallon',ratio,'volume');
 }
-
 addGallonVolume('teaspoon',256*3);
 addGallonVolume('tablespoon',256);
 addGallonVolume('cup',16);
 addGallonVolume('pint',8);
 addGallonVolume('quart',4);
+
+function addByte(name,ratio) {
+    addUnit(name,'byte',ratio,'storage');
+}
+addByte("kilobyte",1/1000);
+addByte("megabyte",1/(1000*1000));
+addByte("gigabyte",1/(1000*1000*1000));
+addByte("terabyte",1/(1000*1000*1000*1000));
 
 const UNIT = {
     makeUnit(name,dim) {
