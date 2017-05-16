@@ -101,20 +101,6 @@ conversions.push({
 
 */
 
-/*
-var units = {
-    'gallon': {     type:'volume', base:'gallon', ratio: 1 },
-    'quart': {      type:'volume', base:'gallon', ratio: 4 },
-    'pint': {       type:'volume', base:'gallon', ratio: 8 },
-    'cup': {        type:'volume', base:'gallon', ratio: 16 },
-    'teaspoon': {   type:'volume', base:'gallon', ratio:768 },
-    'tablespoon': { type:'volume', base:'gallon', ratio:256 },
-
-    'liter':      { type:'volume', base:'liter', ratio:1    },
-    'milliliter': { type:'volume', base:'liter', ratio:1000 },
-};
-*/
-
 var abbrevations = {
     'in':'inch',
     'inches':'inch',
@@ -188,21 +174,9 @@ var abbrevations = {
 
 var cvs = {
     units: {
-        'cup': {
-            name:'cup',
-            base:'gallon',
-            ratio:16,
-            type:'volume'
-        },
         'liter': {
             name:'liter',
             base:'liter',
-            ratio:1,
-            type:'volume'
-        },
-        'gallon': {
-            name:'gallon',
-            base:'gallon',
             ratio:1,
             type:'volume'
         },
@@ -212,103 +186,8 @@ var cvs = {
             ratio:1000,
             type:'volume'
         },
-        'quart': {
-            name:'quart',
-            base:'gallon',
-            ratio:4,
-            type:'volume'
-        },
-        'pint': {
-            name:'pint',
-            base:'gallon',
-            ratio:8,
-            type:'volume'
-        },
-        'tablespoon': {
-            name:'tablespoon',
-            base:'gallon',
-            ratio:256,
-            type:'volume'
-        },
-        'teaspoon': {
-            name:'teaspoon',
-            base:'gallon',
-            ratio:256*3,
-            type:'volume'
-        },
 
 
-        'centimeter': {
-            name:'centimeter',
-            base:'meter',
-            ratio:100,
-            type:'length'
-        },
-        'millimeter': {
-            name:'millimeter',
-            base:'meter',
-            ratio:1000,
-            type:'length'
-        },
-        'kilometer': {
-            name:'kilometer',
-            base:'meter',
-            ratio:1/1000,
-            type:'length'
-        },
-        foot: {
-            name:'foot',
-            base:'foot',
-            ratio:1,
-            type:'length'
-        },
-        inch: {
-            name:'inch',
-            base:'foot',
-            ratio:12,
-            type:'length'
-        },
-        mile: {
-            name:'mile',
-            base:'foot',
-            ratio:1/5280,
-            type:'length'
-        },
-        meter: {
-            name:'meter',
-            base:'meter',
-            ratio:1,
-            type:'length'
-        },
-        league: {
-            name:'league',
-            base:'meter',
-            ratio:1/4000,
-            type:'length'
-        },
-
-
-        acre: {
-            name:'acre',
-            base:'acre',
-            ratio:1,
-            type:'area'
-        },
-
-
-
-        gram: {
-            name:'gram',
-            base:'gram',
-            ratio:1,
-            type:'mass'
-        },
-        kilogram: {
-            name:'gram',
-            base:'gram',
-            ratio:1/1000,
-            type:'mass'
-        },
         pound: {
             name:'pound',
             base:'pound',
@@ -429,14 +308,27 @@ var cvs = {
     ]
 };
 
-function addDuration(name,ratio) {
+function addUnit(name,base,ratio,type) {
     cvs.units[name] = {
         name:name,
-        base:'second',
-        type:'duration',
+        base:base,
         ratio:ratio,
-        dimension: 1
+        type:type,
+        //dimension:1
     }
+}
+addUnit('meter','meter',1,'length');
+addUnit('foot','foot',1,'length');
+addUnit('gram','gram',1,'mass');
+addUnit('acre','acre',1,'area');
+addUnit('gallon','gallon',1,'volume');
+
+addUnit('inch','foot',12,'length');
+addUnit('mile','foot',1/5280,'length');
+addUnit('kilogram','gram',1/1000,'mass');
+
+function addDuration(name,ratio) {
+    addUnit(name,'second',ratio,'duration');
 }
 addDuration('minute',1/(60));
 addDuration('hour',1/(60*60));
@@ -444,6 +336,23 @@ addDuration('day',1/(60*60*24));
 addDuration('month',1/(60*60*24*30));
 addDuration('year',1/(60*60*24*365));
 
+function addMeterLength(name,ratio) {
+    addUnit(name,'meter',ratio,'length');
+}
+addMeterLength('centimeter',100);
+addMeterLength('millimeter',1000);
+addMeterLength('kilometer',1/1000);
+addMeterLength('league',1/4000);
+
+function addGallonVolume(name,ratio) {
+    addUnit(name,'gallon',ratio,'volume');
+}
+
+addGallonVolume('teaspoon',256*3);
+addGallonVolume('tablespoon',256);
+addGallonVolume('cup',16);
+addGallonVolume('pint',8);
+addGallonVolume('quart',4);
 
 const UNIT = {
     makeUnit(name,dim) {
