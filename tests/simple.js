@@ -35,6 +35,11 @@ function unittests(msg,arr) {
             let ans = tcase[1];
             let res = Parser.parseString(str);
             t.approximately(res.getValue(),ans.getValue(),0.01,'value');
+            if(!res.sameUnits(ans)) {
+                console.log("not the same units!");
+                console.log(res);
+                console.log(ans);
+            }
             t.equal(res.sameUnits(ans),true);
         });
         t.end();
@@ -91,6 +96,7 @@ tests("big numbers", [
 
 unittests("simple units", [
 	['6 feet', new Literal(6).withUnit('feet')],
+    ['6 feet * 6', new Literal(36).withUnit('feet')],
 	['6 meter', new Literal(6).withUnit('meter')],
     ['6 cups', new Literal(6).withUnit('cups')],
     ['40 m', new Literal(40).withUnit('meter')],
@@ -157,17 +163,16 @@ test("crashed",(t)=>{
     t.end();
 });
 
-
 unittests("duration units", [
-    ["1 second", new Literal(1,'second')],
-    ['1s', new Literal(1,'second')],
-    ['120s as minutes', new Literal(2, 'minute')],
-    ['7200s as hours', new Literal(2, 'hour')],
-    ['120min as hours', new Literal(2, 'hour')],
-    ['12 hr as days', new Literal(0.5, 'day')],
-    ['90 days as months', new Literal(3, 'month')],
-    ['730 days as years', new Literal(2, 'year')],
-    ['5 years as seconds', new Literal(157680000,'second')]
+    ["1 second", new Literal(1).withUnit('second')],
+    ['1s', new Literal(1).withUnit('second')],
+    ['120s as minutes', new Literal(2).withUnit('minute')],
+    ['7200s as hours', new Literal(2).withUnit('hour')],
+    ['120min as hours', new Literal(2).withUnit('hour')],
+    ['12 hr as days', new Literal(0.5).withUnit('day')],
+    ['90 days as months', new Literal(3).withUnit('month')],
+    ['730 days as years', new Literal(2).withUnit('year')],
+    ['5 years as seconds', new Literal(157680000).withUnit('second')]
 ]);
 
 tests("constants", [

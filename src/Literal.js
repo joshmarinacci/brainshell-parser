@@ -103,11 +103,11 @@ var cvs = {
             dimension:2
         },
         'cuft': {
-            type:'area',
-            base:'foot',
-            dimension:3,
             name:'foot',
-            ratio:1
+            base:'foot',
+            ratio:1,
+            type:'volume',
+            dimension:3
         }
     },
     //convert between unit bases
@@ -201,9 +201,13 @@ function addUnit(name,base,ratio,type) {
         base:base,
         ratio:ratio,
         type:type,
-        dimension:1
+        dimension:1,
+        getUnit: function() {
+            return this;
+        }
     }
 }
+addUnit('none','none',1,'none');
 addUnit('meter','meter',1,'length');
 addUnit('foot','foot',1,'length');
 addUnit('gram','gram',1,'mass');
@@ -216,6 +220,7 @@ addUnit('byte','byte',1,'storage');
 addUnit('bit','bit',1,'storage');
 
 addUnit('inch','foot',12,'length');
+addUnit('yard','foot',1/3,'length');
 addUnit('mile','foot',1/5280,'length');
 addUnit('kilogram','gram',1/1000,'mass');
 addUnit('milliliter','liter',1000,'volume');
@@ -260,16 +265,14 @@ const UNIT = {
         return {unit: name,dim:dim};
     },
     sameUnits(a,b) {
-        return (a.unit == b.unit && a.dimension == b.dimension);
+        return a.getUnit().equal(b.getUnit());
     },
     sameTypes(a,b) {
-        var fu = this.lookupUnit(a.unit);
-        var tu = this.lookupUnit(b.unit);
-        return (fu.type == tu.type);
+        return a.getUnit().type === b.getUnit().type;
     },
 
     getCanonicalName(name) {
-        if(cvs.units[name]) return name;
+        if(cvs.units[name]) return cvs.units[name].name;
         if(abbrevations[name]) return abbrevations[name];
         if(!name) return null;
         console.log("WARNING. no canonical name found for unit " + name);
@@ -283,89 +286,110 @@ const UNIT = {
         return null;
     },
     lookupUnit(name) {
-        if(!cvs.units[name]) console.log("WARNING. No unit for name",name);
+        if(!cvs.units[name]) {
+            console.log("WARNING. No unit for name",name);
+            throw new Error();
+        }
         return cvs.units[name];
     },
     dimConvert(from, to, fu) {
-        let ret = UNIT.convert(from, {unit:fu.base});
+        let ret = this.convert(from, this.lookupUnit(fu.base));
         let toliter = cvs.dims.find((cv) => {
-            if(cv.from.name == ret.unit && cv.from.dim == ret.dimension) {
+            if(cv.from.name == ret.getUnit().name && cv.from.dim == ret.getUnit().dimension) {
                 return true;
             }
         });
         if(!toliter) throw new Error("no conversion found for " + from +" to " + JSON.stringify(to));
-        let ret2 =  new Literal(ret.value/toliter.ratio, toliter.to.name, toliter.to.dim);
+        let ret2 =  new Literal(ret.value/toliter.ratio).withUnit(toliter.to.name, toliter.to.dim);
         return UNIT.convert(ret2,to);
     },
     convert(from, to) {
         //console.log('-----');
         //console.log("new calc doing",from,'to',to);
-        var fu = UNIT.lookupUnit(from.unit);
-        var tu = UNIT.lookupUnit(to.unit);
+        var fu = from.getUnit();
+        var tu = this.lookupUnit(to.getUnit().name);
         //console.log("got from ",fu);
         //console.log("got   to ",tu);
         if(fu.base == tu.base) {
-            var f =Math.pow(tu.ratio/fu.ratio,from.dimension);
-            return new Literal(from.value*f,to.unit,from.dimension);
+            var f =Math.pow(tu.ratio/fu.ratio,fu.dimension);
+            return new Literal(from.value*f).withUnit(to.name,fu.dimension);
         }
         var cvv = cvs.bases.find((cv)=> {
             return (cv.from == fu.base && cv.to == tu.base);
         });
         //console.log("got a cvv",cvv);
         if(cvv) return new Literal(
-            from.value/fu.ratio/Math.pow(cvv.ratio,from.dimension)*tu.ratio,
-            to.unit,
-            from.dimension
-        );
+            from.value/fu.ratio/Math.pow(cvv.ratio,fu.dimension)*tu.ratio)
+            .withUnit(to.getUnit().name,fu.dimension);
 
-        if(fu.type == 'length' && from.dimension == 3 && tu.type == 'volume') {
-            return UNIT.dimConvert(from,to,fu);
+        if(fu.type == 'length' && fu.dimension == 3 && tu.type == 'volume') {
+            return this.dimConvert(from,to,fu);
         }
-        if(fu.type == 'length' && from.dimension == 2 && tu.type == 'area') {
-            return UNIT.dimConvert(from,to,fu);
+        if(fu.type == 'length' && fu.dimension == 2 && tu.type == 'area') {
+            return this.dimConvert(from,to,fu);
         }
         throw new Error("no conversion found");
     }
 };
 
 
+class SimpleUnit {
+    constructor(name,dimension) {
+        this.name = UNIT.getCanonicalName(name);
+        //console.log("making a simple unit with",this.name,dimension);
+        var canon = UNIT.lookupUnit(this.name);
+        //console.log('cannon',canon);
+        this.base = canon.base;
+        this.ratio = canon.ratio;
+        this.type = canon.type;
+        this.dimension = dimension;
+    }
+    toString() {
+        return this.name + "^" + this.dimension;
+    }
+    equal(b) {
+        return (this.name === b.name && this.dimension == b.dimension);
+    }
+    getUnit() {
+        return this;
+    }
+    isNone() {
+        return  this.name === 'none';
+    }
+}
 
 
 class Literal {
-    constructor(value, unit, dimension) {
+    constructor(value, unit) {
         this.type = 'number';
         this.format = 'none';
         this.value = value;
-        this.unit = UNIT.getCanonicalName(unit);
-        this.dimension = dimension;
-        if(!dimension) {
-            if (!unit) {
-                this.dimension = 0;
-            } else {
-                this.dimension = 1;
-            }
-        }
-
-        if(UNIT.hasCanonicalDimension(this.unit)) {
-            var u = UNIT.getCanonicalDimension(this.unit);
-            this.dimension = u.dimension;
-            this.unit = u.name;
+        this._unit = unit;
+        if(typeof unit === 'string') {
+            throw new Error('cannot create a literal with a string unit anymore');
         }
         //console.log("created final literal:",this.toString());
     }
     clone() {
-        var lit = new Literal(this.value,this.unit,this.dimension);
+        var lit = new Literal(this.value).withSimpleUnit(this.unit);
         lit.format = this.format;
         return lit;
     }
     withUnit(u,dim) {
         if(!u) return this;
         if(!dim) dim = 1;
-        if(typeof u === 'string') return new Literal(this.value,u,dim);
+        if(typeof u === 'string') return new Literal(this.value,new SimpleUnit(u,dim));
         throw new Error("can't handle other kind of unit");
     }
+    withSimpleUnit(unit) {
+        return new Literal(this.value,unit);
+    }
     toString () {
-        return this.value + " " + this.unit + "^"+this.dimension;
+        return this.value + " " + this._unit;
+    }
+    getUnit() {
+        if(!this._unit) return new SimpleUnit("none",0);
+        return this._unit;
     }
     as(target) {
         //if(units[target].type === 'format') {
@@ -374,16 +398,19 @@ class Literal {
         return UNIT.convert(this,target);
     };
     multiply(b) {
-        //multiply the same units
-        if(this.unit && !b.unit) {
-            return new Literal(this.value* b.value).withUnit(this.unit,this.dimension);
+        //multiply with only one unit
+        if(this.getUnit().isNone()) {
+            return new Literal(this.value* b.value).withSimpleUnit(b.getUnit());
         }
-        if(!this.unit && b.unit) {
-            return new Literal(this.value* b.value).withUnit(b.unit,b.dimension);
+        //multiply with only one unit
+        if(b.getUnit().isNone()) {
+            return new Literal(this.value* b.value).withSimpleUnit(this.getUnit());
         }
-        if(this.unit == b.unit) {
-            return new Literal(this.value * b.value).withUnit(this.unit,this.dimension + b.dimension);
+        //multiply with same units
+        if(this.getUnit().name == b.getUnit().name) {
+            return new Literal(this.value * b.value).withUnit(this.getUnit().name,this.getUnit().dimension + b.getUnit().dimension);
         }
+        //convert the first to the second unit
         return UNIT.convert(this,b).multiply(b);
     }
     divide(b) {
@@ -391,19 +418,19 @@ class Literal {
     }
     add(b) {
         if(UNIT.sameUnits(this,b)) {
-            return new Literal(this.value + b.value).withUnit(this.unit, this.dimension);
+            return new Literal(this.value + b.value).withSimpleUnit(this.getUnit());
         }
         if(UNIT.sameTypes(this,b)) {
-            return UNIT.convert(this,UNIT.makeUnit(b.unit,this.dimension)).add(b);
+            return UNIT.convert(this, b.getUnit()).add(b);
         }
         throw new Error("bad add");
     }
     subtract(b) {
         if(UNIT.sameUnits(this,b)) {
-            return new Literal(this.value - b.value).withUnit(this.unit, this.dimension);
+            return new Literal(this.value - b.value).withSimpleUnit(this.getUnit());
         }
         if(UNIT.sameTypes(this,b)) {
-            UNIT.convert(this, UNIT.makeUnit(b.unit,this.dimension)).subtract(b);
+            UNIT.convert(this, b.getUnit()).subtract(b);
         }
         throw new Error("bad subtract");
     }
@@ -447,5 +474,6 @@ class LiteralString {
 module.exports = {
     Literal: Literal,
     LiteralString:LiteralString,
-    UNIT: UNIT
+    UNIT: UNIT,
+    SimpleUnit: SimpleUnit
 };

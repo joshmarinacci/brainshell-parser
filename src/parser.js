@@ -2,6 +2,7 @@ var ohm = require('ohm-js');
 var Literal = require('./Literal').Literal;
 var LiteralString = require('./Literal').LiteralString;
 var UNIT = require('./Literal').UNIT;
+var SimpleUnit = require('./Literal').SimpleUnit;
 var moment = require('moment');
 
 class FunCall {
@@ -65,7 +66,7 @@ function generateSemantics(grammar) {
             var num_t = num.calc();
             var unit_t = unit.calc()[0];
             if(!unit_t) return num_t;
-            return num_t.withUnit(unit_t.unit,unit_t.dim);
+            return num_t.withSimpleUnit(unit_t);
         },
         unitchunk : function(a,b,c) {
             var name = a.calc().join("");
@@ -80,10 +81,7 @@ function generateSemantics(grammar) {
             var md = mod.calc();
             if(md.length == 1 && md[0] === 'square') p = 2;
             if(md.length == 1 && md[0] === 'cubic') p = 3;
-            return {
-                unit:n,
-                dim:p
-            }
+            return new SimpleUnit(n,p);
         },
         Number: (a) => a.calc(),
         integer: function(a,b) {
