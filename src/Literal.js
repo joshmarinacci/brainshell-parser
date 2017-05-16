@@ -207,6 +207,16 @@ var units = {
         type:'area',
         dimension:2,
         name:'foot'
+    },
+    'cuft': {
+        type:'area',
+        dimension:3,
+        name:'foot'
+    },
+    'sqmi': {
+        type:'area',
+        dimension:2,
+        name:'mile'
     }
 };
 
@@ -290,11 +300,11 @@ const UNIT = {
         return null;
     },
     hasCanonicalDimension(name) {
-        if(units[name] && units[name].dimension === 2) return true;
+        if(units[name] && units[name].dimension) return true;
         return false;
     },
     getCanonicalDimension(name) {
-        if(units[name] && units[name].dimension === 2) return units[name];
+        if(units[name] && units[name].dimension) return units[name];
         return null;
     },
     calculate:function(parts, target) {
