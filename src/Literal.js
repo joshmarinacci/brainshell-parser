@@ -1,105 +1,15 @@
+/*
+new plan:
+
+* move replace literal.unit and literal.dimension with a single unit object
+* make unit objects be instances of a Unit class
+
+ */
+
 /**
  * Created by josh on 4/22/17.
  */
 //var Decimal = require('decimal.js');
-
-/*var conversions = [];
-addConversion(1,'terabyte',1000,'gigabyte');
-addConversion(1,'tibibyte',1024,'gibibyte');
-addConversion(1,'gigabyte',1000,'megabyte');
-addConversion(1,'gibibyte',1024,'mebibyte');
-addConversion(1,'megabyte',1000,'kilobyte');
-addConversion(1,'mebibyte',1024,'kibibyte');
-addConversion(1,'kilobyte',1000,'byte');
-addConversion(1,'gigabyte',8,'gigabit');
-addConversion(1,'gibibyte',8,'gibibit');
-
-conversions.push({
-    nv:1,
-    nu:'foot',
-    nd:3,
-    dv:7.48052,
-    du:'gallon',
-    dd:1
-});
-conversions.push({
-    nv:7.48052,
-    nu:'gallon',
-    nd:1,
-    dv:1,
-    du:'foot',
-    dd:3
-});
-
-conversions.push({
-    nv:1,
-    nu:'acre',
-    nd:1,
-    dv:4045.86,
-    du:'meter',
-    dd:2
-});
-conversions.push({
-    nv:4045.86,
-    nu:'meter',
-    nd:2,
-    dv:1,
-    du:'acre',
-    dd:1
-});
-conversions.push({
-    nv:1,
-    nu:'acre',
-    nd:1,
-    dv:43560 ,
-    du:'foot',
-    dd:2
-});
-conversions.push({
-    nv:43560 ,
-    nu:'foot',
-    nd:2,
-    dv:1,
-    du:'acre',
-    dd:1
-});
-
-//meter to liter
-conversions.push({
-    nv:1,
-    nu:'meter',
-    nd:3,
-    dv:1000,
-    du:'liter',
-    dd:1
-});
-conversions.push({
-    nv:1000,
-    nu:'liter',
-    nd:1,
-    dv:1,
-    du:'meter',
-    dd:3
-});
-//cm^3 => ml
-conversions.push({
-    nv:1,
-    nu:'centimeter',
-    nd:3,
-    dv:1,
-    du:'milliliter',
-    dd:1
-});
-conversions.push({
-    nv:3,
-    nu:'milliliter',
-    nd:1,
-    dv:1,
-    du:'centimeter',
-    dd:3
-});
-
-*/
 
 var abbrevations = {
     'in':'inch',
@@ -189,6 +99,7 @@ var cvs = {
             ratio:1
         }
     },
+    //convert between unit bases
     bases: [
         {
             from:'gallon',
@@ -216,6 +127,7 @@ var cvs = {
             to:'gram'
         }
     ],
+    //convert between unit types
     dims: [
         {
             from: {
@@ -278,7 +190,7 @@ function addUnit(name,base,ratio,type) {
         base:base,
         ratio:ratio,
         type:type,
-        //dimension:1
+        dimension:1
     }
 }
 addUnit('meter','meter',1,'length');
@@ -353,10 +265,10 @@ const UNIT = {
         return null;
     },
     hasCanonicalDimension(name) {
-        return (cvs.units[name] && cvs.units[name].dimension);
+        return (cvs.units[name] && cvs.units[name].dimension > 1);
     },
     getCanonicalDimension(name) {
-        if(cvs.units[name] && cvs.units[name].dimension) return cvs.units[name];
+        if(cvs.units[name] && cvs.units[name].dimension > 1) return cvs.units[name];
         return null;
     },
     lookupUnit(name) {
