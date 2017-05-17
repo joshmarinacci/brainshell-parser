@@ -80,8 +80,14 @@ function generateSemantics(grammar) {
             var numers = numer.calc();
             var denoms = denom.calc();
             if(denoms.length > 0) {
-                //console.log("doing a complex unit",numers,denoms[0]);
-                return new ComplexUnit(numers,denoms[0]);
+                numers = [numers];
+                //console.log("doing a complex unit",numers,denoms);
+                numers = numers.map((ar)=>UNIT.lookupUnit(ar[0]));
+                denoms = denoms.map((ar)=>{
+                    return UNIT.withDimension(UNIT.lookupUnit(ar[0]),ar[1])
+                });
+                //console.log("now = ",numers,denoms);
+                return new ComplexUnit(numers,denoms);
             }
             var n  = numer.calc()[0];
             var p = numer.calc()[1];

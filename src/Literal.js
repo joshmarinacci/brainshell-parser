@@ -292,6 +292,12 @@ const UNIT = {
         }
         return cvs.units[name];
     },
+    withDimension(unit,dim) {
+        var obj = {};
+        Object.keys(unit).forEach((key)=> obj[key] = unit[key]);
+        obj.dimension = dim;
+        return obj;
+    },
     dimConvert(from, to, fu) {
         let ret = this.convert(from, this.lookupUnit(fu.base));
         let toliter = cvs.dims.find((cv) => {
@@ -329,6 +335,74 @@ const UNIT = {
             return this.dimConvert(from,to,fu);
         }
         throw new Error("no conversion found");
+    },
+    compoundMultiply(a,b) {
+        //console.log("muliplying",a,b);
+        var v2 = a.getValue() * b.getValue();
+        //console.log("new value is", v2);
+
+        var au = a.getUnit();
+        var bu = b.getUnit();
+        if(!au.isCompound()) au = new ComplexUnit([this.lookupUnit(au.name)],[]);
+        if(!bu.isCompound()) bu = new ComplexUnit([this.lookupUnit(bu.name)],[]);
+        //console.log('units',au,bu);
+
+        var u2 = new ComplexUnit(au.numers.concat(bu.numers),au.denoms.concat(bu.denoms));
+        //console.log("new unit is",u2.toString());
+
+        function expand(u2) {
+            //if top and bottom have a time, then expand it
+            var top = u2.numers.find((u)=>u.type=='duration');
+            var bot = u2.denoms.find((u)=>u.type=='duration');
+            if(top && bot) {
+                if(top.base === bot.base) {
+                    //console.log("same base. we can convert");
+                    //console.log("matching",top,bot);
+                    //add 60s/1min == 1s/ratio min
+                    //add  1hr/60*60s ===  1hr ratio / 1s
+                    //u2.numers.push(this.lookupUnit(top.base));
+                    u2.denoms.push(UNIT.lookupUnit(top.name));
+                    u2.numers.push(UNIT.lookupUnit(bot.name));
+                    //u2.denoms.push(this.lookupUnit(bot.base));
+                    var factor = bot.ratio/top.ratio;
+                    v2 = v2 * factor;
+                    //console.log("now it's",u2.toString(),factor,u2);
+                    //console.log("value =",v2);
+                }
+            }
+        }
+
+        expand(u2);
+
+        /*
+        first, fix the wrong dimension from m/s^2
+        make reduce decrement the dimension for top and bottom matches.
+        then just filter out anything with dim == 0 from both
+         */
+        function reduce(u2) {
+
+            //reduce by removing any unit that is on both top and bottom
+            var n1 = u2.numers.slice();
+            var d1 = u2.denoms.slice();
+            //reduce dimension of any unit on both top and bottom
+            n1.forEach((n) => {
+                d1.forEach((d) => {
+                    if(n.name == d.name) {
+                        if(n.dimension > 0 && d.dimension > 0) {
+                            n.dimension--;
+                            d.dimension--;
+                        }
+                    }
+                });
+            });
+            //remove any units that were reduced to zero
+            n1 = n1.filter((u)=>u.dimension>0);
+            d1 = d1.filter((u)=>u.dimension>0);
+            //console.log("after we have",n1,d1);
+            return new ComplexUnit(n1,d1);
+        }
+        u2 = reduce(u2);
+        return new Literal(v2, u2);
     }
 };
 
@@ -356,28 +430,33 @@ class SimpleUnit {
     isNone() {
         return  this.name === 'none';
     }
+    isCompound() { return false; }
 }
 
 class ComplexUnit {
     constructor(numers,denoms) {
-        console.log('making a complex unit', numers, denoms);
+        if(!numers) numers = [];
+        if(!denoms) denoms = [];
         this.numers = numers;
         this.denoms = denoms;
-        if(!numers) this.numers = [];
-        if(!denoms) this.denoms = [];
     }
     toString() {
-        return "complex: "+this.numers.join("^")+ ' / ' +this.denoms.join("^");
+        return "complex: "+
+            this.numers.map((u)=>u.name + "^" + u.dimension).join(" ")
+            + ' / ' +
+            this.denoms.map((u)=>u.name + "^" + u.dimension).join(" ");
     }
     equal(b) {
-        console.log("comapring",this,'to',b);
+        //console.log("comparing",this,'to',b);
         if(this.numers.length !== b.numers.length) return false;
         if(this.denoms.length !== b.denoms.length) return false;
         for(let i=0; i<this.numers.length; i++) {
-            if(this.numers[i] !== b.numers[i]) return false;
+            if(this.numers[i].name !== b.numers[i].name) return false;
         }
         return true;
     }
+    isNone() { return false; }
+    isCompound() { return true; }
 }
 
 
@@ -406,8 +485,14 @@ class Literal {
     withSimpleUnit(unit) {
         return new Literal(this.value,unit);
     }
-    withComplexUnit(nums,denoms) {
-        return new Literal(this.value, new ComplexUnit(nums,denoms));
+    withComplexUnitArray(numers,denoms) {
+        if(typeof numers[0] === 'string') {
+            numers = [UNIT.lookupUnit(numers[0])];
+        }
+        if(typeof denoms[0] === 'string') {
+            denoms = [UNIT.lookupUnit(denoms[0])];
+        }
+        return new Literal(this.value, new ComplexUnit(numers,denoms));
     }
     toString () {
         return this.value + " " + this._unit;
@@ -435,6 +520,9 @@ class Literal {
         if(this.getUnit().name == b.getUnit().name) {
             return new Literal(this.value * b.value).withUnit(this.getUnit().name,this.getUnit().dimension + b.getUnit().dimension);
         }
+
+        if(this.getUnit().isCompound() || b.getUnit().isCompound()) return UNIT.compoundMultiply(this,b);
+
         //convert the first to the second unit
         return UNIT.convert(this,b).multiply(b);
     }
