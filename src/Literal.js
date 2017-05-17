@@ -298,6 +298,11 @@ const UNIT = {
         obj.dimension = dim;
         return obj;
     },
+    cloneCompound(unit) {
+        var obj = {};
+        Object.keys(unit).forEach((key)=> obj[key] = unit[key]);
+        return obj;
+    },
     dimConvert(from, to, fu) {
         let ret = this.convert(from, this.lookupUnit(fu.base));
         let toliter = cvs.dims.find((cv) => {
@@ -334,10 +339,10 @@ const UNIT = {
         if(fu.type == 'length' && fu.dimension == 2 && tu.type == 'area') {
             return this.dimConvert(from,to,fu);
         }
-        throw new Error("no conversion found");
+        throw new Error("no conversion found for " + from + " to " + to);
     },
     compoundMultiply(a,b) {
-        //console.log("muliplying",a,b);
+        //console.log("compound multiplying", a.toString(), b.toString());
         var v2 = a.getValue() * b.getValue();
         //console.log("new value is", v2);
 
@@ -350,37 +355,28 @@ const UNIT = {
         var u2 = new ComplexUnit(au.numers.concat(bu.numers),au.denoms.concat(bu.denoms));
         //console.log("new unit is",u2.toString());
 
-        function expand(u2) {
+        function expand(unit) {
             //if top and bottom have a time, then expand it
-            var top = u2.numers.find((u)=>u.type=='duration');
-            var bot = u2.denoms.find((u)=>u.type=='duration');
-            if(top && bot) {
-                if(top.base === bot.base) {
-                    //console.log("same base. we can convert");
-                    //console.log("matching",top,bot);
-                    //add 60s/1min == 1s/ratio min
-                    //add  1hr/60*60s ===  1hr ratio / 1s
-                    //u2.numers.push(this.lookupUnit(top.base));
-                    u2.denoms.push(UNIT.lookupUnit(top.name));
-                    u2.numers.push(UNIT.lookupUnit(bot.name));
-                    //u2.denoms.push(this.lookupUnit(bot.base));
-                    var factor = bot.ratio/top.ratio;
-                    v2 = v2 * factor;
-                    //console.log("now it's",u2.toString(),factor,u2);
-                    //console.log("value =",v2);
+            function check(u2,type) {
+                var top = u2.numers.find((u)=>u.type==type);
+                var bot = u2.denoms.find((u)=>u.type==type);
+                if(top && bot) {
+                    if(top.base === bot.base) {
+                        u2.denoms.push(UNIT.lookupUnit(top.name));
+                        u2.numers.push(UNIT.lookupUnit(bot.name));
+                        var factor = bot.ratio/top.ratio;
+                        v2 = v2 * factor;
+                    }
                 }
+                return u2;
             }
+            unit = check(unit,'duration');
+            unit = check(unit,'length');
+            return unit;
         }
+        u2 = expand(u2);
 
-        expand(u2);
-
-        /*
-        first, fix the wrong dimension from m/s^2
-        make reduce decrement the dimension for top and bottom matches.
-        then just filter out anything with dim == 0 from both
-         */
         function reduce(u2) {
-
             //reduce by removing any unit that is on both top and bottom
             var n1 = u2.numers.slice();
             var d1 = u2.denoms.slice();
@@ -419,7 +415,7 @@ class SimpleUnit {
         this.dimension = dimension;
     }
     toString() {
-        return this.name + "^" + this.dimension;
+        return "siu:" + this.name + "^" + this.dimension;
     }
     equal(b) {
         return (this.name === b.name && this.dimension == b.dimension);
@@ -441,9 +437,9 @@ class ComplexUnit {
         this.denoms = denoms;
     }
     toString() {
-        return "complex: "+
+        return "cxu:"+
             this.numers.map((u)=>u.name + "^" + u.dimension).join(" ")
-            + ' / ' +
+            + '/' +
             this.denoms.map((u)=>u.name + "^" + u.dimension).join(" ");
     }
     equal(b) {
@@ -457,6 +453,11 @@ class ComplexUnit {
     }
     isNone() { return false; }
     isCompound() { return true; }
+    invert() {
+        var n2 = this.numers.map((u)=>UNIT.cloneCompound(u));
+        var d2 = this.denoms.map((u)=>UNIT.cloneCompound(u));
+        return new ComplexUnit(d2,n2);
+    }
 }
 
 
@@ -551,7 +552,9 @@ class Literal {
         return new Literal(Math.pow(this.value, b.value));
     }
     invert() {
-        return new Literal(1/this.value);
+        var u = this.getUnit();
+        if(u.isCompound()) u = u.invert();
+        return new Literal(1/this.value,u);
     }
     sameUnits(b) {
         return UNIT.sameUnits(this,b);

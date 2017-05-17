@@ -143,15 +143,7 @@ unittests('complex units', [
 
 
     ['50 mile', new Literal(50).withUnit('mile')],
-    //['60 miles / hour', new Literal(60).withComplexUnit(['mile'],['hour'])],
-    //['60mi/hr', new Literal(60).withComplexUnit(['mi'],['hr'])],
-    //['9.8m/s^2', new Literal(9.8).withComplexUnit(['meter'],['second','second'])],
-
-
     //['2 feet / second', new Literal(2,'knot',1)],
-    //['60 minutes * 60 miles / hour', new Literal(60).withComplexUnit('mile')],
-    //['10 seconds * 9.8m/s^2', new Literal(98).withComplexUnit(['meter'],['second'])],
-
 ]);
 
 
@@ -203,12 +195,12 @@ unittests("master tests",[
 //'1_000_000 / 26',   // (shows in the canonical form (1 million divided by 26))
 //6. ex: how long will it take superman to go around the world?  earth.radius / (4000 feet / second) =
 
-    //['(4000 ft/s)',new Literal(4000).withComplexUnit(['feet'],['second'])],
-    //['(4 ft/s) * 6',new Literal(24).withComplexUnit(['feet'],['second'])],
-    //['6*(4 ft/s)',new Literal(24).withComplexUnit(['feet'],['second'])],
+    ['(4000 ft/s)',new Literal(4000).withComplexUnitArray(['foot',1],['second',1])],
+    ['(4 ft/s) * 6',new Literal(24).withComplexUnitArray(['foot',1],['second',1])],
+    ['6*(4 ft/s)',new Literal(24).withComplexUnitArray(['foot',1],['second',1])],
     ['earth.radius*5',new Literal(ER*5).withUnit('kilometer',1)],
 
-    //['6371.008km / (4000 m/s)',new Literal(6371.008*1000/4000).withComplexUnit(['second'],[])],
+    //['6371.008km / (4000 m/s)',new Literal(6371.008*1000/4000).withComplexUnitArray(['second',1],[])],
     //['6371.008 km / (4000 m/s) as hours',new Literal(6371.008*1000/4000/(60*60)).withComplexUnit(['hour'],[])],
     //['earth.radius / (4000 m/s) as hours',new Literal(6371.008*1000/4000/(60*60)).withComplexUnit(['hour'],[])],
 
