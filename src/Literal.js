@@ -204,6 +204,9 @@ function addUnit(name,base,ratio,type) {
         dimension:1,
         getUnit: function() {
             return this;
+        },
+        clone: function() {
+            return new SimpleUnit(this.name, this.dimension);
         }
     }
 }
@@ -261,12 +264,6 @@ addByte("gigabyte",1/(1000*1000*1000));
 addByte("terabyte",1/(1000*1000*1000*1000));
 
 const UNIT = {
-    makeUnit(name,dim) {
-        return {unit: name,dim:dim};
-    },
-    sameUnits(a,b) {
-        return a.getUnit().equal(b.getUnit());
-    },
     sameTypes(a,b) {
         return a.getUnit().type === b.getUnit().type;
     },
@@ -278,13 +275,6 @@ const UNIT = {
         console.log("WARNING. no canonical name found for unit " + name);
         return null;
     },
-    hasCanonicalDimension(name) {
-        return (cvs.units[name] && cvs.units[name].dimension > 1);
-    },
-    getCanonicalDimension(name) {
-        if(cvs.units[name] && cvs.units[name].dimension > 1) return cvs.units[name];
-        return null;
-    },
     lookupUnit(name) {
         if(!cvs.units[name]) {
             console.log("WARNING. No unit for name",name);
@@ -293,15 +283,9 @@ const UNIT = {
         return cvs.units[name];
     },
     withDimension(unit,dim) {
-        var obj = {};
-        Object.keys(unit).forEach((key)=> obj[key] = unit[key]);
-        obj.dimension = dim;
-        return obj;
-    },
-    cloneCompound(unit) {
-        var obj = {};
-        Object.keys(unit).forEach((key)=> obj[key] = unit[key]);
-        return obj;
+        var u = unit.clone();
+        u.dimension = dim;
+        return u;
     },
     dimConvert(from, to, fu) {
         let ret = this.convert(from, this.lookupUnit(fu.base));
@@ -312,7 +296,7 @@ const UNIT = {
         });
         if(!toliter) throw new Error("no conversion found for " + from +" to " + JSON.stringify(to));
         let ret2 =  new Literal(ret.value/toliter.ratio).withUnit(toliter.to.name, toliter.to.dim);
-        return UNIT.convert(ret2,to);
+        return this.convert(ret2,to);
     },
     convert(from, to) {
         //console.log('-----');
@@ -322,8 +306,7 @@ const UNIT = {
         //console.log("got from ",fu.toString());
         //console.log("got   to ",tu);
         if(fu.isCompound() && fu.canReduceToSimple()) {
-            var fu2 = fu.reduceToSimple();
-            return UNIT.convert(new Literal(from.value,fu2),to);
+            return this.convert(new Literal(from.value,fu.reduceToSimple()),to);
         }
         if(fu.base == tu.base) {
             var f =Math.pow(tu.ratio/fu.ratio,fu.dimension);
@@ -384,6 +367,7 @@ const UNIT = {
 
         function reduce(u2) {
             //reduce by removing any unit that is on both top and bottom
+            u2 = u2.clone();
             var n1 = u2.numers.slice();
             var d1 = u2.denoms.slice();
             //reduce dimension of any unit on both top and bottom
@@ -436,6 +420,9 @@ class SimpleUnit {
     asComplex() {
         return new ComplexUnit([this],[]);
     }
+    clone() {
+        return new SimpleUnit(this.name, this.dimension);
+    }
 }
 
 class ComplexUnit {
@@ -465,8 +452,8 @@ class ComplexUnit {
     isNone() { return false; }
     isCompound() { return true; }
     invert() {
-        var n2 = this.numers.map((u)=>UNIT.cloneCompound(u));
-        var d2 = this.denoms.map((u)=>UNIT.cloneCompound(u));
+        var n2 = this.numers.map((u)=>u.clone());
+        var d2 = this.denoms.map((u)=>u.clone());
         return new ComplexUnit(d2,n2);
     }
     canReduceToSimple() {
@@ -477,6 +464,12 @@ class ComplexUnit {
         var n1 = this.numers[0];
         return new SimpleUnit(n1.name,n1.dimension);
     }
+    clone() {
+        var n2 = this.numers.map((u)=>u.clone());
+        var d2 = this.denoms.map((u)=>u.clone());
+        return new ComplexUnit(n2,d2);
+    }
+
     collapse() {
         //TODO: make this reusable
         var ns = this.numers.reduce((a,b)=>{
@@ -516,7 +509,7 @@ class Literal {
         //console.log("created final literal:",this.toString());
     }
     clone() {
-        var lit = new Literal(this.value).withSimpleUnit(this.unit);
+        var lit = new Literal(this.value, this.getUnit().clone());
         lit.format = this.format;
         return lit;
     }
@@ -579,8 +572,8 @@ class Literal {
         return this.multiply(b.invert());
     }
     add(b) {
-        if(UNIT.sameUnits(this,b)) {
-            return new Literal(this.value + b.value).withSimpleUnit(this.getUnit());
+        if(this.getUnit().equal(b.getUnit())) {
+            return new Literal(this.value + b.value,this.getUnit());
         }
         if(UNIT.sameTypes(this,b)) {
             return UNIT.convert(this, b.getUnit()).add(b);
@@ -588,8 +581,8 @@ class Literal {
         throw new Error("bad add");
     }
     subtract(b) {
-        if(UNIT.sameUnits(this,b)) {
-            return new Literal(this.value - b.value).withSimpleUnit(this.getUnit());
+        if(this.getUnit().equal(b.getUnit())) {
+            return new Literal(this.value - b.value, this.getUnit());
         }
         if(UNIT.sameTypes(this,b)) {
             UNIT.convert(this, b.getUnit()).subtract(b);
@@ -597,7 +590,7 @@ class Literal {
         throw new Error("bad subtract");
     }
     exponent(b) {
-        return new Literal(Math.pow(this.value, b.value));
+        return new Literal(Math.pow(this.value, b.value), this.getUnit());
     }
     invert() {
         var u = this.getUnit();
@@ -606,7 +599,7 @@ class Literal {
         return new Literal(1/this.value,u);
     }
     sameUnits(b) {
-        return UNIT.sameUnits(this,b);
+        return this.getUnit().equal(b.getUnit());
     }
     withPreferredFormat(format) {
         var lt = this.clone();

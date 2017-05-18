@@ -7,7 +7,7 @@ var Literal = require('../src/Literal').Literal;
 
 
 test("complex units",(t)=>{
-    //compareComplexUnit(t,'3ft * (1ft/s)', new Literal(3).withComplexUnitArray(['foot',2],['second',1]));
+    compareComplexUnit(t,'3ft * (1ft/s)', new Literal(3).withComplexUnitArray(['foot',2],['second',1]));
     compareComplexUnit(t,'3ft / (1 ft/s)',new Literal(3).withComplexUnitArray(['second',1],[]));
     compareComplexUnit(t,'3ft / (1 ft/s) as second',new Literal(3).withUnit('second'));
     compareComplexUnit(t,'3ft / (1 ft/min) as second',new Literal(3*60).withUnit('second',1));
