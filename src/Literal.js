@@ -316,11 +316,15 @@ const UNIT = {
     },
     convert(from, to) {
         //console.log('-----');
-        //console.log("new calc doing",from,'to',to);
+        //console.log("converting",from.toString(),'to',to.toString());
         var fu = from.getUnit();
         var tu = this.lookupUnit(to.getUnit().name);
-        //console.log("got from ",fu);
+        //console.log("got from ",fu.toString());
         //console.log("got   to ",tu);
+        if(fu.isCompound() && fu.canReduceToSimple()) {
+            var fu2 = fu.reduceToSimple();
+            return UNIT.convert(new Literal(from.value,fu2),to);
+        }
         if(fu.base == tu.base) {
             var f =Math.pow(tu.ratio/fu.ratio,fu.dimension);
             return new Literal(from.value*f).withUnit(to.name,fu.dimension);
@@ -457,6 +461,14 @@ class ComplexUnit {
         var n2 = this.numers.map((u)=>UNIT.cloneCompound(u));
         var d2 = this.denoms.map((u)=>UNIT.cloneCompound(u));
         return new ComplexUnit(d2,n2);
+    }
+    canReduceToSimple() {
+        if(this.numers.length == 1 && this.denoms.length == 0) return true;
+        return false;
+    }
+    reduceToSimple() {
+        var n1 = this.numers[0];
+        return new SimpleUnit(n1.name,n1.dimension);
     }
 }
 
