@@ -45,8 +45,6 @@ var abbrevations = {
 
     'm':'meter',
     'meters':'meter',
-    'km':'kilometer',
-    'kilometers':'kilometer',
     'cm':'centimeter',
     'mm':'millimeter',
     'millimeters':'millimeter',
@@ -244,8 +242,17 @@ function addMeterLength(name,ratio) {
 }
 addMeterLength('centimeter',100);
 addMeterLength('millimeter',1000);
-addMeterLength('kilometer',1/1000);
 addMeterLength('league',1/4000);
+
+metric_multiples = [['kilo','k'],['mega','M'],['giga','G'],['tera','T'],['peta','P'],['exa','E'],['zetta','Z'],['yotta','Y']];
+//metric_fractions = ['milli','micro','nano','pico','femto','atto','zepto','yocto'];
+metric_multiples.forEach((prefix,i)=>{
+    var name = prefix[0]+'meter';
+    addMeterLength(name,1/Math.pow(1000,i+1));
+    var abbr = prefix[1]+'m';
+    abbrevations[abbr] = name;
+    abbrevations[name+'s'] = name;
+});
 
 function addGallonVolume(name,ratio) {
     addUnit(name,'gallon',ratio,'volume');
