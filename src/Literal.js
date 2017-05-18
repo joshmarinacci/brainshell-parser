@@ -343,7 +343,9 @@ const UNIT = {
         if(fu.type == 'length' && fu.dimension == 2 && tu.type == 'area') {
             return this.dimConvert(from,to,fu);
         }
-        throw new Error("no conversion found for " + from + " to " + to);
+
+        //upgrade to a complex unit
+        return new Literal(from.getValue(), fu.asComplex());
     },
     compoundMultiply(a,b) {
         //console.log("compound multiplying", a.toString(), b.toString());
@@ -431,6 +433,9 @@ class SimpleUnit {
         return  this.name === 'none';
     }
     isCompound() { return false; }
+    asComplex() {
+        return new ComplexUnit([this],[]);
+    }
 }
 
 class ComplexUnit {
@@ -448,6 +453,7 @@ class ComplexUnit {
     }
     equal(b) {
         var a = this.collapse();
+        if(!b.isCompound()) b = b.asComplex();
         b = b.collapse();
         if(a.numers.length !== b.numers.length) return false;
         if(a.denoms.length !== b.denoms.length) return false;
@@ -595,6 +601,7 @@ class Literal {
     }
     invert() {
         var u = this.getUnit();
+        if(!u.isCompound()) u = u.asComplex();
         if(u.isCompound()) u = u.invert();
         return new Literal(1/this.value,u);
     }
