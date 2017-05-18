@@ -70,10 +70,10 @@ tests('parsing 42 in different formats', [
 
 
 testsCanonical('parsing to canonical output', [
-    //['42','42'],
-    //['0x42','0x42'],
-    //['0x42 as decimal','66'],
-    //['42 as hex','0x2a']
+    ['42','42'],
+    ['0x42','0x42'],
+    ['0x42 as decimal','66'],
+    ['42 as hex','0x2a']
 ]);
 
 

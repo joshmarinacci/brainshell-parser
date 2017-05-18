@@ -108,6 +108,20 @@ var cvs = {
             ratio:1,
             type:'volume',
             dimension:3
+        },
+        'hex': {
+            name:'hex',
+            base:'hex',
+            ratio:1,
+            type:'format',
+            dimension:0
+        },
+        'decimal': {
+            name:'decimal',
+            base:'decimal',
+            ratio:1,
+            type:'format',
+            dimension:0
         }
     },
     //convert between unit bases
@@ -544,9 +558,9 @@ class Literal {
         return this._unit;
     }
     as(target) {
-        //if(units[target].type === 'format') {
-        //    return this.withPreferredFormat(target);
-        //}
+        if(target.type === 'format') {
+            return this.withPreferredFormat(target);
+        }
         return UNIT.convert(this,target);
     };
     multiply(b) {
@@ -604,13 +618,12 @@ class Literal {
     withPreferredFormat(format) {
         var lt = this.clone();
         lt.format = format;
+        if(format.name) lt.format = format.name;
         return lt;
     }
     toCanonical() {
-        if(this.format === 'hex') {
-            return '0x'+this.nv.toString(16);
-        }
-        return this.toString();
+        if(this.format === 'hex') return '0x'+this.value.toString(16);
+        return this.value.toString(10);
     }
     getValue() {
         return this.value;
