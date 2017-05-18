@@ -117,9 +117,9 @@ unittests("simple units", [
     //['2 sqft', new Literal(2).withUnit([['squarefoot'],[]])],
     //['2 cuft', new Literal(2, 'cubicfoot')],
     ['2 TB as GB',new Literal(2*1000).withUnit('gigabyte')],
-    //['2 TiB as GiB',new Literal(2*1024,'gibibyte')],
-    //['2 MiB as KiB',new Literal(2*1024,'kibibyte')],
-    //['2 KiB as MiB',new Literal(2/1024,'mebibyte')],
+    ['2 TiB as GiB',new Literal(2*1024).withUnit('gibibyte')],
+    ['2 MiB as KiB',new Literal(2*1024).withUnit('kibibyte')],
+    ['2 KiB as MiB',new Literal(2/1024).withUnit('mebibyte')],
     ['2 KB as MB',new Literal(2/1000).withUnit('megabyte')],
     //['1 GiB as Gibit', new Literal(8).withUnit('gibibit')],
     //['1 GB as Gbit', new Literal(8).withUnit('gigabit')]

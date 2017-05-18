@@ -75,19 +75,6 @@ var abbrevations = {
     'lbs':'pound',
     'lb':'pound',
 
-    'TB':'terabyte',
-    'GB':'gigabyte',
-    'MB':'megabyte',
-    'KB':'kilobyte',
-    'TiB':'tibibyte',
-    'GiB':'gibibyte',
-    'MiB':'mebibyte',
-    'KiB':'kibibyte',
-    'Gibit':'gibibit',
-    'TBit':'terabit',
-    'Gbit':'gigabit',
-    'Mbit':'megabit',
-
     'acres':'acre',
     'ac':'acre',
 
@@ -272,10 +259,21 @@ addGallonVolume('quart',4);
 function addByte(name,ratio) {
     addUnit(name,'byte',ratio,'storage');
 }
-addByte("kilobyte",1/1000);
-addByte("megabyte",1/(1000*1000));
-addByte("gigabyte",1/(1000*1000*1000));
-addByte("terabyte",1/(1000*1000*1000*1000));
+
+function addByteUnits(arr,suffix,abbrSuffix,power) {
+    arr.forEach((prefix,i)=>{
+        var name = prefix+suffix;
+        addByte(name,1/Math.pow(power,i+1));
+        var abbr = prefix[0].toUpperCase()+abbrSuffix;
+        abbrevations[abbr] = name;
+    });
+}
+var prefixes_1000 = ['kilo','mega','giga','tera','peta','exa','zetta','yotta'];
+addByteUnits(prefixes_1000,'byte','B',1000);
+addByteUnits(prefixes_1000,'bit','bit',1000);
+var prefixes_1024 = ['kibi','mebi','gibi','tibi','pebi','exbi','zebi','yobi'];
+addByteUnits(prefixes_1024,'byte','iB',1024);
+addByteUnits(prefixes_1024,'bit','ibit',1024);
 
 const UNIT = {
     sameTypes(a,b) {
