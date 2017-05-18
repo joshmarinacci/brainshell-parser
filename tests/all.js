@@ -7,4 +7,5 @@ require('./duration');
 require('./length');
 require('./mass');
 require('./volume');
+require('./complex');
 //require('temperature');

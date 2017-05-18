@@ -447,11 +447,12 @@ class ComplexUnit {
             this.denoms.map((u)=>u.name + "^" + u.dimension).join(" ");
     }
     equal(b) {
-        //console.log("comparing",this,'to',b);
-        if(this.numers.length !== b.numers.length) return false;
-        if(this.denoms.length !== b.denoms.length) return false;
-        for(let i=0; i<this.numers.length; i++) {
-            if(this.numers[i].name !== b.numers[i].name) return false;
+        var a = this.collapse();
+        b = b.collapse();
+        if(a.numers.length !== b.numers.length) return false;
+        if(a.denoms.length !== b.denoms.length) return false;
+        for(let i=0; i<a.numers.length; i++) {
+            if(a.numers[i].name !== b.numers[i].name) return false;
         }
         return true;
     }
@@ -469,6 +470,30 @@ class ComplexUnit {
     reduceToSimple() {
         var n1 = this.numers[0];
         return new SimpleUnit(n1.name,n1.dimension);
+    }
+    collapse() {
+        //TODO: make this reusable
+        var ns = this.numers.reduce((a,b)=>{
+            if(a.length == 0) return a.concat([b]);
+            var last = a.pop();
+            if(last.name == b.name) {
+                var c = {
+                    name:last.name,
+                    base:last.base,
+                    ratio:last.ratio,
+                    type:last.type,
+                    dimension: last.dimension + b.dimension,
+                    getUnit: last.getUnit,
+                }
+                a.push(c);
+                return a;
+            } else {
+                a.push(last);
+                a.push(b);
+                return a;
+            }
+        },[]);
+        return new ComplexUnit(ns,this.denoms);
     }
 }
 
@@ -500,7 +525,12 @@ class Literal {
     }
     withComplexUnitArray(numers,denoms) {
         if(typeof numers[0] === 'string') {
-            numers = [UNIT.lookupUnit(numers[0])];
+            var unit = UNIT.lookupUnit(numers[0]);
+            if(typeof numers[1] === 'number') {
+                numers = [new SimpleUnit(unit.name,numers[1])];
+            } else {
+                numers = [unit];
+            }
         }
         if(typeof denoms[0] === 'string') {
             denoms = [UNIT.lookupUnit(denoms[0])];
