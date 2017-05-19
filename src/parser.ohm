@@ -13,11 +13,12 @@ BrainShell {
 		| Literal
 		| Symbol
     Literal = Number Unit?
-	Number = hex | float | integer
+	Number = hex | percent | float | integer
 	hex = "0x" hexDigit+
 	float = (digit|"_")+ "." digit+ exp?
 	exp = "e" "-"? digit+
 	integer = (digit|"_")+ exp?
+	percent = integer "%"
 	Unit =  unitmodifier? unitchunk ("/" unitchunk)?
 	unitchunk = (~"as" letter+) ("^" digit+)?
 	unitmodifier = "square" | "cubic"

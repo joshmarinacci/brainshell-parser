@@ -105,6 +105,7 @@ function generateSemantics(grammar) {
         },
         float: function(a,b,c,e) {  return new Literal(parseFloat(this.sourceString));  },
         hex:  function(a,b) {       return new Literal(parseInt(this.sourceString)).withPreferredFormat('hex'); },
+        percent: (a,b) => a.calc().multiply(new Literal(1/100)),
         exp: (_,sign,exp) => new Literal(parseFloat(exp.calc()[0])),
         AddExpr_plus: ((a,_,b) => a.calc().add(b.calc())),
         AddExpr_minus: ((a,_,b) => a.calc().subtract(b.calc())),
