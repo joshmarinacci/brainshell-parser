@@ -46,8 +46,6 @@ var abbrevations = {
     'm':'meter',
     'meters':'meter',
     'cm':'centimeter',
-    'mm':'millimeter',
-    'millimeters':'millimeter',
 
     'gal':'gallon',
     'gallons':'gallon',
@@ -60,13 +58,9 @@ var abbrevations = {
     'tsp':'teaspoon',
     'l':'liter',
     'liters':'liter',
-    'ml':'milliliter',
-    'milliliters':'milliliter',
 
     'grams':'gram',
     'g':'gram',
-    'kg':'kilogram',
-    'kilograms':'kilogram',
     'oz':'ounce',
     'ounces':'ounce',
     'pounds':'pound',
@@ -224,8 +218,6 @@ addUnit('bit','bit',1,'storage');
 addUnit('inch','foot',12,'length');
 addUnit('yard','foot',1/3,'length');
 addUnit('mile','foot',1/5280,'length');
-addUnit('kilogram','gram',1/1000,'mass');
-addUnit('milliliter','liter',1000,'volume');
 addUnit('ounce','pound',16,'mass');
 
 function addDuration(name,ratio) {
@@ -241,18 +233,36 @@ function addMeterLength(name,ratio) {
     addUnit(name,'meter',ratio,'length');
 }
 addMeterLength('centimeter',100);
-addMeterLength('millimeter',1000);
 addMeterLength('league',1/4000);
 
-metric_multiples = [['kilo','k'],['mega','M'],['giga','G'],['tera','T'],['peta','P'],['exa','E'],['zetta','Z'],['yotta','Y']];
-//metric_fractions = ['milli','micro','nano','pico','femto','atto','zepto','yocto'];
-metric_multiples.forEach((prefix,i)=>{
-    var name = prefix[0]+'meter';
-    addMeterLength(name,1/Math.pow(1000,i+1));
-    var abbr = prefix[1]+'m';
-    abbrevations[abbr] = name;
-    abbrevations[name+'s'] = name;
-});
+const metric_multiples = [['kilo','k'],['mega','M'],['giga','G'],['tera','T'],['peta','P'],['exa','E'],['zetta','Z'],['yotta','Y']];
+function addMetricMultiples(arr,suffix,abr,type) {
+    arr.forEach((prefix,i)=>{
+        var name = prefix[0]+suffix;
+        addUnit(name,suffix,1/Math.pow(1000,i+1),type);
+        var abbr = prefix[1]+abr;
+        abbrevations[abbr] = name;
+        abbrevations[name+'s'] = name;
+        console.log('added',abbr,' => ', name, '1/'+Math.pow(1000,i+1));
+    });
+}
+addMetricMultiples(metric_multiples,'meter','m','length');
+addMetricMultiples(metric_multiples,'gram','g','mass');
+addMetricMultiples(metric_multiples,'liter','l','volume');
+const metric_fractions = [['milli','m'],['micro','u'],['nano','n'],['pico','p'],['femto','f'],['atto','a'],['zepto','z'],['yocto','y']];
+function addMetricFractions(arr,suffix,abr,type) {
+    arr.forEach((prefix,i)=>{
+        var name = prefix[0]+suffix;
+        addUnit(name,suffix,Math.pow(1000,i+1),type);
+        var abbr = prefix[1]+abr;
+        abbrevations[abbr] = name;
+        abbrevations[name+'s'] = name;
+        console.log('added',abbr,' => ', name, '1/'+Math.pow(1000,i+1));
+    });
+}
+addMetricFractions(metric_fractions,'meter','m','length');
+addMetricFractions(metric_fractions,'gram','g','mass');
+addMetricFractions(metric_fractions,'liter','l','volume');
 
 function addGallonVolume(name,ratio) {
     addUnit(name,'gallon',ratio,'volume');
