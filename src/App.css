@@ -36,3 +36,7 @@ h1, h2, h3, h4, h5 {
   width: 5em;
   min-width: 2em;
 }
+
+.result {
+  font-size: 200%;
+}

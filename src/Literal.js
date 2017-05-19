@@ -243,7 +243,6 @@ function addMetricMultiples(arr,suffix,abr,type) {
         var abbr = prefix[1]+abr;
         abbrevations[abbr] = name;
         abbrevations[name+'s'] = name;
-        console.log('added',abbr,' => ', name, '1/'+Math.pow(1000,i+1));
     });
 }
 addMetricMultiples(metric_multiples,'meter','m','length');
@@ -257,7 +256,6 @@ function addMetricFractions(arr,suffix,abr,type) {
         var abbr = prefix[1]+abr;
         abbrevations[abbr] = name;
         abbrevations[name+'s'] = name;
-        console.log('added',abbr,' => ', name, '1/'+Math.pow(1000,i+1));
     });
 }
 addMetricFractions(metric_fractions,'meter','m','length');

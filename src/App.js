@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 import Parser from "./parser";
 var Literal = require('../src/Literal').Literal;
+var style = require('../src/styler').style;
 
 class App extends Component {
     constructor(props) {
@@ -44,21 +45,18 @@ class App extends Component {
                            onKeyDown={this.keydown.bind(this)}/>
                     <button onClick={this.click.bind(this)}>Calculate</button>
                 </div>
-                <h2>
-                    <span>{this.renderResult()}</span>
-                </h2>
-            </div>
+                <div className="result" dangerouslySetInnerHTML={{__html:this.renderResult()}}/>
+              </div>
         );
     }
     renderResult() {
         if(this.state.crashed) {
             return "error";
         }
-        var lit = this.state.result;
+        return style(this.state.result);
         //if(!lit.value.isFinite()) {
         //    return "\u221E";
         //}
-        return lit.toString();
     }
 }
 
