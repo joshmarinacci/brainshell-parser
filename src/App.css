@@ -1,17 +1,18 @@
 html {
-  font-family: "Brush Script MT";
-  font-size: 2rem;
-  color: blue;
+  /*font-family: "Brush Script MT";*/
+  font-size: 1rem;
+  /*color: blue;*/
 }
 input, button {
   font-size: 100%;
   margin: 0.25rem;
   padding: 0.5rem;
   color: blue;
-  font-family: "Brush Script MT";
+  /*font-family: "Brush Script MT";*/
+  border: 1px solid lightgray;
 }
 h1, h2, h3, h4, h5 {
-  font-family: "Brush Script MT";
+  /*font-family: "Brush Script MT";*/
 }
 
 .vbox {
@@ -33,4 +34,5 @@ h1, h2, h3, h4, h5 {
 .line input {
   flex: 1;
   width: 5em;
+  min-width: 2em;
 }
