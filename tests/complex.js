@@ -11,7 +11,7 @@ test("complex units",(t)=>{
     compareComplexUnit(t,'3ft / (1 ft/s)',new Literal(3).withComplexUnitArray(['second',1],[]));
     compareComplexUnit(t,'3ft / (1 ft/s) as second',new Literal(3).withUnit('second'));
     compareComplexUnit(t,'3ft / (1 ft/min) as second',new Literal(3*60).withUnit('second',1));
-    //compareComplexUnit(t,'1m / (1ft/s)', new Literal(1*3.28).withComplexUnitArray(['second',1],[]));
+    compareComplexUnit(t,'1m / (1ft/s)', new Literal(3.28084).withComplexUnitArray(['second',1],[]));
     compareComplexUnit(t,'60 miles', new Literal(60).withUnit('mile'));
     compareComplexUnit(t,'60 miles/hour', new Literal(60).withComplexUnitArray(['mile',1],['hour',1]));
     compareComplexUnit(t,'60 miles/hour * 2', new Literal(120).withComplexUnitArray(['mile',1],['hour',1]));

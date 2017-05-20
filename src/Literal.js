@@ -372,16 +372,30 @@ const UNIT = {
         //console.log("new unit is",u2.toString());
 
         function expand(unit) {
-            //if top and bottom have a time, then expand it
+            //if top and bottom have a time or length then expand it
             function check(u2,type) {
                 var top = u2.numers.find((u)=>u.type==type);
                 var bot = u2.denoms.find((u)=>u.type==type);
+                //console.log("found for type", type,top,bot);
                 if(top && bot) {
                     if(top.base === bot.base) {
                         u2.denoms.push(UNIT.lookupUnit(top.name));
                         u2.numers.push(UNIT.lookupUnit(bot.name));
                         var factor = bot.ratio/top.ratio;
                         v2 = v2 * factor;
+                    } else {
+                        //console.log("must convert between bases");
+                        var cvv = cvs.bases.find((cv)=> {
+                            return (cv.from == top.base && cv.to == bot.base);
+                        });
+                        //console.log("found conversion",cvv);
+                        if(cvv) {
+                            v2 = v2/top.ratio/Math.pow(cvv.ratio,top.dimension)*bot.ratio;
+                            //console.log("new v2 = ", v2);
+                            u2.denoms.push(UNIT.lookupUnit(top.name));
+                            u2.numers.push(UNIT.lookupUnit(bot.name));
+                        }
+
                     }
                 }
                 return u2;
