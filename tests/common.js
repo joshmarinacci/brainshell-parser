@@ -31,8 +31,8 @@ function compareComplexUnit(t,str,ans) {
     t.approximately(res.getValue(),ans.getValue(), 0.01);
     if(!res.sameUnits(ans)) {
         console.log("units not equal: ", str, res.toString());
-        console.log(res.toString(),res);
-        console.log(ans.toString(),ans);
+        console.log(res.toString(),res.getUnit());
+        console.log(ans.toString(),ans.getUnit());
     }
     t.equal(res.sameUnits(ans), true);
 }

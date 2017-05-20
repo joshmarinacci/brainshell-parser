@@ -23,11 +23,14 @@ test("complex units",(t)=>{
     compareComplexUnit(t,'60 mile / 1 hour', new Literal(60).withComplexUnitArray(['mile'],['hour']));
     compareComplexUnit(t,'4000 mile * 1 hour / 40 mile', new Literal(100).withUnit('hour'));
     compareComplexUnit(t,'4000 mile / (40 mi/hr)', new Literal(100).withUnit('hour'));
-    //compareComplexUnit(t,'600000 meter / (40 mi/hr)', new Literal(9.32).withUnit('hour'));
+    compareComplexUnit(t,'600000 meter / (40 mi/hr)', new Literal(9.32).withUnit('hour'));
     compareComplexUnit(t,'1/10m/s',new Literal(0.1).withComplexUnitArray(['second',1],['meter',1]));
     compareComplexUnit(t,'5m / 5m/s',new Literal(1).withComplexUnitArray(['second',1],[]));
     compareComplexUnit(t,'5km / 5m/s',new Literal(1000).withComplexUnitArray(['second',1],[]));
-    //compareComplexUnit(t,'earth.radius / 4000 feet/second',new Literal(1592.752).withComplexUnitArray(['second'],[]));
+    const ER = 6371.008;
+    compareComplexUnit(t,'earth.radius / 4000 meter/second', new Literal(ER*1000/4000).withComplexUnitArray(['second'],[]));
+    compareComplexUnit(t,'earth.radius / 4000 feet/second', new Literal(ER*1000/1219.2).withComplexUnitArray(['second'],[]));
+    compareComplexUnit(t,'earth.radius / 4000 feet/second as hour', new Literal((ER*1000/1219.2)/60/60).withUnit('hour'));
     compareComplexUnit(t,'4000mi / (4000 ft/second)',new Literal(5280).withComplexUnitArray(['second'],[]));
     compareComplexUnit(t,'4000mi / (2727 mi/hr)',new Literal(1.46).withComplexUnitArray(['hour'],[]));
     compareComplexUnit(t,'earth.radius / 4000 m/s as hours',new Literal(0.44).withUnit('hour'));
@@ -35,9 +38,12 @@ test("complex units",(t)=>{
     //7. how long does it take light to get from the sun to the earth?
     //compareComplexUnit(t,'92_000_000 miles / lightspeed as minutes', new Literal(8).withUnit('minute'));
     //how long does it take to drive around the world at 60 mph
-    //compareComplexUnit(t,'earth.radius * 2 * pi / 60 mi/hr as days', new Literal(415/24).withUnit('hour'));
+    compareComplexUnit(t,'earth.radius * 2 * pi / 60 km/hr as days', new Literal(ER*Math.PI*2/60/24).withUnit('day'));
     //How many earths could fit inside jupiter?
-    //compareComplexUnit(t,'(4/3 * pi * jupiter.radius^3) / (4/3*pi*earth.radius^3)', new Literal(1300));
+    compareComplexUnit(t,'jupiter.radius^3 * 4/3 * pi', new Literal(145019167189860.16).withComplexUnitArray(['kilometer',3],[]));
+    //compareComplexUnit(t,'4/3 * pi * jupiter.radius^3 ', new Literal(145019167189860.16).withComplexUnitArray(['kilometer',3],[]));
+    compareComplexUnit(t,'(jupiter.radius^3 * 4/3 * pi) / (earth.radius^3 * 4/3 * pi)', new Literal(1321.33));
+    //compareComplexUnit(t,'earth.radius^3 * 4/3 * pi', new Literal(108.321*10E10).withComplexUnitArray(['kilometer',3],[]));
     t.end();
 });
 
