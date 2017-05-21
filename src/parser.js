@@ -138,7 +138,25 @@ function generateSemantics(grammar) {
         _terminal: function() {
             return this.sourceString;
         }
+    });
 
+    sem.addOperation('html', {
+        AddExpr_plus: (a,_,b) => a.html() + " + "+ b.html(),
+        Literal:(num,unit)=> '<span>'+num.calc().getValue() + " " + unit.html()+'</span>',
+        Unit: function(mod, numer, div, denom) {
+            var u = this.calc();
+            if(u.isCompound()) {
+                var str = '';
+                str += u.numers.map((n)=> n.name + '<sup>'+n.dimension+'</sup>').join(" ");
+                str += '/';
+                str += u.denoms.map((n)=> n.name + '<sup>'+n.dimension+'</sup>').join(" ");
+                return str;
+            }
+            if(u.dimension > 1) {
+                return u.name + '<sup>'+ u.dimension + '</sup>';
+            }
+            return u.name;
+        }
     });
     return sem;
 }
@@ -184,5 +202,12 @@ module.exports = {
         var js = sem(m).tree();
         console.log("styling",str, "->"+js);
         return js;
+    },
+    parseStyledExpression: function(str) {
+        var grammar = this.get();
+        var m = grammar.match(str);
+        var txt = sem(m).html();
+        console.log('styling',str,'to',txt);
+        return txt;
     }
 }
