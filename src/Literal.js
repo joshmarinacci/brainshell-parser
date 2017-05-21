@@ -148,6 +148,19 @@ var cvs = {
         },
         {
             from: {
+                name:'foot',
+                dim:3,
+                type:'length'
+            },
+            ratio:0.0353147,
+            to: {
+                name:'liter',
+                dim:1,
+                type:'volume'
+            }
+        },
+        {
+            from: {
                 name:'meter',
                 dim:3,
                 type:'length'
@@ -323,16 +336,54 @@ const UNIT = {
         return u;
     },
     dimConvert(from, to, fu) {
-        //console.log("dimension convert from", from, to, fu);
+        //console.log("dimension convert from", from.toString(), 'to',to.toString(), 'with',fu);
         let ret = this.convert(from, this.lookupUnit(fu.base));
-        //console.log("ret = ", ret.toString());
-        let toliter = cvs.dims.find((cv) => {
+        //console.log("ret = ", ret.toString(),ret.getUnit());
+        if(ret.getUnit().isCompound()) {
+            var u = ret.getUnit();
+            var val = ret.getValue();
+            var tu = to.base;
+            //console.log('target unit is', tu);
+            //console.log("target unit base is", to.base);
+            var match = null;
+            cvs.dims.forEach((cv)=>{
+                if(cv.to.name == tu) {
+                    //console.log("converter",cv);
+                    ret.getUnit().numers.find((nu)=>{
+                        //console.log("looking at numer",nu);
+                        if(nu.name == cv.from.name && nu.dimension == cv.from.dim) {
+                            //console.log("found a keeper");
+                            match = cv;
+                        }
+                    });
+                }
+            });
+            //console.log("found a matching converter",match);
+            if(match) {
+                //console.log('value is',val);
+                let u3 = new ComplexUnit(
+                    u.numers.concat(new SimpleUnit(match.to.name, match.to.dim)),
+                    u.denoms.concat(new SimpleUnit(match.from.name, match.from.dim)));
+                //console.log("u3", u3);
+                var retx = this.expand(u3);
+                val = val * retx[0];
+                u3 = retx[1];
+
+                var u4 = UNIT.reduce(u3);
+                //console.log("u4 = ", u4);
+                var v5 = new Literal(val/match.ratio,u4);
+                //console.log("v5 = ", v5.toString());
+                return this.convert(v5,to);
+            }
+        }
+
+        let conv = cvs.dims.find((cv) => {
             if(cv.from.name == ret.getUnit().name && cv.from.dim == ret.getUnit().dimension) {
                 return true;
             }
         });
-        if(!toliter) throw new Error("no conversion found for " + from +" to " + JSON.stringify(to));
-        let ret2 =  new Literal(ret.value/toliter.ratio).withUnit(toliter.to.name, toliter.to.dim);
+        if(!conv) throw new Error("no conversion found for " + from +" to " + JSON.stringify(to));
+        let ret2 =  new Literal(ret.value/conv.ratio).withUnit(conv.to.name, conv.to.dim);
         return this.convert(ret2,to);
     },
     convert(from, to) {
@@ -340,8 +391,8 @@ const UNIT = {
         //console.log("converting",from.toString(),'to',to.toString());
         var fu = from.getUnit();
         var tu = this.lookupUnit(to.getUnit().name);
-        //console.log("got from ",fu.toString());
-        //console.log("got   to ",tu);
+        //console.log("got from = ",fu.toString());
+        //console.log("got   to = ",tu.toString());
         if(fu.isCompound() && fu.canReduceToSimple()) {
             return this.convert(new Literal(from.value,fu.reduceToSimple()),to);
         }
@@ -374,79 +425,89 @@ const UNIT = {
         return this.compoundConvert(l2,b);
     },
     compoundConvert(a,b) {
-        //console.log("compound multiplying", a.toString(), b.toString());
-        var v2 = a.getValue();// * b.getValue();
+        //console.log("compound converting", a.toString(), 'to', b.toString());
+        var v2 = a.getValue();
         //console.log("new value is", v2);
 
+        //make everything be compound
         var au = a.getUnit();
         var bu = b.getUnit();
         if(!au.isCompound()) au = new ComplexUnit([this.lookupUnit(au.name)],[]);
         if(!bu.isCompound()) bu = new ComplexUnit([this.lookupUnit(bu.name)],[]);
-        //console.log('units',au,bu);
+        //console.log('units',au.toString(),au,bu.toString(),bu);
 
         var u2 = new ComplexUnit(au.numers.concat(bu.numers),au.denoms.concat(bu.denoms));
         //console.log("new unit is",u2.toString());
 
-        function expand(unit) {
-            //if top and bottom have a time or length then expand it
-            function check(u2,type) {
-                var top = u2.numers.find((u)=>u.type==type);
-                var bot = u2.denoms.find((u)=>u.type==type);
-                //console.log("found for type", type,top,bot);
-                if(top && bot) {
-                    if(top.base === bot.base) {
+        //fully expand and convert units to common types
+        var ret = this.expand(u2);
+        v2 = v2 * ret[0];
+        u2 = ret[1];
+        u2 = u2.collapse();
+        //console.log("expanded to ", u2.toString());
+
+        //cancel and reduce
+        u2 = this.reduce(u2);
+        //console.log("reduced to", u2.toString());
+        return new Literal(v2, u2.collapse());
+    },
+
+
+    expand(unit) {
+        var v2 = 1;
+        //if top and bottom have a time or length then expand it
+        function check(u2,type) {
+            var top = u2.numers.find((u)=>u.type==type);
+            var bot = u2.denoms.find((u)=>u.type==type);
+            //console.log("found for type", type,top,bot);
+            if(top && bot) {
+                if(top.base === bot.base) {
+                    u2.denoms.push(UNIT.lookupUnit(top.name));
+                    u2.numers.push(UNIT.lookupUnit(bot.name));
+                    var factor = bot.ratio/top.ratio;
+                    v2 = v2 * factor;
+                } else {
+                    //console.log("must convert between bases");
+                    var cvv = cvs.bases.find((cv) => cv.from == top.base && cv.to == bot.base);
+                    //console.log("found conversion",cvv);
+                    if(cvv) {
+                        v2 = v2/top.ratio/Math.pow(cvv.ratio,top.dimension)*bot.ratio;
+                        //console.log("new v2 = ", v2);
                         u2.denoms.push(UNIT.lookupUnit(top.name));
                         u2.numers.push(UNIT.lookupUnit(bot.name));
-                        var factor = bot.ratio/top.ratio;
-                        v2 = v2 * factor;
-                    } else {
-                        //console.log("must convert between bases");
-                        var cvv = cvs.bases.find((cv)=> {
-                            return (cv.from == top.base && cv.to == bot.base);
-                        });
-                        //console.log("found conversion",cvv);
-                        if(cvv) {
-                            v2 = v2/top.ratio/Math.pow(cvv.ratio,top.dimension)*bot.ratio;
-                            //console.log("new v2 = ", v2);
-                            u2.denoms.push(UNIT.lookupUnit(top.name));
-                            u2.numers.push(UNIT.lookupUnit(bot.name));
-                        }
+                    }
 
+                }
+            }
+            return u2;
+        }
+        unit = check(unit,'duration');
+        unit = check(unit,'length');
+        return [v2,unit];
+    },
+
+    reduce(u2) {
+        u2 = u2.clone();
+        var n1 = u2.numers.slice();
+        var d1 = u2.denoms.slice();
+        //reduce dimension of any unit on both top and bottom
+        n1.forEach((n) => {
+            d1.forEach((d) => {
+                if(n.name == d.name) {
+                    if(n.dimension > 0 && d.dimension > 0) {
+                        var sum = Math.min(n.dimension, d.dimension);
+                        n.dimension-= sum;
+                        d.dimension-= sum;
                     }
                 }
-                return u2;
-            }
-            unit = check(unit,'duration');
-            unit = check(unit,'length');
-            return unit;
-        }
-        u2 = expand(u2);
-
-        function reduce(u2) {
-            //reduce by removing any unit that is on both top and bottom
-            u2 = u2.clone();
-            var n1 = u2.numers.slice();
-            var d1 = u2.denoms.slice();
-            //reduce dimension of any unit on both top and bottom
-            n1.forEach((n) => {
-                d1.forEach((d) => {
-                    if(n.name == d.name) {
-                        if(n.dimension > 0 && d.dimension > 0) {
-                            n.dimension--;
-                            d.dimension--;
-                        }
-                    }
-                });
             });
-            //remove any units that were reduced to zero
-            n1 = n1.filter((u)=>u.dimension>0);
-            d1 = d1.filter((u)=>u.dimension>0);
-            //console.log("after we have",n1,d1);
-            return new ComplexUnit(n1,d1);
-        }
-        u2 = reduce(u2);
-        return new Literal(v2, u2);
-    },
+        });
+        //remove any units that were reduced to zero
+        n1 = n1.filter((u)=>u.dimension>0);
+        d1 = d1.filter((u)=>u.dimension>0);
+        //console.log("after we have",n1,d1);
+        return new ComplexUnit(n1,d1);
+    }
 };
 
 
@@ -539,27 +600,21 @@ class ComplexUnit {
             if(a.type === 'none') return false;
             return true;
         }
-        var ns = this.numers.filter(removeNone).reduce((a,b)=>{
+        function cl(a,b) {
             if(a.length == 0) return a.concat([b]);
             var last = a.pop();
             if(last.name == b.name) {
-                var c = {
-                    name:last.name,
-                    base:last.base,
-                    ratio:last.ratio,
-                    type:last.type,
-                    dimension: last.dimension + b.dimension,
-                    getUnit: last.getUnit,
-                }
-                a.push(c);
+                a.push(new SimpleUnit(last.name,last.dimension + b.dimension));
                 return a;
             } else {
                 a.push(last);
                 a.push(b);
                 return a;
             }
-        },[]);
-        return new ComplexUnit(ns,this.denoms);
+        }
+        var ns = this.numers.filter(removeNone).reduce(cl,[]);
+        var ds = this.denoms.filter(removeNone).reduce(cl,[]);
+        return new ComplexUnit(ns,ds);
     }
 }
 
@@ -583,7 +638,7 @@ class Literal {
     withUnit(u,dim) {
         if(!u) return this;
         if(!dim) dim = 1;
-        if(typeof u === 'string') return new Literal(this.value,new SimpleUnit(u,dim));
+        if(typeof u === 'string') return new Literal(this.value).withComplexUnitArray([u,dim]);
         throw new Error("can't handle other kind of unit");
     }
     withSimpleUnit(unit) {
