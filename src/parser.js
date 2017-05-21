@@ -38,6 +38,7 @@ const SYMBOLS = {
     'pi': new Literal(Math.PI),
     'earth.radius':new Literal(6371.008).withUnit('kilometer'),
     'jupiter.radius':new Literal(69911).withUnit('km'),
+    'five':new Literal(5).withUnit('km'),
     'date': function(arg) {
         console.log("doing date on arg " + arg, arg.string);
         return moment(arg.string);
@@ -125,7 +126,19 @@ function generateSemantics(grammar) {
     });
     sem.addOperation('tree',{
         FunCall:(ident,_1,expr,_2) => ['funcall',ident.tree(),expr.tree()],
+        Literal:(num,unit)=> ['literal',num.calc(),unit.tree()],
+        AddExpr_plus: (a,_,b) => ['add', a.tree(), b.tree()],
+        AddExpr_minus: (a,_,b) => ['sub', a.tree(), b.tree()],
+        MulExpr_multiply: (a,_,b) => ['mul', a.tree(), b.tree()],
+        MulExpr_divide: (a,_,b) => ['div', a.tree(), b.tree()],
+        ExpExpr_power: (a,_,b) => ['power', a.tree(), b.tree()],
+        PriExpr_paren: (_1,a,_2) => ['paren', a.tree()],
+        AsExpr: (a,_,u) => ['as',a.tree(),u.calc()],
         identifier:function(_a,_b) { return this.sourceString.toLowerCase()},
+        _terminal: function() {
+            return this.sourceString;
+        }
+
     });
     return sem;
 }
@@ -157,8 +170,11 @@ module.exports = {
         var grammar = this.get();
         var m = grammar.match(str);
         if(m.failed()) throw new Error("match failed on: " + str);
-        var js = sem(m).calc();
+        var val = sem(m);
+        var js = val.calc();
         console.log("parsing",str, "->"+ js.toString());
+        //var tree = val.tree();
+        //console.log("tree is", JSON.stringify(tree,null,'  '));
         return js;
     },
     parseTree: function(str) {

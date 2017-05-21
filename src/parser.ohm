@@ -2,11 +2,11 @@ BrainShell {
 	Expr    = FunCall | AsExpr | AddExpr | Symbol | String
 	AsExpr = Expr "as" Unit
 	AddExpr = AddExpr "+" MulExpr --plus
-        | AddExpr "-" MulExpr --minus
-        | MulExpr
-	MulExpr = MulExpr "*" MulExpr --multiply
-		| MulExpr "/" MulExpr --divide
-		| ExpExpr
+            | AddExpr "-" MulExpr --minus
+            | MulExpr
+	MulExpr = MulExpr "*" ExpExpr --multiply
+		    | MulExpr "/" ExpExpr --divide
+		    | ExpExpr
 	ExpExpr = ExpExpr "^" ExpExpr -- power
 	    | PriExpr
 	PriExpr = "(" Expr ")" --paren
