@@ -513,7 +513,11 @@ class ComplexUnit {
 
     collapse() {
         //TODO: make this reusable
-        var ns = this.numers.reduce((a,b)=>{
+        function removeNone(a) {
+            if(a.type === 'none') return false;
+            return true;
+        }
+        var ns = this.numers.filter(removeNone).reduce((a,b)=>{
             if(a.length == 0) return a.concat([b]);
             var last = a.pop();
             if(last.name == b.name) {
@@ -564,21 +568,26 @@ class Literal {
         return new Literal(this.value,unit);
     }
     withComplexUnitArray(numers,denoms) {
-        if(typeof numers[0] === 'string') {
-            var unit = UNIT.lookupUnit(numers[0]);
-            if(typeof numers[1] === 'number') {
-                numers = [new SimpleUnit(unit.name,numers[1])];
-            } else {
-                numers = [unit];
+        var nums = [];
+        for(var i=0; i<numers.length; i++) {
+            var u = numers[i];
+            if (typeof u === 'string') {
+                var unit = UNIT.lookupUnit(u);
+                if (typeof numers[i+1] === 'number') {
+                    nums.push(new SimpleUnit(unit.name, numers[i+1]));
+                    i++;
+                } else {
+                    nums.push(unit);
+                }
             }
         }
         if(typeof denoms[0] === 'string') {
             denoms = [UNIT.lookupUnit(denoms[0])];
         }
-        return new Literal(this.value, new ComplexUnit(numers,denoms));
+        return new Literal(this.value, new ComplexUnit(nums,denoms));
     }
     toString () {
-        return this.value + " " + this._unit;
+        return this.value + " " + this.getUnit();
     }
     getUnit() {
         if(!this._unit) return new SimpleUnit("none",0);
@@ -599,12 +608,11 @@ class Literal {
         if(b.getUnit().isNone()) {
             return new Literal(this.value* b.value).withSimpleUnit(this.getUnit());
         }
+        if(this.getUnit().isCompound() || b.getUnit().isCompound()) return UNIT.compoundMultiply(this,b);
         //multiply with same units
         if(this.getUnit().name == b.getUnit().name) {
             return new Literal(this.value * b.value).withUnit(this.getUnit().name,this.getUnit().dimension + b.getUnit().dimension);
         }
-
-        if(this.getUnit().isCompound() || b.getUnit().isCompound()) return UNIT.compoundMultiply(this,b);
 
         //convert the first to the second unit
         return UNIT.convert(this,b).multiply(b);

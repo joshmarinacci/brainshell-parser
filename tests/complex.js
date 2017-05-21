@@ -21,7 +21,8 @@ test("complex units",(t)=>{
     compareComplexUnit(t,'9.8 m/s^2 * 10 s', new Literal(98.0).withComplexUnitArray(['meter'],['second']));
     compareComplexUnit(t,'10 s * 9.8 m/s^2', new Literal(98.0).withComplexUnitArray(['meter'],['second']));
     compareComplexUnit(t,'60 mile / 1 hour', new Literal(60).withComplexUnitArray(['mile'],['hour']));
-    //compareComplexUnit(t,'4000 mile * 1 hour / 40 mile', new Literal(100).withUnit('hour'));
+    compareComplexUnit(t,'4000 mile * 1 hour', new Literal(4000).withComplexUnitArray(['mile',1,'hour',1],[]));
+    compareComplexUnit(t,'4000 mile * 1 hour / 40 mile', new Literal(100).withUnit('hour'));
     compareComplexUnit(t,'4000 mile / (40 mi/hr)', new Literal(100).withUnit('hour'));
     compareComplexUnit(t,'600000 meter / (40 mi/hr)', new Literal(9.32).withUnit('hour'));
     compareComplexUnit(t,'1/10m/s',new Literal(0.1).withComplexUnitArray(['second',1],['meter',1]));
