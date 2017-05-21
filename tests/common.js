@@ -28,7 +28,7 @@ function compareUnit(t, str, num, unit, dim) {
 
 function compareComplexUnit(t,str,ans) {
     let res = Parser.parseString(str);
-    t.approximately(res.getValue(),ans.getValue(), 0.01);
+    t.approximately(res.getValue(),ans.getValue(), 0.5);
     if(!res.sameUnits(ans)) {
         console.log("units not equal: ", str, res.toString());
         console.log(res.toString(),res.getUnit());
