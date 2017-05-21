@@ -510,22 +510,18 @@ class ComplexUnit {
     sameType(b) {
         var a = this.collapse();
         b = b.collapse();
-        if(a.numers[0].type == b.numers[0].type) return true;
-        return false;
+        return (a.numers[0].type == b.numers[0].type);
     }
     isNone() { return false; }
     isCompound() { return true; }
-    asComplex() {
-        return this;
-    }
+    asComplex() { return this; }
     invert() {
         var n2 = this.numers.map((u)=>u.clone());
         var d2 = this.denoms.map((u)=>u.clone());
         return new ComplexUnit(d2,n2);
     }
     canReduceToSimple() {
-        if(this.numers.length == 1 && this.denoms.length == 0) return true;
-        return false;
+        return (this.numers.length == 1 && this.denoms.length == 0)
     }
     reduceToSimple() {
         var n1 = this.numers[0];
@@ -608,6 +604,7 @@ class Literal {
                 }
             }
         }
+        if(!denoms) denoms = [];
         if(typeof denoms[0] === 'string') {
             denoms = [UNIT.lookupUnit(denoms[0])];
         }
