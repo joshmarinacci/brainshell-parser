@@ -18,8 +18,8 @@ function compareUnit(t, str, num, unit, dim) {
         }
         if(!res.sameUnits(ans)) {
             console.log("units not equal: ", str, res.toString());
-            console.log(res);
-            console.log(ans);
+            console.log(res.toString(),res.getUnit());
+            console.log(ans.toString(),ans.getUnit());
         }
         t.equal(res.sameUnits(ans), true);
     }

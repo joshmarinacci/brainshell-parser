@@ -200,6 +200,9 @@ function addUnit(name,base,ratio,type) {
         },
         clone: function() {
             return new SimpleUnit(this.name, this.dimension);
+        },
+        toString: function() {
+            return this.name + "^"+this.dimension;
         }
     }
 }
@@ -292,6 +295,11 @@ addByteUnits(prefixes_1024,'bit','ibit',1024);
 
 const UNIT = {
     sameTypes(a,b) {
+        if(a.getUnit().isCompound() || b.getUnit().isCompound()) {
+            let au = a.getUnit().asComplex();
+            let bu = b.getUnit().asComplex();
+            return au.sameType(bu);
+        }
         return a.getUnit().type === b.getUnit().type;
     },
 
@@ -315,7 +323,9 @@ const UNIT = {
         return u;
     },
     dimConvert(from, to, fu) {
+        //console.log("dimension convert from", from, to, fu);
         let ret = this.convert(from, this.lookupUnit(fu.base));
+        //console.log("ret = ", ret.toString());
         let toliter = cvs.dims.find((cv) => {
             if(cv.from.name == ret.getUnit().name && cv.from.dim == ret.getUnit().dimension) {
                 return true;
@@ -358,8 +368,14 @@ const UNIT = {
         return new Literal(from.getValue(), fu.asComplex());
     },
     compoundMultiply(a,b) {
-        //console.log("compound multiplying", a.toString(), b.toString());
         var v2 = a.getValue() * b.getValue();
+        var l2 = a.clone();
+        l2.value = v2;
+        return this.compoundConvert(l2,b);
+    },
+    compoundConvert(a,b) {
+        //console.log("compound multiplying", a.toString(), b.toString());
+        var v2 = a.getValue();// * b.getValue();
         //console.log("new value is", v2);
 
         var au = a.getUnit();
@@ -430,7 +446,7 @@ const UNIT = {
         }
         u2 = reduce(u2);
         return new Literal(v2, u2);
-    }
+    },
 };
 
 
@@ -449,6 +465,7 @@ class SimpleUnit {
         return "siu:" + this.name + "^" + this.dimension;
     }
     equal(b) {
+        if(b.isCompound()) return b.equal(this);
         return (this.name === b.name && this.dimension == b.dimension);
     }
     getUnit() {
@@ -490,8 +507,17 @@ class ComplexUnit {
         }
         return true;
     }
+    sameType(b) {
+        var a = this.collapse();
+        b = b.collapse();
+        if(a.numers[0].type == b.numers[0].type) return true;
+        return false;
+    }
     isNone() { return false; }
     isCompound() { return true; }
+    asComplex() {
+        return this;
+    }
     invert() {
         var n2 = this.numers.map((u)=>u.clone());
         var d2 = this.denoms.map((u)=>u.clone());
@@ -572,6 +598,7 @@ class Literal {
         for(var i=0; i<numers.length; i++) {
             var u = numers[i];
             if (typeof u === 'string') {
+                u = UNIT.getCanonicalName(u);
                 var unit = UNIT.lookupUnit(u);
                 if (typeof numers[i+1] === 'number') {
                     nums.push(new SimpleUnit(unit.name, numers[i+1]));
