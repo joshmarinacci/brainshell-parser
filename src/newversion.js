@@ -125,75 +125,81 @@ class LiteralNumber {
     expand() {
         console.log('expanding');
         //if top and bottom have a time or length then expand it
-        function check(u2,type) {
-            var top = u2._numers.find((u)=>u.getType()==type);
-            var bot = u2._denoms.find((u)=>u.getType()==type);
-            //console.log("found for type", type,top,bot);
-            if(top && bot) {
-                if(top.getName() == bot.getName()) {
-                    console.log("same on top and bottom. ignore");
-                    return u2;
-                }
-                //TODO: this conversion code is almost identical to what is below
-                if(top.getBase() === bot.getBase()) {
-                    console.log("same base",top.getRatio(),bot.getRatio());
-                    u2._numers.push(new UnitPart(bot.getName(),1,bot.getRatio()));
-                    u2._denoms.push(new UnitPart(top.getName(),1,top.getRatio()));
-                } else {
-                    console.log("must convert between bases");
-                    var cvv = UNITS.findConversion(top.getBase(), bot.getBase());
-                    console.log("found conversion",cvv);
-                    if(cvv) {
-                        u2._numers.push(new UnitPart(cvv.to,1,1));
-                        u2._denoms.push(new UnitPart(cvv.from,1,cvv.ratio));
-                    }
-
+        this.check2(this,'duration');
+        this.check2(this,'length');
+        this.check2(this,'volume');
+        return this;
+    }
+    check2(a,type) {
+        //find something in the top and bottom of the same number
+        var first = a._numers.find((u)=>u.getType()==type);
+        var second = a._denoms.find((u)=>u.getType()==type);
+        //console.log("found for type", type,top,bot);
+        if(first && second) {
+            if(first.getName() == second.getName()) {
+                console.log("same on top and bottom. ignore");
+                return a;
+            }
+            //TODO: this conversion code is almost identical to what is below
+            if(first.getBase() === second.getBase()) {
+                //console.log("same base",first.getRatio(),second.getRatio());
+                a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
+                a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
+            } else {
+                //console.log("must convert between bases");
+                var cvv = UNITS.findConversion(first.getBase(), second.getBase());
+                //console.log("found conversion",cvv);
+                if(cvv) {
+                    a._numers.push(new UnitPart(first.getBase(),1,1));
+                    a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
+                    a._numers.push(new UnitPart(cvv.to,1,1));
+                    a._denoms.push(new UnitPart(cvv.from,1,cvv.ratio));
+                    a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
+                    a._denoms.push(new UnitPart(second.getBase(),1,1));
+                    //console.log("now a is",a);
                 }
             }
-            return u2;
         }
-        check(this,'duration');
-        check(this,'length');
-        return this;
+        return a;
+    }
+
+    // TODO: this conversion code is almost identical to what is above
+    process(a,b,type) {
+        //find something in the top of two different numbers
+        var first = a._numers.find((u)=>u.getType() == type);
+        var second = b._numers.find((u)=>u.getType() == type);
+        if(first && second) {
+            //console.log("looking for a conversion from",first.getName(),'to',second.getName());
+            if(first.getBase() == second.getBase()) {
+                a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
+                a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
+            } else {
+                //console.log("must convert between bases");
+                var cvv = UNITS.findConversion(first.getBase(), second.getBase());
+                //console.log("found conversion",cvv);
+                if(cvv) {
+                    //convert first to it's base
+                    //convert base to other base
+                    //convert other base to second
+                    a._numers.push(new UnitPart(first.getBase(),1,1));
+                    a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
+                    a._numers.push(new UnitPart(cvv.to,1,1));
+                    a._denoms.push(new UnitPart(cvv.from,1,cvv.ratio));
+                    a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
+                    a._denoms.push(new UnitPart(second.getBase(),1,1));
+                    //console.log("now a is",a);
+                }
+            }
+        }
     }
 
     convert(b) {
         var a = this;
         console.log("converting", a.toString());
         console.log('to', b.toString());
-        console.log("a value", a._value, 'and b = ', b._value);
-        function check(u1,u2,type) {
-            var first = u1._numers.find((u)=>u.getType() == type);
-            var secon = u2._numers.find((u)=>u.getType() == type);
-            //console.log("found for type", type,first,secon);
-            return {
-                type:type,
-                first:first,
-                second:secon
-            }
-        }
-        //var res = check(a,b,'length');
-
-        // TODO: this conversion code is almost identical to what is above
-        //find a unit in first with the same type as a unit in second, in the numers only.
-        function process(a,b,type) {
-            var res = check(a,b,type);
-            //add a conversion from first unit to the second
-            if(res.first && res.second) {
-                //console.log("found a match",res);
-                console.log("looking for a conversion from",res.first.getName(),'to',res.second.getName());
-                if(res.first.getBase() == res.second.getBase()) {
-                    //console.log("same base");
-                    //first.ratio * first.base / 1 * first.name //  60s*60s/1h
-                    a._numers.push(new UnitPart(res.second.getName(),1,res.second.getRatio()));
-                    a._denoms.push(new UnitPart(res.first.getName(),1,res.first.getRatio()));
-                    //console.log("now a is", a.toString());
-                }
-            }
-        }
-        process(a,b,'duration');
-        process(a,b,'length');
-
+        this.process(a,b,'duration');
+        this.process(a,b,'length');
+        this.process(a,b,'volume');
         a = a.reduce();
         //console.log("now a is",a);
         return a;
@@ -393,6 +399,16 @@ test('basic conversion',(t)=>{
 
     //compareComplexUnit(t,'(jupiter.radius^3 * 4/3 * pi) / (earth.radius^3 * 4/3 * pi)', new' +
     //' Literal(1321.33));
+    //['4 quart as gallon', new Literal(1).withUnit('gallon')],
+
+    compare(t, new LiteralNumber(4).withUnits(['quart']).as(new LiteralNumber(1).withUnits(['gallon']))
+        , new LiteralNumber(1).withUnits(['gallon'])
+    );
+    compare(t, new LiteralNumber(5).withUnits(['mile']).as(new LiteralNumber(1).withUnits(['meter']))
+        , new LiteralNumber(8046.72).withUnits(['meter'])
+    );
+    //    ['5 miles as meters',new Literal(8046.72).withUnit('meter')],
+
     t.end();
 
 
