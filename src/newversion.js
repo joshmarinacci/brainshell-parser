@@ -2,6 +2,7 @@
  * Created by josh on 5/22/17.
  */
 var test = require('tape');
+require('tape-approximately')(test);
 
 var UNITS = require('./units2');
 
@@ -47,8 +48,18 @@ class LiteralNumber {
             this._denoms.concat(b._denoms)
         );
         nu = nu.expand();
+        console.log('after expanding',nu);
         nu = nu.reduce();
+        console.log('after reducing',nu);
+        if(nu.isReduceable()) {
+            console.log("we can reduce again");
+            nu = nu.expand();
+            console.log('after expanding',nu);
+            nu = nu.reduce();
+            console.log('after reducing',nu);
+        }
         nu = nu.collapse();
+        console.log('after collapsing',nu);
         return nu;
     }
 
@@ -67,7 +78,7 @@ class LiteralNumber {
     }
 
     invert() {
-        return new LiteralNumber(this.getValue(), this._denoms, this._numers)
+        return new LiteralNumber(1/this.getValue(), this._denoms, this._numers)
     }
 
     as(to) {
@@ -91,6 +102,17 @@ class LiteralNumber {
 
     }
 
+    isReduceable() {
+        function check(a,type) {
+            var top = a._numers.find((u)=>u.getType() == type);
+            var bot = a._denoms.find((u)=>u.getType() == type);
+            if(top && bot) return true;
+            return false;
+        }
+        if(check(this,'length')) return true;
+        if(check(this,'duration')) return true;
+        return false;
+    }
     expand() {
         //if top and bottom have a time or length then expand it
         function check(u2,type) {
@@ -202,7 +224,7 @@ class LiteralNumber {
         //remove any units that were reduced to zero
         n1 = n1.filter((u)=>u._dim>0);
         d1 = d1.filter((u)=>u._dim>0);
-        //console.log("after we have",n1,d1,v2);
+        console.log("after we have",n1,d1,v2);
         return new LiteralNumber(v2,n1,d1);//ComplexUnit(n1,d1);
     }
 
@@ -260,7 +282,7 @@ class UnitPart {
 
 function compare(t,res,ans) {
     console.log(`comparing ${res} to ${ans}`);
-    t.equal(res.getValue(),ans.getValue());
+    t.approximately(res.getValue(),ans.getValue(), 0.5);
     t.equal(res.equalUnits(ans),true);
 }
 test('basic conversion',(t)=>{
@@ -289,6 +311,30 @@ test('basic conversion',(t)=>{
     compare(t, new LiteralNumber(9.8).withUnits(['meter'],[['second',2]]), new LiteralNumber(9.8).withUnits(['meter'],[['second',2]]));
     compare(t, new LiteralNumber(9.8).withUnits(['meter'],[['second',2]]).multiply(new LiteralNumber(10).withUnits(['second'])),
         new LiteralNumber(98.0).withUnits(['meter'],[['second',2]]));
+    compare(t, new LiteralNumber(10).withUnits(['second']).multiply(new LiteralNumber(9.8).withUnits(['meter'],[['second',2]])),
+        new LiteralNumber(98.0).withUnits(['meter'],[['second',2]]));
+
+    compare(t, new LiteralNumber(4000).withUnits(['mile'])
+        .multiply(new LiteralNumber(1).withUnits(['hour']))
+        ,new LiteralNumber(4000).withUnits(['mile','hour'])
+    );
+    compare(t, new LiteralNumber(4000).withUnits(['mile'])
+        .multiply(new LiteralNumber(1).withUnits(['hour']))
+        .divide(new LiteralNumber(40).withUnits(['mile']))
+        ,new LiteralNumber(100).withUnits(['hour'])
+    );
+
+    // = 60000 meter / (40 mi/hr)
+    // = meter * hour / mile
+    // = meter * foot * hour / mile * meter
+    // = foot * hour / mile
+    // = hour
+    // 600000 / 40
+    compare(t, new LiteralNumber(600000).withUnits(['meter'])
+        .divide(new LiteralNumber(40).withUnits(['mile'],['hour']))
+        ,new LiteralNumber(9.32).withUnits(['hour'])
+    );
+    //compareComplexUnit(t,'600000 meter / (40 mi/hr)', new Literal(9.32).withUnit('hour'));
 
     t.end();
 
