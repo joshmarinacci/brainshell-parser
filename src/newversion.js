@@ -33,15 +33,12 @@ class LiteralNumber {
         this._denoms = (denoms?denoms:[]);
     }
     withUnits(numers, denoms) {
-        let n = numers.map((f)=>{
-            if(typeof f[1] === 'number') {
-                return new UnitPart(f[0],f[1]);
-            }
+        function toUnitPart(f) {
+            if(typeof f[1] === 'number') return new UnitPart(f[0],f[1]);
             return new UnitPart(f,1)
-        });
+        }
         if(!denoms) denoms = [];
-        let d = denoms.map((f)=>new UnitPart(f,1));
-        return new LiteralNumber(this._value, n,d);
+        return new LiteralNumber(this._value, numers.map(toUnitPart),denoms.map(toUnitPart));
     }
 
     multiply(b) {
@@ -106,10 +103,8 @@ class LiteralNumber {
                     return u2;
                 }
                 if(top.getBase() === bot.getBase()) {
-                    console.log("same base");
-                    u2._denoms.push(UNIT.lookupUnit(top.name));
-                    u2._numers.push(UNIT.lookupUnit(bot.name));
-                    u2._numers.push(new UnitPart(bot.getName(),1,1));
+                    console.log("same base",top.getRatio(),bot.getRatio());
+                    u2._numers.push(new UnitPart(bot.getName(),1,bot.getRatio()));
                     u2._denoms.push(new UnitPart(top.getName(),1,top.getRatio()));
                 } else {
                     console.log("must convert between bases");
@@ -263,15 +258,6 @@ class UnitPart {
     }
 }
 
-/*
-console.log(new LiteralNumber(5).withUnits(['foot'],[]).toString());
-console.log(new LiteralNumber(5).multiply(new LiteralNumber(5)).toString());
-console.log(new LiteralNumber(5).multiply(new LiteralNumber(5).withUnits(['foot'],['second'])).toString());
-
-console.log(new LiteralNumber(5).withUnits(['foot'],[])
-    .multiply(new LiteralNumber(5).withUnits(['foot'],[]))
-    .toString());
-    */
 function compare(t,res,ans) {
     console.log(`comparing ${res} to ${ans}`);
     t.equal(res.getValue(),ans.getValue());
@@ -294,6 +280,15 @@ test('basic conversion',(t)=>{
     compare(t, new LiteralNumber(1).withUnits(['meter']).divide(new LiteralNumber(1).withUnits(['foot'],['second'])),
         new LiteralNumber(3.28084).withUnits(['second'])
     );
+    compare(t, new LiteralNumber(60).withUnits(['mile']), new LiteralNumber(60).withUnits(['mile']));
+    compare(t, new LiteralNumber(60).withUnits(['mile'],['hour']).multiply(new LiteralNumber(2)), new LiteralNumber(120).withUnits(['mile'],['hour']));
+    compare(t, new LiteralNumber(60).withUnits(['minute']).multiply(new LiteralNumber(60).withUnits(['mile'],['hour'])),
+        new LiteralNumber(60).withUnits(['mile'])
+    );
+
+    compare(t, new LiteralNumber(9.8).withUnits(['meter'],[['second',2]]), new LiteralNumber(9.8).withUnits(['meter'],[['second',2]]));
+    compare(t, new LiteralNumber(9.8).withUnits(['meter'],[['second',2]]).multiply(new LiteralNumber(10).withUnits(['second'])),
+        new LiteralNumber(98.0).withUnits(['meter'],[['second',2]]));
 
     t.end();
 
