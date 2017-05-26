@@ -246,6 +246,10 @@ test('basic conversion',(t)=>{
         new LiteralNumber(3).withUnits([['foot',2]],['second']));
     compare(t, new LiteralNumber(3).withUnits(['foot'],[]).divide(new LiteralNumber(1).withUnits(['foot'],['second'])),
         new LiteralNumber(3).withUnits(['second']));
+    compare(t, new LiteralNumber(3).withUnits(['foot']).divide(new LiteralNumber(1).withUnits(['foot'],['second'])).as(new LiteralNumber(1).withUnits(['second'])),
+        new LiteralNumber(3).withUnits(['second'])
+    );
+    //compareComplexUnit(t,'3ft / (1 ft/s) as second',new Literal(3).withUnit('second'));
     t.end();
 
 
