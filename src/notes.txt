@@ -1,0 +1,74 @@
+given seconds^1 and want to convert to hours^1, but possibly have other units involved
+how do we do it?
+
+
+5 * sec/1   *  1hour/(60*60)sec
+
+how to convert 4 quart to 1 gallon
+
+we have
+
+4 * quart/1   * 1 gallon / 4 quart
+
+so find the conversion from the source unit to the target unit.
+currently only works if there's only one source unit part.
+
+---
+
+new plan.
+
+create a new implementation. forget the parser for now. just do unit calcs.
+new LiteralNumber(value, numers, denoms)
+or UNITS.makeNumber(5, [['ft']],[['s']]) = 5 ft/s
+UNITS.makeNumber(9.8 [['m']],[['s',2]]) = 9.8 m/s^2
+
+for multiplying, combine the units then expand and reduce
+for converting
+    if number unit equal to target unit end
+    find conversions of the same type that apply to the target
+    apply conversions
+    reduce
+    if equal now, then end
+    find conversions across type that apply to the target
+    apply conversions
+    reduce
+    if equal now, then end
+    else, not convertible. throw error
+
+
+
+class LiteralNumber(value, numers, denoms) {
+    constructor() {
+        this._value = value;
+        this._numers = numers;
+        this._denoms = denoms;
+    }
+    multiply(b) {
+        var nu =  new LiteralNumber(this.value * b.value,
+            this._numers.concat(b._numers)
+            this._denoms.concat(b._denoms)
+        )
+        nu = nu.expand();
+        nu = nu.reduce();
+        nu = nu.collapse();
+        return nu;
+    }
+    divide(b) {
+        this.multiply(b.invert())
+    }
+    invert() {
+        return new LiteralNumber(this.value, this.denoms, this.numers)
+    }
+    as(to) {
+        if(this.equalUnits(to)) return this;
+    }
+    isNone() {
+    toString() {
+}
+
+class UnitPart(name, dim, factor) {
+    this._name = name;
+    this._dim = (dim?dim:1);
+    this._factor = (factor?factor:1);
+}
+

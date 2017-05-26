@@ -22,291 +22,11 @@ if(unit.isCompound() || b.unit.isCompound()) {
  */
 //var Decimal = require('decimal.js');
 
-var abbrevations = {
-    'in':'inch',
-    'inches':'inch',
-    'ft':'foot',
-    'feet':'foot',
-    'yards':'yard',
-    'yd':'yard',
-    'miles':'mile',
-    'mi':'mile',
-    'leagues':'league',
-
-    's':'second',
-    'seconds':'second',
-    'min':'minute',
-    'minutes':'minute',
-    'hr':'hour',
-    'hours':'hour',
-    'days':'day',
-    'months':'month',
-    'years':'year',
-
-    'm':'meter',
-    'meters':'meter',
-    'cm':'centimeter',
-
-    'gal':'gallon',
-    'gallons':'gallon',
-    'qt':'quart',
-    'pt':'pint',
-    'cups':'cup',
-    'tablespoons':'tablespoon',
-    'tbsp':'tablespoon',
-    'teaspoons':'teaspoon',
-    'tsp':'teaspoon',
-    'l':'liter',
-    'liters':'liter',
-
-    'grams':'gram',
-    'g':'gram',
-    'oz':'ounce',
-    'ounces':'ounce',
-    'pounds':'pound',
-    'lbs':'pound',
-    'lb':'pound',
-
-    'acres':'acre',
-    'ac':'acre',
-
-};
-
-var cvs = {
-    units: {
-        'sqft': {
-            name:'foot',
-            base:'foot',
-            ratio:1,
-            type:'area',
-            dimension:2
-        },
-        'cuft': {
-            name:'foot',
-            base:'foot',
-            ratio:1,
-            type:'volume',
-            dimension:3
-        },
-        'hex': {
-            name:'hex',
-            base:'hex',
-            ratio:1,
-            type:'format',
-            dimension:0
-        },
-        'decimal': {
-            name:'decimal',
-            base:'decimal',
-            ratio:1,
-            type:'format',
-            dimension:0
-        }
-    },
-    //convert between unit bases
-    bases: [
-        {
-            from:'gallon',
-            ratio: 1/3.78541,
-            to:'liter'
-        },
-        {
-            from:'liter',
-            ratio: 1/0.264172,
-            to:'gallon'
-        },
-        {
-            from:'meter',
-            ratio:1/3.28084,
-            to:'foot'
-        },
-        {
-            from:'foot',
-            ratio:3.28084,
-            to:'meter'
-        },
-        {
-            from:'pound',
-            ratio:1/453.592,
-            to:'gram'
-        }
-    ],
-    //convert between unit types
-    dims: [
-        {
-            from: {
-                name:'foot',
-                dim:3,
-                type:'length'
-            },
-            ratio:0.133681,
-            to: {
-                name:'gallon',
-                dim:1,
-                type:'volume'
-            }
-        },
-        {
-            from: {
-                name:'foot',
-                dim:3,
-                type:'length'
-            },
-            ratio:0.0353147,
-            to: {
-                name:'liter',
-                dim:1,
-                type:'volume'
-            }
-        },
-        {
-            from: {
-                name:'meter',
-                dim:3,
-                type:'length'
-            },
-            ratio:1/1000,
-            to: {
-                name:'liter',
-                dim:1,
-                type:'volume'
-            }
-        },
-        {
-            from: {
-                name:'meter',
-                dim:2,
-                type:'length'
-            },
-            ratio:4046.86,
-            to: {
-                name:'acre',
-                dim:1,
-                type:'area'
-            }
-        },
-        {
-            from: {
-                name:'foot',
-                dim:2,
-                type:'length'
-            },
-            ratio:43560,
-            to: {
-                name:'acre',
-                dim:1,
-                type:'area'
-            }
-        }
-    ]
-};
-
-function addUnit(name,base,ratio,type) {
-    cvs.units[name] = {
-        name:name,
-        base:base,
-        ratio:ratio,
-        type:type,
-        dimension:1,
-        getUnit: function() {
-            return this;
-        },
-        clone: function() {
-            return new SimpleUnit(this.name, this.dimension);
-        },
-        toString: function() {
-            return this.name + "^"+this.dimension;
-        }
-    }
-}
-addUnit('none','none',1,'none');
-addUnit('meter','meter',1,'length');
-addUnit('foot','foot',1,'length');
-addUnit('gram','gram',1,'mass');
-addUnit('pound','pound',1,'mass');
-addUnit('acre','acre',1,'area');
-addUnit('gallon','gallon',1,'volume');
-addUnit('liter','liter',1,'volume');
-addUnit('second','second',1,'duration');
-addUnit('byte','byte',1,'storage');
-addUnit('bit','bit',1,'storage');
-
-addUnit('inch','foot',12,'length');
-addUnit('yard','foot',1/3,'length');
-addUnit('mile','foot',1/5280,'length');
-addUnit('ounce','pound',16,'mass');
-
-function addDuration(name,ratio) {
-    addUnit(name,'second',ratio,'duration');
-}
-addDuration('minute',1/(60));
-addDuration('hour',1/(60*60));
-addDuration('day',1/(60*60*24));
-addDuration('month',1/(60*60*24*30));
-addDuration('year',1/(60*60*24*365));
-
-function addMeterLength(name,ratio) {
-    addUnit(name,'meter',ratio,'length');
-}
-addMeterLength('centimeter',100);
-addMeterLength('league',1/4000);
-
-const metric_multiples = [['kilo','k'],['mega','M'],['giga','G'],['tera','T'],['peta','P'],['exa','E'],['zetta','Z'],['yotta','Y']];
-function addMetricMultiples(arr,suffix,abr,type) {
-    arr.forEach((prefix,i)=>{
-        var name = prefix[0]+suffix;
-        addUnit(name,suffix,1/Math.pow(1000,i+1),type);
-        var abbr = prefix[1]+abr;
-        abbrevations[abbr] = name;
-        abbrevations[name+'s'] = name;
-    });
-}
-addMetricMultiples(metric_multiples,'meter','m','length');
-addMetricMultiples(metric_multiples,'gram','g','mass');
-addMetricMultiples(metric_multiples,'liter','l','volume');
-const metric_fractions = [['milli','m'],['micro','u'],['nano','n'],['pico','p'],['femto','f'],['atto','a'],['zepto','z'],['yocto','y']];
-function addMetricFractions(arr,suffix,abr,type) {
-    arr.forEach((prefix,i)=>{
-        var name = prefix[0]+suffix;
-        addUnit(name,suffix,Math.pow(1000,i+1),type);
-        var abbr = prefix[1]+abr;
-        abbrevations[abbr] = name;
-        abbrevations[name+'s'] = name;
-    });
-}
-addMetricFractions(metric_fractions,'meter','m','length');
-addMetricFractions(metric_fractions,'gram','g','mass');
-addMetricFractions(metric_fractions,'liter','l','volume');
-
-function addGallonVolume(name,ratio) {
-    addUnit(name,'gallon',ratio,'volume');
-}
-addGallonVolume('teaspoon',256*3);
-addGallonVolume('tablespoon',256);
-addGallonVolume('cup',16);
-addGallonVolume('pint',8);
-addGallonVolume('quart',4);
-
-function addByte(name,ratio) {
-    addUnit(name,'byte',ratio,'storage');
-}
-
-function addByteUnits(arr,suffix,abbrSuffix,power) {
-    arr.forEach((prefix,i)=>{
-        var name = prefix+suffix;
-        addByte(name,1/Math.pow(power,i+1));
-        var abbr = prefix[0].toUpperCase()+abbrSuffix;
-        abbrevations[abbr] = name;
-    });
-}
-var prefixes_1000 = ['kilo','mega','giga','tera','peta','exa','zetta','yotta'];
-addByteUnits(prefixes_1000,'byte','B',1000);
-addByteUnits(prefixes_1000,'bit','bit',1000);
-var prefixes_1024 = ['kibi','mebi','gibi','tibi','pebi','exbi','zebi','yobi'];
-addByteUnits(prefixes_1024,'byte','iB',1024);
-addByteUnits(prefixes_1024,'bit','ibit',1024);
-
 const UNIT = {
+    makeFromNameAndDimension(name,dim) {
+        var su = new SimpleUnit(name,dim);
+        return new ComplexUnit([su],[]);
+    },
     sameTypes(a,b) {
         if(a.getUnit().isCompound() || b.getUnit().isCompound()) {
             let au = a.getUnit().asComplex();
@@ -387,12 +107,24 @@ const UNIT = {
         return this.convert(ret2,to);
     },
     convert(from, to) {
-        //console.log('-----');
-        //console.log("converting",from.toString(),'to',to.toString());
+        console.log(`--- converting  ${from} to ${to}`);
         var fu = from.getUnit();
-        var tu = this.lookupUnit(to.getUnit().name);
+        var tu = to;//this.lookupUnit(to.getUnit().name);
+        //already equal
+        if(from.getUnit().equal(to)) return from;
+
+        //if source unit has only one component, and so does target unit
+        // the find conversion factor from source to target
+
+        console.log("target unit is", to);
+        var tt = to.numers[0];
+        var conv = new ComplexUnit([new SimpleUnit(tt.name,1)],
+            [new SimpleUnit(tt.base,1)]);
+        //to.name / to.ratio * to.base
+        return this.compoundConvert(from,new Literal(1,conv));
         //console.log("got from = ",fu.toString());
         //console.log("got   to = ",tu.toString());
+        /*
         if(fu.isCompound() && fu.canReduceToSimple()) {
             return this.convert(new Literal(from.value,fu.reduceToSimple()),to);
         }
@@ -414,9 +146,10 @@ const UNIT = {
         if(fu.type == 'length' && fu.dimension == 2 && tu.type == 'area') {
             return this.dimConvert(from,to,fu);
         }
-
+        //
         //upgrade to a complex unit
         return new Literal(from.getValue(), fu.asComplex());
+        */
     },
     compoundMultiply(a,b) {
         var v2 = a.getValue() * b.getValue();
@@ -425,9 +158,9 @@ const UNIT = {
         return this.compoundConvert(l2,b);
     },
     compoundConvert(a,b) {
-        //console.log("compound converting", a.toString(), 'to', b.toString());
+        console.log("compound converting", a.toString(), 'to', b.toString());
         var v2 = a.getValue();
-        //console.log("new value is", v2);
+        console.log("new value is", v2);
 
         //make everything be compound
         var au = a.getUnit();
@@ -437,19 +170,23 @@ const UNIT = {
         //console.log('units',au.toString(),au,bu.toString(),bu);
 
         var u2 = new ComplexUnit(au.numers.concat(bu.numers),au.denoms.concat(bu.denoms));
-        //console.log("new unit is",u2.toString());
+        console.log("new unit is",u2.toString());
 
         //fully expand and convert units to common types
         var ret = this.expand(u2);
         v2 = v2 * ret[0];
+        console.log("final value is", v2);
         u2 = ret[1];
         u2 = u2.collapse();
-        //console.log("expanded to ", u2.toString());
+        console.log("expanded to ", u2.toString());
 
         //cancel and reduce
         u2 = this.reduce(u2);
-        //console.log("reduced to", u2.toString());
-        return new Literal(v2, u2.collapse());
+        console.log("reduced to", u2.toString());
+        u2 = u2.collapse();
+        console.log("collapsed to", u2.toString());
+        console.log("final final value is", v2);
+        return new Literal(v2, u2);
     },
 
 
@@ -459,8 +196,12 @@ const UNIT = {
         function check(u2,type) {
             var top = u2.numers.find((u)=>u.type==type);
             var bot = u2.denoms.find((u)=>u.type==type);
-            //console.log("found for type", type,top,bot);
+            console.log("found for type", type,top,bot);
             if(top && bot) {
+                if(top.name == bot.name) {
+                    console.log("same on top and bottom. ignore");
+                    return u2;
+                }
                 if(top.base === bot.base) {
                     u2.denoms.push(UNIT.lookupUnit(top.name));
                     u2.numers.push(UNIT.lookupUnit(bot.name));
@@ -549,6 +290,12 @@ class ComplexUnit {
         if(!numers) numers = [];
         if(!denoms) denoms = [];
         this.numers = numers;
+        this.numers = numers.map((n) => {
+            if(!(n instanceof SimpleUnit)) {
+                return new SimpleUnit(n.name, n.dimension);
+            }
+            return n;
+        });
         this.denoms = denoms;
     }
     toString() {
@@ -558,7 +305,7 @@ class ComplexUnit {
             this.denoms.map((u)=>u.name + "^" + u.dimension).join(" ");
     }
     equal(b) {
-        var a = this.collapse();
+        var a = this.collapse();c
         if(!b.isCompound()) b = b.asComplex();
         b = b.collapse();
         if(a.numers.length !== b.numers.length) return false;
@@ -573,7 +320,11 @@ class ComplexUnit {
         b = b.collapse();
         return (a.numers[0].type == b.numers[0].type);
     }
-    isNone() { return false; }
+    isNone() {
+        //console.log("numers = ", this.numers[0]);
+        if(this.numers.length == 1 && this.numers[0].isNone() && this.denoms.length == 0) return true;
+        return false;
+    }
     isCompound() { return true; }
     asComplex() { return this; }
     invert() {
@@ -628,7 +379,10 @@ class Literal {
         if(typeof unit === 'string') {
             throw new Error('cannot create a literal with a string unit anymore');
         }
-        //console.log("created final literal:",this.toString());
+        console.log("created final literal:",this.toString());
+        if(!value) {
+            throw new Error('invalid value');
+        }
     }
     clone() {
         var lit = new Literal(this.value, this.getUnit().clone());
@@ -642,6 +396,7 @@ class Literal {
         throw new Error("can't handle other kind of unit");
     }
     withSimpleUnit(unit) {
+        //console.log("making an new literal ",this.value, unit.toString());
         return new Literal(this.value,unit);
     }
     withComplexUnitArray(numers,denoms) {
@@ -669,7 +424,7 @@ class Literal {
         return this.value + " " + this.getUnit();
     }
     getUnit() {
-        if(!this._unit) return new SimpleUnit("none",0);
+        if(!this._unit) return new ComplexUnit([new SimpleUnit("none",0)],[]);
         return this._unit;
     }
     as(target) {
@@ -679,6 +434,7 @@ class Literal {
         return UNIT.convert(this,target);
     };
     multiply(b) {
+        console.log(`multiplying ${this} by ${b}`);
         //multiply with only one unit
         if(this.getUnit().isNone()) {
             return new Literal(this.value* b.value).withSimpleUnit(b.getUnit());
@@ -687,14 +443,15 @@ class Literal {
         if(b.getUnit().isNone()) {
             return new Literal(this.value* b.value).withSimpleUnit(this.getUnit());
         }
-        if(this.getUnit().isCompound() || b.getUnit().isCompound()) return UNIT.compoundMultiply(this,b);
+        return UNIT.compoundMultiply(this,b);
+        //if(this.getUnit().isCompound() || b.getUnit().isCompound()) return UNIT.compoundMultiply(this,b);
         //multiply with same units
-        if(this.getUnit().name == b.getUnit().name) {
-            return new Literal(this.value * b.value).withUnit(this.getUnit().name,this.getUnit().dimension + b.getUnit().dimension);
-        }
+        //if(this.getUnit().name == b.getUnit().name) {
+        //    return new Literal(this.value * b.value).withUnit(this.getUnit().name,this.getUnit().dimension + b.getUnit().dimension);
+        //}
 
         //convert the first to the second unit
-        return UNIT.convert(this,b).multiply(b);
+        //return UNIT.convert(this,b).multiply(b);
     }
     divide(b) {
         return this.multiply(b.invert());
