@@ -64,6 +64,14 @@ class LiteralNumber {
         return nu;
     }
 
+    exponent(b) {
+        console.log("doing to a power", this.toString(),'to the', b.toString());
+        var exp = b.getValue();
+        var n2 = this._numers.map((u)=>new UnitPart(u.getName(),u.getDimension()*exp, u.getFactor()));
+        var d2 = this._denoms.map((u)=>new UnitPart(u.getName(),u.getDimension()*exp, u.getFactor()));
+        return new LiteralNumber(Math.pow(this.getValue(), b.getValue()),n2,d2);
+    }
+
     toString() {
         let n = this._numers.map((u)=>u.getFactor()+'*'+u.getName() + '^' + u.getDimension()).join();
         let d = this._denoms.map((u)=>u.getFactor()+'*'+u.getName() + '^' + u.getDimension()).join();
@@ -346,6 +354,45 @@ test('basic conversion',(t)=>{
         .as(new LiteralNumber(1).withUnits(['hour']))
     ,new LiteralNumber((ER*1000/1219.2)/60/60).withUnits(['hour'])
     );
+
+
+    compare(t, new LiteralNumber(ER).withUnits(['kilometer'])
+        .multiply(new LiteralNumber(2))
+        .multiply(new LiteralNumber(Math.PI))
+        .divide(new LiteralNumber(60).withUnits(['kilometer'],['hour']))
+        .as(new LiteralNumber(1).withUnits(['day']))
+        ,new LiteralNumber(ER*2*Math.PI/60/24).withUnits(['day'])
+    );
+    //compareComplexUnit(t,'earth.radius * 2 * pi / 60 km/hr as days', new Literal(ER*Math.PI*2/60/24).withUnit('day'));
+
+    //compareComplexUnit(t,'jupiter.radius^3 * 4/3 * pi', new' +
+    //' Literal(Math.pow(JR,3)*4/3*Math.PI).withComplexUnitArray(['kilometer',3],[]));
+    var JR = 69911;
+    compare(t, new LiteralNumber(JR).withUnits(['kilometer'])
+        .exponent(new LiteralNumber(3))
+        .multiply(new LiteralNumber(4))
+        .divide(new LiteralNumber(3))
+        .multiply(new LiteralNumber(Math.PI))
+    , new LiteralNumber(Math.pow(JR,3)*4/3*Math.PI).withUnits([['kilometer',3]])
+    );
+
+    compare(t, new LiteralNumber(JR).withUnits(['kilometer'])
+        .exponent(new LiteralNumber(3))
+        .multiply(new LiteralNumber(4))
+        .divide(new LiteralNumber(3))
+        .multiply(new LiteralNumber(Math.PI))
+        .divide(
+            new LiteralNumber(ER).withUnits(['kilometer'])
+                .exponent(new LiteralNumber(3))
+                .multiply(new LiteralNumber(4))
+                .divide(new LiteralNumber(3))
+                .multiply(new LiteralNumber(Math.PI))
+        )
+        , new LiteralNumber(1321.33)
+    );
+
+    //compareComplexUnit(t,'(jupiter.radius^3 * 4/3 * pi) / (earth.radius^3 * 4/3 * pi)', new' +
+    //' Literal(1321.33));
     t.end();
 
 
