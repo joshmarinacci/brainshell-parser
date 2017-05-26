@@ -297,7 +297,14 @@ const UNIT = {
     },
     findConversion(from,to) {
         return cvs.bases.find((cv) => cv.from == from && cv.to == to);
-    }
+    },
+    getCanonicalName(name) {
+        if(cvs.units[name]) return cvs.units[name].name;
+        if(abbrevations[name]) return abbrevations[name];
+        if(!name) return null;
+        console.log("WARNING. no canonical name found for unit " + name);
+        return null;
+    },
 };
 
 module.exports = UNIT;

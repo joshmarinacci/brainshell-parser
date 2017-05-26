@@ -2,8 +2,10 @@ var ohm = require('ohm-js');
 var Literal = require('./Literal').Literal;
 var LiteralString = require('./Literal').LiteralString;
 var UNIT = require('./Literal').UNIT;
+var UNITS = require('./units2');
 var ComplexUnit = require('./Literal').ComplexUnit;
 var moment = require('moment');
+var LiteralNumber = require('./LiteralNumber').LiteralNumber;
 
 class FunCall {
     constructor(fun, arg) {
@@ -34,10 +36,10 @@ function GET(url) {
 }
 
 const SYMBOLS = {
-    'pi': new Literal(Math.PI),
-    'earth.radius':new Literal(6371.008).withUnit('kilometer'),
-    'jupiter.radius':new Literal(69911).withUnit('km'),
-    'five':new Literal(5).withUnit('km'),
+    'pi': new LiteralNumber(Math.PI),
+    'earth.radius':new LiteralNumber(6371.008).withUnits(['kilometer']),
+    'jupiter.radius':new LiteralNumber(69911).withUnits(['km']),
+    'five':new LiteralNumber(5).withUnits(['km']),
     'date': function(arg) {
         console.log("doing date on arg " + arg, arg.string);
         return moment(arg.string);
@@ -67,13 +69,13 @@ function generateSemantics(grammar) {
             var num_t = num.calc();
             var unit_t = unit.calc()[0];
             if(!unit_t) return num_t;
-            //console.log("doing final literal",num_t, unit_t);
-            return num_t.withSimpleUnit(unit_t);
+            console.log("doing final literal",num_t, unit_t);
+            return num_t.withUnits(unit_t);
         },
         unitchunk : function(a,b,c) {
             var name = a.calc().join("");
             var power = c.calc().join("");
-            name = UNIT.getCanonicalName(name);
+            name = UNITS.getCanonicalName(name);
             if(power) return [name,parseInt(power)];
             return [name,1];
         },
@@ -88,22 +90,22 @@ function generateSemantics(grammar) {
                     return UNIT.withDimension(UNIT.lookupUnit(ar[0]),ar[1])
                 });
                 //console.log("now = ",numers,denoms);
-                return new ComplexUnit(numers,denoms);
+                return [numers,denoms];
             }
             var n  = numer.calc()[0];
             var p = numer.calc()[1];
             var md = mod.calc();
             if(md.length == 1 && md[0] === 'square') p = 2;
             if(md.length == 1 && md[0] === 'cubic') p = 3;
-            //console.log("Making unit with",n,p);
-            return UNIT.makeFromNameAndDimension(n,p);
+            console.log("Making unit with",n,p);
+            return [[n,p]];
         },
         Number: (a) => a.calc(),
         integer: function(a,b) {
             var v = parseInt(a.calc().join("").replace(/_/g,''), 10);
             var exp = b.calc();
             if(exp && exp.length >= 1) v = v* Math.pow(10, exp[0].getValue());
-            return new Literal(v);
+            return new LiteralNumber(v);
         },
         float: function(a,b,c,e) {  return new Literal(parseFloat(this.sourceString));  },
         hex:  function(a,b) {       return new Literal(parseInt(this.sourceString)).withPreferredFormat('hex'); },
