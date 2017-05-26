@@ -35,22 +35,22 @@ class LiteralNumber {
     withUnits(numers, denoms) {
         let n = numers.map((f)=>{
             if(typeof f[1] === 'number') {
-                console.log("it's an array");
                 return new UnitPart(f[0],f[1]);
             }
             return new UnitPart(f,1)
         });
+        if(!denoms) denoms = [];
         let d = denoms.map((f)=>new UnitPart(f,1));
         return new LiteralNumber(this._value, n,d);
     }
 
     multiply(b) {
-        var nu = new LiteralNumber(this._value * b._value,
+        var nu = new LiteralNumber(this.getValue() * b.getValue(),
             this._numers.concat(b._numers),
             this._denoms.concat(b._denoms)
         );
         //nu = nu.expand();
-        //nu = nu.reduce();
+        nu = nu.reduce();
         nu = nu.collapse();
         return nu;
     }
@@ -66,11 +66,11 @@ class LiteralNumber {
     }
 
     divide(b) {
-        this.multiply(b.invert())
+        return this.multiply(b.invert())
     }
 
     invert() {
-        return new LiteralNumber(this.value, this.denoms, this.numers)
+        return new LiteralNumber(this.getValue(), this._denoms, this._numers)
     }
 
     as(to) {
@@ -142,10 +142,10 @@ class LiteralNumber {
         //console.log("before n1 is",n1);
 
 
-
+        //subtract dimension of any unit that is on top and bottom
         n1.forEach((n) => {
             d1.forEach((d) => {
-                if(n.name == d.name) {
+                if(n.getName() == d.getName()) {
                     if(n._dim > 0 && d._dim > 0) {
                         var sum = Math.min(n._dim, d._dim);
                         n._dim-= sum;
@@ -244,6 +244,8 @@ test('basic conversion',(t)=>{
         new LiteralNumber(5*60*60).withUnits(['second'],[]));
     compare(t, new LiteralNumber(3).withUnits(['foot'],[]).multiply(new LiteralNumber(1).withUnits(['foot'],['second'])),
         new LiteralNumber(3).withUnits([['foot',2]],['second']));
+    compare(t, new LiteralNumber(3).withUnits(['foot'],[]).divide(new LiteralNumber(1).withUnits(['foot'],['second'])),
+        new LiteralNumber(3).withUnits(['second']));
     t.end();
 
 
