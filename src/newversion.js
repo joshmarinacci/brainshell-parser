@@ -33,7 +33,13 @@ class LiteralNumber {
         this._denoms = (denoms?denoms:[]);
     }
     withUnits(numers, denoms) {
-        let n = numers.map((f)=>new UnitPart(f,1));
+        let n = numers.map((f)=>{
+            if(typeof f[1] === 'number') {
+                console.log("it's an array");
+                return new UnitPart(f[0],f[1]);
+            }
+            return new UnitPart(f,1)
+        });
         let d = denoms.map((f)=>new UnitPart(f,1));
         return new LiteralNumber(this._value, n,d);
     }
@@ -227,11 +233,18 @@ console.log(new LiteralNumber(5).withUnits(['foot'],[])
     .multiply(new LiteralNumber(5).withUnits(['foot'],[]))
     .toString());
     */
+function compare(t,res,ans) {
+    console.log(`comparing ${res} to ${ans}`);
+    t.equal(res.getValue(),ans.getValue());
+    t.equal(res.equalUnits(ans),true);
+}
 test('basic conversion',(t)=>{
-
-    var val = new LiteralNumber(5).withUnits(['hour'],[])
-        .as(new LiteralNumber(1).withUnits(['second'],[]));
-    t.equal(val.getValue(),5*60*60);
-    t.equal(val.equalUnits(new LiteralNumber(5*60*60).withUnits(['second'],[])),true);
+    compare(t,new LiteralNumber(5).withUnits(['hour'],[])
+        .as(new LiteralNumber(1).withUnits(['second'],[])),
+        new LiteralNumber(5*60*60).withUnits(['second'],[]));
+    compare(t, new LiteralNumber(3).withUnits(['foot'],[]).multiply(new LiteralNumber(1).withUnits(['foot'],['second'])),
+        new LiteralNumber(3).withUnits([['foot',2]],['second']));
     t.end();
+
+
 });
