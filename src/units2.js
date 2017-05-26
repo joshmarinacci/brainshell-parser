@@ -294,6 +294,9 @@ const UNIT = {
             throw new Error();
         }
         return cvs.units[name];
+    },
+    findConversion(from,to) {
+        return cvs.bases.find((cv) => cv.from == from && cv.to == to);
     }
 };
 
