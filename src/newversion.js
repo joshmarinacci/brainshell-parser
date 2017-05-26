@@ -43,6 +43,7 @@ class LiteralNumber {
     }
 
     multiply(b) {
+        console.log("multiplying",this.toString(),'times', b.toString());
         var nu = new LiteralNumber(this.getValue() * b.getValue(),
             this._numers.concat(b._numers),
             this._denoms.concat(b._denoms)
@@ -114,16 +115,18 @@ class LiteralNumber {
         return false;
     }
     expand() {
+        console.log('expanding');
         //if top and bottom have a time or length then expand it
         function check(u2,type) {
             var top = u2._numers.find((u)=>u.getType()==type);
             var bot = u2._denoms.find((u)=>u.getType()==type);
-            console.log("found for type", type,top,bot);
+            //console.log("found for type", type,top,bot);
             if(top && bot) {
                 if(top.getName() == bot.getName()) {
                     console.log("same on top and bottom. ignore");
                     return u2;
                 }
+                //TODO: this conversion code is almost identical to what is below
                 if(top.getBase() === bot.getBase()) {
                     console.log("same base",top.getRatio(),bot.getRatio());
                     u2._numers.push(new UnitPart(bot.getName(),1,bot.getRatio()));
@@ -154,7 +157,7 @@ class LiteralNumber {
         function check(u1,u2,type) {
             var first = u1._numers.find((u)=>u.getType() == type);
             var secon = u2._numers.find((u)=>u.getType() == type);
-            console.log("found for type", type,first,secon);
+            //console.log("found for type", type,first,secon);
             return {
                 type:type,
                 first:first,
@@ -163,17 +166,18 @@ class LiteralNumber {
         }
         //var res = check(a,b,'length');
 
+        // TODO: this conversion code is almost identical to what is above
         //find a unit in first with the same type as a unit in second, in the numers only.
         function process(a,b,type) {
             var res = check(a,b,type);
             //add a conversion from first unit to the second
             if(res.first && res.second) {
                 //console.log("found a match",res);
-                //console.log("looking for a conversion from",res.first.getName(),'to',res.second.getName());
+                console.log("looking for a conversion from",res.first.getName(),'to',res.second.getName());
                 if(res.first.getBase() == res.second.getBase()) {
                     //console.log("same base");
                     //first.ratio * first.base / 1 * first.name //  60s*60s/1h
-                    a._numers.push(new UnitPart(res.first.getBase(),1,1));
+                    a._numers.push(new UnitPart(res.second.getName(),1,res.second.getRatio()));
                     a._denoms.push(new UnitPart(res.first.getName(),1,res.first.getRatio()));
                     //console.log("now a is", a.toString());
                 }
@@ -323,19 +327,25 @@ test('basic conversion',(t)=>{
         .divide(new LiteralNumber(40).withUnits(['mile']))
         ,new LiteralNumber(100).withUnits(['hour'])
     );
-
-    // = 60000 meter / (40 mi/hr)
-    // = meter * hour / mile
-    // = meter * foot * hour / mile * meter
-    // = foot * hour / mile
-    // = hour
-    // 600000 / 40
     compare(t, new LiteralNumber(600000).withUnits(['meter'])
         .divide(new LiteralNumber(40).withUnits(['mile'],['hour']))
         ,new LiteralNumber(9.32).withUnits(['hour'])
     );
-    //compareComplexUnit(t,'600000 meter / (40 mi/hr)', new Literal(9.32).withUnit('hour'));
-
+    compare(t, new LiteralNumber(1)
+        .divide(new LiteralNumber(10).withUnits(['meter'],['second']))
+        ,new LiteralNumber(0.1).withUnits(['second'],['meter'])
+    );
+    compare(t, new LiteralNumber(5).withUnits(['kilometer'])
+        .divide(new LiteralNumber(5).withUnits(['meter'],['second']))
+        ,new LiteralNumber(1000).withUnits(['second'])
+    );
+    //compareComplexUnit(t,'5km / 5m/s',new Literal(1000).withComplexUnitArray(['second',1],[]));
+    const ER = 6371.008;
+    compare(t, new LiteralNumber(ER).withUnits(['kilometer'])
+        .divide(new LiteralNumber(4000).withUnits(['foot'],['second']))
+        .as(new LiteralNumber(1).withUnits(['hour']))
+    ,new LiteralNumber((ER*1000/1219.2)/60/60).withUnits(['hour'])
+    );
     t.end();
 
 
