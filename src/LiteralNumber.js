@@ -9,9 +9,16 @@ class LiteralNumber {
         this._numers = (numers?numers:[]);
         this._denoms = (denoms?denoms:[]);
     }
+    withUnit(numers,denoms) {
+        return this.withUnits(numers,denoms);
+    }
     withUnits(numers, denoms) {
+        if(typeof numers === 'string') {
+            return new LiteralNumber(this._value, [new UnitPart(numers,1,1)],[]);
+        }
         function toUnitPart(f) {
             if(typeof f[1] === 'number') return new UnitPart(f[0],f[1]);
+            if(f instanceof UnitPart) return f;
             return new UnitPart(f,1)
         }
         if(!denoms) denoms = [];
