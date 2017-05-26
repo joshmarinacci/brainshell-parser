@@ -18,6 +18,19 @@ class LiteralNumber {
         return new LiteralNumber(this._value, numers.map(toUnitPart),denoms.map(toUnitPart));
     }
 
+    add(to) {
+        if (this.equalUnits(to)) {
+            return new LiteralNumber(this.getValue() + to.getValue()).withUnits(this._numers,this._denoms);
+        }
+        throw new Error("bad add");
+    }
+    subtract(to) {
+        if (this.equalUnits(to)) {
+            return new LiteralNumber(this.getValue() - to.getValue()).withUnits(this._numers,this._denoms);
+        }
+        throw new Error("bad sub");
+    }
+
     multiply(b) {
         console.log("multiplying",this.toString(),'times', b.toString());
         var nu = new LiteralNumber(this.getValue() * b.getValue(),
@@ -250,7 +263,7 @@ class LiteralNumber {
 
 class UnitPart {
     constructor(name, dim, factor) {
-        this._name = name;
+        this._name = UNITS.getCanonicalName(name);
         this._dim = (dim ? dim : 1);
         this._factor = (factor ? factor : 1);
     }

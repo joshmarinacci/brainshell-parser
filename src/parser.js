@@ -107,10 +107,10 @@ function generateSemantics(grammar) {
             if(exp && exp.length >= 1) v = v* Math.pow(10, exp[0].getValue());
             return new LiteralNumber(v);
         },
-        float: function(a,b,c,e) {  return new Literal(parseFloat(this.sourceString));  },
-        hex:  function(a,b) {       return new Literal(parseInt(this.sourceString)).withPreferredFormat('hex'); },
-        percent: (a,b) => a.calc().multiply(new Literal(1/100)),
-        exp: (_,sign,exp) => new Literal(parseFloat(exp.calc()[0])),
+        float: function(a,b,c,e) {  return new LiteralNumber(parseFloat(this.sourceString));  },
+        hex:  function(a,b) {       return new LiteralNumber(parseInt(this.sourceString))},//.withPreferredFormat('hex'); },
+        percent: (a,b) => a.calc().multiply(new LiteralNumber(1/100)),
+        exp: (_,sign,exp) => new LiteralNumber(parseFloat(exp.calc()[0])),
         AddExpr_plus: ((a,_,b) => a.calc().add(b.calc())),
         AddExpr_minus: ((a,_,b) => a.calc().subtract(b.calc())),
         MulExpr_multiply: ((a,_,b) => a.calc().multiply(b.calc())),
