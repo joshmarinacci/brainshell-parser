@@ -117,7 +117,7 @@ function generateSemantics(grammar) {
         MulExpr_divide: ((a,_,b) => a.calc().divide(b.calc())),
         ExpExpr_power: ((a,_,b) => a.calc().exponent(b.calc())),
         PriExpr_paren: ((p1,a,p2) => a.calc()),
-        AsExpr: (a,_,u) => a.calc().as(u.calc()),
+        AsExpr: (a,_,u) => a.calc().as(new LiteralNumber(1).withUnits(u.calc())),
         identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
         String_single:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
         String_double:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},

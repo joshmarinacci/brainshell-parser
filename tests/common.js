@@ -4,24 +4,24 @@
 var test = require('tape');
 require('tape-approximately')(test);
 var Parser = require('../src/parser.js');
-var Literal = require('../src/Literal').Literal;
-var moment = require('moment');
+var LiteralNumber = require('../src/LiteralNumber').LiteralNumber;
+
 function compareUnit(t, str, num, unit, dim) {
     let res = Parser.parseString(str);
     t.approximately(res.getValue(),num, 0.01);
-    let ans = new Literal(num).withUnit(unit);
+    let ans = new LiteralNumber(num).withUnit([unit]);
     if(unit === 'none') {
 
     } else {
         if(dim && dim !== 1) {
-            ans = new Literal(num).withUnit(unit,dim);
+            ans = new LiteralNumber(num).withUnit([[unit,dim]]);
         }
-        if(!res.sameUnits(ans)) {
+        if(!res.equalUnits(ans)) {
             console.log("units not equal: ", str, res.toString());
             console.log(res.toString(),res.getUnit());
             console.log(ans.toString(),ans.getUnit());
         }
-        t.equal(res.sameUnits(ans), true);
+        t.equal(res.equalUnits(ans), true);
     }
 
 }

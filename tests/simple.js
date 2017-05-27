@@ -99,30 +99,31 @@ unittests("simple units", [
     ['6 cups', new LiteralNumber(6).withUnit('cups')],
     ['40 m', new LiteralNumber(40).withUnit('meter')],
     ['40m', new LiteralNumber(40).withUnit('meter')],
-    //['40m as feet', new LiteralNumber(131.234).withUnit('foot')],
+    ['40km as m', new LiteralNumber(40*1000).withUnit('meter')],
+    ['40m as feet', new LiteralNumber(131.234).withUnit('foot')],
     ['4 ft',new LiteralNumber(4).withUnit('feet')],
     ['4 ft + 5 ft', new LiteralNumber(9).withUnit('feet')],
     ['4 ft - 5 ft', new LiteralNumber(-1).withUnit('feet')],
     ['4 yards',new LiteralNumber(4).withUnit('yard')],
     ['4 yd',new LiteralNumber(4).withUnit('yard')],
     ['5 km',new LiteralNumber(5).withUnit('kilometer')],
-    //['5 km as meters',new LiteralNumber(5000).withUnit('meter')],
-    //['5 miles as meters',new Literal(8046.72).withUnit('meter')],
-    //['4 quart as gallon', new Literal(1).withUnit('gallon')],
-    //['16 cups as gallons', new Literal(1).withUnit('gallon')],
-    //['3 teaspoons as tablespoons', new Literal(1).withUnit('tablespoon')],
+    ['5 km as meters',new LiteralNumber(5000).withUnit('meter')],
+    ['5 miles as meters',new LiteralNumber(8046.72).withUnit('meter')],
+    ['4 quart as gallon', new LiteralNumber(1).withUnit('gallon')],
+    ['16 cups as gallons', new LiteralNumber(1).withUnit('gallon')],
+    ['3 teaspoons as tablespoons', new LiteralNumber(1).withUnit('tablespoon')],
     ['2 ft * 2 ft', new LiteralNumber(4).withUnits([['foot',2]])],
     //['2 sqft', new Literal(2).withUnit([['squarefoot'],[]])],
     //['2 cuft', new Literal(2, 'cubicfoot')],
-    //['2 TB as GB',new Literal(2*1000).withUnit('gigabyte')],
-    //['2 TiB as GiB',new Literal(2*1024).withUnit('gibibyte')],
-    //['2 MiB as KiB',new Literal(2*1024).withUnit('kibibyte')],
-    //['2 KiB as MiB',new Literal(2/1024).withUnit('mebibyte')],
-    //['2 KB as MB',new Literal(2/1000).withUnit('megabyte')],
+    //['2 TB as GB',new LiteralNumber(2*1000).withUnit('gigabyte')],
+    //['2 TiB as GiB',new LiteralNumber(2*1024).withUnit('gibibyte')],
+    //['2 MiB as KiB',new LiteralNumber(2*1024).withUnit('kibibyte')],
+    //['2 KiB as MiB',new LiteralNumber(2/1024).withUnit('mebibyte')],
+    //['2 KB as MB',new LiteralN(2/1000).withUnit('megabyte')],
     //['1 GiB as Gibit', new Literal(8).withUnit('gibibit')],
     //['1 GB as Gbit', new Literal(8).withUnit('gigabit')]
     //['2 MB as byte',new Literal(2*1000*1000).withUnit('byte')],
-    //['1 kilobyte as byte', new Literal(1000).withUnit('byte')]
+    //['1 kilobyte as byte', new LiteralNumber(1000).withUnit('byte')]
 ]);
 
 
@@ -136,7 +137,7 @@ unittests('complex units', [
     ['2 ft^3', new LiteralNumber(2).withUnit('foot',3)],
     //['2 ft^3 as cuft', new Literal(2).withUnit('foot',3)],
     ['2ft * 2ft * 2 feet', new LiteralNumber(8).withUnit('foot',3)],
-    //['2ft * 2ft * 2ft as gallons', new Literal(59.8442).withUnit('gallon')],
+    //['2ft * 2ft * 2ft as gallons', new LiteralNumber(59.8442).withUnit('gallon')],
 
 
 
@@ -157,23 +158,22 @@ test("crashed",(t)=>{
 unittests("duration units", [
     ["1 second", new LiteralNumber(1).withUnit('second')],
     ['1s', new LiteralNumber(1).withUnit('second')],
-    //['120s as minutes', new LiteralNumber(2).withUnit('minute')],
-    //['7200s as hours', new Literal(2).withUnit('hour')],
-    //['120min as hours', new Literal(2).withUnit('hour')],
-    //['12 hr as days', new Literal(0.5).withUnit('day')],
-    //['90 days as months', new Literal(3).withUnit('month')],
-    //['730 days as years', new Literal(2).withUnit('year')],
-    //['5 years as seconds', new Literal(157680000).withUnit('second')]
+    ['120s as minutes', new LiteralNumber(2).withUnit('minute')],
+    ['7200s as hours', new LiteralNumber(2).withUnit('hour')],
+    ['120min as hours', new LiteralNumber(2).withUnit('hour')],
+    ['12 hr as days', new LiteralNumber(0.5).withUnit('day')],
+    ['90 days as months', new LiteralNumber(3).withUnit('month')],
+    ['730 days as years', new LiteralNumber(2).withUnit('year')],
+    ['5 years as seconds', new LiteralNumber(157680000).withUnit('second')]
 ]);
 
-/*
 tests("constants", [
     ['Pi',Math.PI],
     ['pi',Math.PI],
     ['earth.radius as mi',3958.76084],
     ['jupiter.radius as km', 69911]
 ]);
-*/
+
 /*
 tests("function calls", [
     ["'foo'", "foo"], //string literal
