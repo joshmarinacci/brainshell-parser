@@ -129,6 +129,7 @@ class LiteralNumber {
         this.check2(this,'duration');
         this.check2(this,'length');
         this.check2(this,'volume');
+        this.check2(this,'area');
         return this;
     }
     check2(a,type) {
@@ -198,31 +199,33 @@ class LiteralNumber {
         var a = this;
         console.log("converting", a.toString());
         console.log('to', b.toString());
-        function ck(a,b) {
+        function ck(a, b, fromType, dim, toType) {
             //if contains length ^3 and 'to' contains volume, then convert
-            if(a._numers.find((u)=>u.getDimension() === 3 && u.getType() === 'length')) {
+            if(a._numers.find((u)=>u.getDimension() === dim && u.getType() === fromType)) {
                 //console.log("found a length ^3");
-                if(b._numers.find((u)=>u.getType() === 'volume')) {
+                if(b._numers.find((u)=>u.getType() === toType)) {
                     //console.log("found a volume");
                     //console.log("=========== do conversion");
-                    var c = a.dimConvert(b,'length','volume');
+                    var c = a.dimConvert(b,fromType, dim, toType);
                     //console.log("now it's",c);
                     return c;
                 }
             }
             return a;
         }
-        a = ck(a,b);
+        a = ck(a,b, 'length', 3, 'volume');
+        a = ck(a,b, 'length', 2, 'area');
         this.process(a,b,'duration');
         this.process(a,b,'length');
         this.process(a,b,'volume');
+        this.process(a,b,'area');
         a = a.reduce();
         //console.log("now a is",a);
         return a;
     }
 
-    dimConvert(to,fromType, toType) {
-        var u1 = this._numers.find((u) => u.getDimension() === 3 && u.getType() === fromType);
+    dimConvert(to, fromType, dim, toType) {
+        var u1 = this._numers.find((u) => u.getDimension() === dim && u.getType() === fromType);
         //console.log("u1 = ", u1);
         var u2 = to._numers.find((u) => u.getType() === toType);
         //console.log('u2 = ', u2);
