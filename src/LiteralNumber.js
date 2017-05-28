@@ -53,9 +53,10 @@ class LiteralNumber {
 
     multiply(b) {
         console.log("multiplying",this.toString(),'times', b.toString());
-        var nu = new LiteralNumber(this.getValue() * b.getValue(),
-            this._numers.concat(b._numers),
-            this._denoms.concat(b._denoms)
+        var a = this.process(this,b,'length');
+        var nu = new LiteralNumber(a.getValue() * b.getValue(),
+            a._numers.concat(b._numers),
+            a._denoms.concat(b._denoms)
         );
         nu = nu.expand();
         //console.log('after expanding',nu);
@@ -179,7 +180,7 @@ class LiteralNumber {
         //find something in the top of two different numbers
         var first = a._numers.find((u)=>u.getType() == type);
         var second = b._numers.find((u)=>u.getType() == type);
-        if(first && second) {
+        if(first && second && first.getName() !== second.getName()) {
             //console.log("looking for a conversion from",first.getName(),'to',second.getName());
             if(first.getBase() == second.getBase()) {
                 a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(), second.getDimension())));
