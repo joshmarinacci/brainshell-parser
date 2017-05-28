@@ -29,6 +29,9 @@ class LiteralNumber {
             numers.map(toUnitPart),
             denoms.map(toUnitPart));
     }
+    clone() {
+        return new LiteralNumber(this.getValue(), this._numers.map(u=>u.clone()), this._denoms.map(u=>u.clone()));
+    }
 
     add(to) {
         if (this.equalUnits(to)) {
@@ -172,6 +175,7 @@ class LiteralNumber {
 
     // TODO: this conversion code is almost identical to what is above
     process(a,b,type) {
+        a = a.clone();
         //find something in the top of two different numbers
         var first = a._numers.find((u)=>u.getType() == type);
         var second = b._numers.find((u)=>u.getType() == type);
@@ -198,6 +202,7 @@ class LiteralNumber {
                 }
             }
         }
+        return a;
     }
 
     convert(b) {
@@ -220,10 +225,11 @@ class LiteralNumber {
         }
         a = ck(a,b, 'length', 3, 'volume');
         a = ck(a,b, 'length', 2, 'area');
-        this.process(a,b,'duration');
-        this.process(a,b,'length');
-        this.process(a,b,'volume');
-        this.process(a,b,'area');
+        a = this.process(a,b,'duration');
+        a = this.process(a,b,'length');
+        a = this.process(a,b,'volume');
+        a = this.process(a,b,'area');
+        a = this.process(a,b,'storage');
         a = a.reduce();
         //console.log("now a is",a);
         return a;
@@ -239,7 +245,7 @@ class LiteralNumber {
         //console.log('second = ', second);
         var conv = UNITS.findDimConversion(first.getBase(), second.getBase());
         //console.log("conv = ", conv);
-        let a = this;
+        let a = this.clone();
         //convert from u1 to the base
         a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
         a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
@@ -255,7 +261,7 @@ class LiteralNumber {
 
     reduce() {
         //console.log("a is",this.toString());
-        var u2 = this;//this.clone();
+        var u2 = this.clone();
         var v2 = this._value;
         //console.log('v2 is',v2);
         var n1 = u2._numers.slice();
@@ -325,6 +331,9 @@ class UnitPart {
         this._name = UNITS.getCanonicalName(name);
         this._dim = (dim ? dim : 1);
         this._factor = (factor ? factor : 1);
+    }
+    clone() {
+        return new UnitPart(this.getName(), this.getDimension(), this.getFactor());
     }
     getName() {
         return this._name;

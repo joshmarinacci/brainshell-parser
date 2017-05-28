@@ -115,15 +115,15 @@ unittests("simple units", [
     ['2 ft * 2 ft', new LiteralNumber(4).withUnits([['foot',2]])],
     //['2 sqft', new Literal(2).withUnit([['squarefoot'],[]])],
     //['2 cuft', new Literal(2, 'cubicfoot')],
-    //['2 TB as GB',new LiteralNumber(2*1000).withUnit('gigabyte')],
-    //['2 TiB as GiB',new LiteralNumber(2*1024).withUnit('gibibyte')],
-    //['2 MiB as KiB',new LiteralNumber(2*1024).withUnit('kibibyte')],
-    //['2 KiB as MiB',new LiteralNumber(2/1024).withUnit('mebibyte')],
-    //['2 KB as MB',new LiteralN(2/1000).withUnit('megabyte')],
-    //['1 GiB as Gibit', new Literal(8).withUnit('gibibit')],
-    //['1 GB as Gbit', new Literal(8).withUnit('gigabit')]
-    //['2 MB as byte',new Literal(2*1000*1000).withUnit('byte')],
-    //['1 kilobyte as byte', new LiteralNumber(1000).withUnit('byte')]
+    ['2 TB as GB',new LiteralNumber(2*1000).withUnit('gigabyte')],
+    ['2 TiB as GiB',new LiteralNumber(2*1024).withUnit('gibibyte')],
+    ['2 MiB as KiB',new LiteralNumber(2*1024).withUnit('kibibyte')],
+    ['2 KiB as MiB',new LiteralNumber(2/1024).withUnit('mebibyte')],
+    ['2 KB as MB',new LiteralNumber(2/1000).withUnit('megabyte')],
+    //['1 GiB as Gibit', new LiteralNumber(8).withUnit('gibibit')],
+    //['1 GB as Gbit', new LiteralNumber(8).withUnit('gigabit')]
+    ['2 MB as byte',new LiteralNumber(2*1000*1000).withUnit('byte')],
+    ['1 kilobyte as byte', new LiteralNumber(1000).withUnit('byte')]
 ]);
 
 
@@ -190,21 +190,21 @@ tests("lists", [
 
 const ER = 6371.008;
 unittests("master tests",[
-    //['200ft * 600ft as acres',new LiteralNumber(2.75482094).withUnit('acre',1)],
+    ['200ft * 600ft as acres',new LiteralNumber(2.75482094).withUnit('acre')],
     ['10ft * 15ft * 8ft as gallons',new LiteralNumber(8976.6).withUnit('gallon')],
     //['0xCAFEBABE as decimal',new Literal(0xCAFEBABE)],
 //4. pick a random winner from these four people: Random(List('Alice','Bob','Carl','Dan'))
 //'1_000_000 / 26',   // (shows in the canonical form (1 million divided by 26))
 //6. ex: how long will it take superman to go around the world?  earth.radius / (4000 feet / second) =
 
-    //['(4000 ft/s)',new LiteralNumber(4000).withUnits(['foot'],['second'])],
-    //['(4 ft/s) * 6',new LiteralNumber(24).withUnits(['foot'],['second'])],
-    //['6*(4 ft/s)',new LiteralNumber(24).withUnits(['foot'],['second'])],
-    //['earth.radius*5',new LiteralNumber(ER*5).withUnits('kilometer')],
+    ['(4000 ft/s)',new LiteralNumber(4000).withUnits(['foot'],['second'])],
+    ['(4 ft/s) * 6',new LiteralNumber(24).withUnits(['foot'],['second'])],
+    ['6*(4 ft/s)',new LiteralNumber(24).withUnits(['foot'],['second'])],
+    ['earth.radius*5',new LiteralNumber(ER*5).withUnits('kilometer')],
 
-    //['6371.008km / (4000 m/s)',new Literal(6371.008*1000/4000).withComplexUnitArray(['second',1],[])],
-    //['6371.008 km / (4000 m/s) as hours',new Literal(6371.008*1000/4000/(60*60)).withComplexUnit(['hour'],[])],
-    //['earth.radius / (4000 m/s) as hours',new Literal(6371.008*1000/4000/(60*60)).withComplexUnit(['hour'],[])],
+    ['6371.008km / (4000 m/s)',new LiteralNumber(6371.008*1000/4000).withUnit('second')],
+    ['6371.008 km / (4000 m/s) as hours',new LiteralNumber(6371.008*1000/4000/(60*60)).withUnit('hour')],
+    ['earth.radius / (4000 m/s) as hours',new LiteralNumber(6371.008*1000/4000/(60*60)).withUnit('hour')],
 
 //    7. how long does it take light to get from the sun to the earth?  92_000_000 miles / lightspeed = 8 minutes
 //8. how long does it take to drive around the world at 60 mph if there was a road that went all around the world? use pi * radius to find circumference in miles, divide by 60mph
