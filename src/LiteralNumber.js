@@ -213,7 +213,7 @@ class LiteralNumber {
                     //console.log("=========== do conversion");
                     var c = a.dimConvert(b,fromType, dim, toType);
                     //console.log("now it's",c);
-                    return c;
+                    return c.reduce();
                 }
             }
             return a;
@@ -230,10 +230,13 @@ class LiteralNumber {
     }
 
     dimConvert(to, fromType, dim, toType) {
+        //console.log('converting',this);
+        //console.log('to',to);
+        //console.log("from type",fromType,'dim',dim,'totype',toType);
         var first = this._numers.find((u) => u.getDimension() === dim && u.getType() === fromType);
-        //console.log("u1 = ", u1);
+        //console.log("first = ", first);
         var second = to._numers.find((u) => u.getType() === toType);
-        //console.log('u2 = ', u2);
+        //console.log('second = ', second);
         var conv = UNITS.findDimConversion(first.getBase(), second.getBase());
         //console.log("conv = ", conv);
         let a = this;
@@ -246,6 +249,7 @@ class LiteralNumber {
         //convert from the second base to u2
         a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
         a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
+        //console.log('now this is',this);
         return a;
     }
 
