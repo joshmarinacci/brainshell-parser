@@ -178,8 +178,8 @@ class LiteralNumber {
         if(first && second) {
             //console.log("looking for a conversion from",first.getName(),'to',second.getName());
             if(first.getBase() == second.getBase()) {
-                a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
-                a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
+                a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(), second.getDimension())));
+                a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(), first.getDimension())));
             } else {
                 //console.log("must convert between bases");
                 var cvv = UNITS.findConversion(first.getBase(), second.getBase());
