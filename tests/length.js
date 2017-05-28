@@ -43,13 +43,13 @@ test("length units", function(t) {
     compareUnit(t,'4ft as inch',4*12,'inch');
     compareUnit(t,'4ft', 4,'ft');
     compareUnit(t,'4ft/2ft',2,'none');
-    //compareUnit(t,'4ft/2m',0.6096,'none');
+    compareUnit(t,'4ft/2m',0.6096,'none');
     //compareUnit(t,'4ft/2gal',3,'none');//should error
     compareUnit(t,'(4+5)*6',(4+5)*6,'none');
     compareUnit(t,'4+5*6',4+(5*6),'none');
     compareUnit(t,'4+(5*6)',4+(5*6),'none');
     //compareUnit(t,'4ft - 2gal');//should error
-    //compareUnit(t,'4ft * 2sqft',8,'feet',3);
+    compareUnit(t,'4ft * 2sqft',8,'feet',3);
     compareUnit(t,'4m + 12ft as m',4 + 3.6576,'m');
     compareUnit(t,'4mm + 12ft as mm',4 + (3.6576/0.001),'mm');
     compareUnit(t,'40mm + 40cm + 4m',4.440,'m');
