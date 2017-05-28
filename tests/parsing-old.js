@@ -2,6 +2,7 @@ var test = require('tape');
 require('tape-approximately')(test);
 var Parser = require('../src/parser.js');
 var Literal = require('../src/Literal').Literal;
+var LiteralNumber = require('../src/LiteralNumber').LiteralNumber;
 var moment = require('moment');
 
 function compareFormat(t, str, num, format) {
@@ -18,21 +19,21 @@ function compareNumber(t, str, num) {
 function compareUnit(t, str, num, unit, dim) {
     let res = Parser.parseString(str);
     t.approximately(res.getValue(),num, 0.001);
-    let ans = new Literal(num).withUnit(unit);
+    let ans = new LiteralNumber(num).withUnit(unit);
     if(unit === 'none') {
 
     } else {
         if(dim && dim !== 1) {
-            //console.log("=========");
-            //console.log('res',res,'ans',ans);
-            ans = new Literal(num).withPowerUnit(unit,dim);
+            console.log("=========");
+            console.log('res',res,'ans',ans);
+            ans = new LiteralNumber(num).withUnits([[unit,dim]]);
         }
-        if(!res.sameUnits(ans)) {
+        if(!res.equalUnits(ans)) {
             console.log("units not equal: ", str, res.toString());
             console.log(res);
             console.log(ans);
         }
-        t.equal(res.sameUnits(ans), true);
+        t.equal(res.equalUnits(ans), true);
     }
 
 }
@@ -81,8 +82,8 @@ test("notation parsing", function(t) {
     //compareNumber(t, '2e-2', 0.02);
     compareNumber(t, '2*(10^2)', 200);
     compareNumber(t, '2_000_000', 2 * 1000 * 1000);
-    //compareNumber(t, '50%', 0.5);
-    //compareNumber(t, '36 * 45%', 36 * 0.45);
+    compareNumber(t, '50%', 0.5);
+    compareNumber(t, '36 * 45%', 36 * 0.45);
     compareNumber(t,'1+2',3);
     compareNumber(t,'1.2+3.4',1.2+3.4);
     compareNumber(t,'1.2-3.4',1.2-3.4);
@@ -94,23 +95,21 @@ test("notation parsing", function(t) {
     compareNumber(t,'4 + 5',9);
     compareNumber(t,'4+5',9);
     compareNumber(t,'4.8 + 5',9.8);
-    //compareUnit(t,'4ft+5ft',9,'ft');
-    //compareUnit(t,'4ft*5ft',20,'ft',2);
+    compareUnit(t,'4ft+5ft',9,'ft');
+    compareUnit(t,'4ft*5ft',20,'ft',2);
     compareUnit(t,'4ft * 5',20,'ft',1);
     //compareUnit(t,'4ft * 5ft as square meters', 1.85806,'meter',2);
-    //compareUnit(t,'4ft * 5ft * 6ft', 4*5*6,'foot',3);
+    compareUnit(t,'4ft * 5ft * 6ft', 4*5*6,'foot',3);
     compareUnit(t,'4ft - 5ft',4-5,'ft');
     //compareUnit(t,'4ft * 5ft * 6ft as gal',897.662,'gallon',1);
-    //compareUnit(t,'4ft as in',4*12,'inch');
-    //compareUnit(t,'4.5 ft as in',4.5*12,'inch');
+    compareUnit(t,'4ft as in',4*12,'inch');
+    compareUnit(t,'4.5 ft as in',4.5*12,'inch');
     compareUnit(t,'4ft',4,'ft',1);
     compareUnit(t,'(4ft)',4,'ft',1);
-    //compareUnit(t,'4ft^2',4,'ft',2);
+    compareUnit(t,'4ft^2',4,'ft',2);
     //compareUnit(t,'(4ft)^2',16,'ft',1);
-
     t.end();
 });
-
 
 
 test("negative numbers",function(t) {
@@ -145,7 +144,6 @@ test("precedence",function(t) {
     compareNumber(t,"((1+5)*((6*8)+(7+6)))",(1+5)*((6*8)+(7+6)));
     t.end();
 });
-
 
 
 

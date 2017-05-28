@@ -29,12 +29,12 @@ function compareUnit(t, str, num, unit, dim) {
 function compareComplexUnit(t,str,ans) {
     let res = Parser.parseString(str);
     t.approximately(res.getValue(),ans.getValue(), 0.5);
-    if(!res.sameUnits(ans)) {
+    if(!res.equalUnits(ans)) {
         console.log("units not equal: ", str, res.toString());
-        console.log(res.toString(),res.getUnit());
-        console.log(ans.toString(),ans.getUnit());
+        console.log(res.toString(),res);
+        console.log(ans.toString(),ans);
     }
-    t.equal(res.sameUnits(ans), true);
+    t.equal(res.equalUnits(ans), true);
 }
 
 module.exports = {

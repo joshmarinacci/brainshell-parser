@@ -14,7 +14,10 @@ class LiteralNumber {
     }
     withUnits(numers, denoms) {
         if(typeof numers === 'string') {
-            return new LiteralNumber(this._value, [new UnitPart(numers,1,1)],[]);
+            numers = [[numers,1]];
+        }
+        if(typeof denoms === 'string') {
+            denoms = [[denoms,1]];
         }
         function toUnitPart(f) {
             if(typeof f[1] === 'number') return new UnitPart(f[0],f[1]);
@@ -22,7 +25,9 @@ class LiteralNumber {
             return new UnitPart(f,1)
         }
         if(!denoms) denoms = [];
-        return new LiteralNumber(this._value, numers.map(toUnitPart),denoms.map(toUnitPart));
+        return new LiteralNumber(this._value,
+            numers.map(toUnitPart),
+            denoms.map(toUnitPart));
     }
 
     add(to) {

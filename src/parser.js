@@ -69,8 +69,8 @@ function generateSemantics(grammar) {
             var num_t = num.calc();
             var unit_t = unit.calc()[0];
             if(!unit_t) return num_t;
-            console.log("doing final literal",num_t, unit_t);
-            return num_t.withUnits(unit_t);
+            //console.log("doing final literal",num_t, unit_t);
+            return num_t.withUnits(unit_t[0],unit_t[1]);
         },
         unitchunk : function(a,b,c) {
             var name = a.calc().join("");
@@ -84,12 +84,6 @@ function generateSemantics(grammar) {
             var denoms = denom.calc();
             if(denoms.length > 0) {
                 numers = [numers];
-                //console.log("doing a complex unit",numers,denoms);
-                //numers = numers.map((ar)=>UNIT.lookupUnit(ar[0]));
-                //denoms = denoms.map((ar)=>{
-                //    return UNIT.withDimension(UNIT.lookupUnit(ar[0]),ar[1])
-                //});
-                console.log("now = ",numers,denoms);
                 return [numers,denoms];
             }
             var n  = numer.calc()[0];
@@ -98,7 +92,7 @@ function generateSemantics(grammar) {
             if(md.length == 1 && md[0] === 'square') p = 2;
             if(md.length == 1 && md[0] === 'cubic') p = 3;
             //console.log("Making unit with",n,p);
-            return [[n,p]];
+            return [[[n,p]],[]];
         },
         Number: (a) => a.calc(),
         integer: function(a,b) {
@@ -117,7 +111,7 @@ function generateSemantics(grammar) {
         MulExpr_divide: ((a,_,b) => a.calc().divide(b.calc())),
         ExpExpr_power: ((a,_,b) => a.calc().exponent(b.calc())),
         PriExpr_paren: ((p1,a,p2) => a.calc()),
-        AsExpr: (a,_,u) => a.calc().as(new LiteralNumber(1).withUnits(u.calc())),
+        AsExpr: (a,_,u) => a.calc().as(new LiteralNumber(1).withUnits(u.calc()[0])),
         identifier:function(_a,_b) { return resolveSymbol(this.sourceString)},
         String_single:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
         String_double:function(_a,str,_b) { return new LiteralString(str.calc().join(""))},
