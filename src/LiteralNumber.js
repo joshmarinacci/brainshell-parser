@@ -139,6 +139,7 @@ class LiteralNumber {
         this.check2(this,'length');
         this.check2(this,'volume');
         this.check2(this,'area');
+        this.check2(this,'mass');
         return this;
     }
     check2(a,type) {
@@ -230,6 +231,7 @@ class LiteralNumber {
         a = this.process(a,b,'length');
         a = this.process(a,b,'volume');
         a = this.process(a,b,'area');
+        a = this.process(a,b,'mass');
         a = this.process(a,b,'storage');
         a = a.reduce();
         //console.log("now a is",a);
