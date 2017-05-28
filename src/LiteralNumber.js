@@ -50,18 +50,18 @@ class LiteralNumber {
             this._denoms.concat(b._denoms)
         );
         nu = nu.expand();
-        console.log('after expanding',nu);
+        //console.log('after expanding',nu);
         nu = nu.reduce();
-        console.log('after reducing',nu);
+        //console.log('after reducing',nu);
         if(nu.isReduceable()) {
-            console.log("we can reduce again");
+            //console.log("we can reduce again");
             nu = nu.expand();
-            console.log('after expanding',nu);
+            //console.log('after expanding',nu);
             nu = nu.reduce();
-            console.log('after reducing',nu);
+            //console.log('after reducing',nu);
         }
         nu = nu.collapse();
-        console.log('after collapsing',nu);
+        //console.log('after collapsing',nu);
         return nu;
     }
 
@@ -124,7 +124,7 @@ class LiteralNumber {
         return false;
     }
     expand() {
-        console.log('expanding');
+        //console.log('expanding');
         //if top and bottom have a time or length then expand it
         this.check2(this,'duration');
         this.check2(this,'length');
@@ -198,11 +198,41 @@ class LiteralNumber {
         var a = this;
         console.log("converting", a.toString());
         console.log('to', b.toString());
+        function ck(a,b) {
+            //if contains length ^3 and 'to' contains volume, then convert
+            if(a._numers.find((u)=>u.getDimension() === 3 && u.getType() === 'length')) {
+                //console.log("found a length ^3");
+                if(b._numers.find((u)=>u.getType() === 'volume')) {
+                    //console.log("found a volume");
+                    //console.log("=========== do conversion");
+                    var c = a.dimConvert(b,'length','volume');
+                    //console.log("now it's",c);
+                    return c;
+                }
+            }
+            return a;
+        }
+        a = ck(a,b);
         this.process(a,b,'duration');
         this.process(a,b,'length');
         this.process(a,b,'volume');
         a = a.reduce();
         //console.log("now a is",a);
+        return a;
+    }
+
+    dimConvert(to,fromType, toType) {
+        var u1 = this._numers.find((u) => u.getDimension() === 3 && u.getType() === fromType);
+        //console.log("u1 = ", u1);
+        var u2 = to._numers.find((u) => u.getType() === toType);
+        //console.log('u2 = ', u2);
+        var conv = UNITS.findDimConversion(u1.getBase(), u2.getBase());
+        //console.log("conv = ", conv);
+        let a = this;
+        //a._numers.push(new UnitPart(u1.getBase(),u2.getDimension(),1));
+        //a._denoms.push(new UnitPart(u1.getName(),1,first.getRatio())l);
+        a._numers.push(new UnitPart(conv.to.name, conv.to.dim,1));
+        a._denoms.push(new UnitPart(conv.from.name, conv.from.dim,conv.ratio));
         return a;
     }
 
@@ -243,7 +273,7 @@ class LiteralNumber {
         //remove any units that were reduced to zero
         n1 = n1.filter((u)=>u._dim>0);
         d1 = d1.filter((u)=>u._dim>0);
-        console.log("after we have",n1,d1,v2);
+        //console.log("after we have",n1,d1,v2);
         return new LiteralNumber(v2,n1,d1);//ComplexUnit(n1,d1);
     }
 

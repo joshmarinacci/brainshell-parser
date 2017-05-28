@@ -298,6 +298,9 @@ const UNIT = {
     findConversion(from,to) {
         return cvs.bases.find((cv) => cv.from == from && cv.to == to);
     },
+    findDimConversion(from,to) {
+        return cvs.dims.find((cv) => cv.from.name == from && cv.to.name == to);
+    },
     getCanonicalName(name) {
         if(cvs.units[name]) return cvs.units[name].name;
         if(abbrevations[name]) return abbrevations[name];

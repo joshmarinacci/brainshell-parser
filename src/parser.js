@@ -97,7 +97,7 @@ function generateSemantics(grammar) {
             var md = mod.calc();
             if(md.length == 1 && md[0] === 'square') p = 2;
             if(md.length == 1 && md[0] === 'cubic') p = 3;
-            console.log("Making unit with",n,p);
+            //console.log("Making unit with",n,p);
             return [[n,p]];
         },
         Number: (a) => a.calc(),
