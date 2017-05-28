@@ -9,7 +9,7 @@ var LiteralNumber = require('../src/LiteralNumber').LiteralNumber;
 function compareUnit(t, str, num, unit, dim) {
     let res = Parser.parseString(str);
     t.approximately(res.getValue(),num, 0.01);
-    let ans = new LiteralNumber(num).withUnit([unit]);
+    let ans = new LiteralNumber(num).withUnit(unit);
     if(unit === 'none') {
 
     } else {
