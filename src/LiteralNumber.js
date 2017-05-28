@@ -237,10 +237,15 @@ class LiteralNumber {
         var conv = UNITS.findDimConversion(u1.getBase(), u2.getBase());
         //console.log("conv = ", conv);
         let a = this;
-        //a._numers.push(new UnitPart(u1.getBase(),u2.getDimension(),1));
-        //a._denoms.push(new UnitPart(u1.getName(),1,first.getRatio())l);
-        a._numers.push(new UnitPart(conv.to.name, conv.to.dim,1));
+        //convert from u1 to the base
+        a._numers.push(new UnitPart(u1.getBase(),u1.getDimension(),1));
+        a._denoms.push(new UnitPart(u1.getName(),u1.getDimension(),Math.pow(u1.getRatio(),u1.getDimension())));
+        //convert between bases
+        a._numers.push(new UnitPart(conv.to.name, conv.to.dim, Math.pow(1,conv.to.dim)));
         a._denoms.push(new UnitPart(conv.from.name, conv.from.dim,conv.ratio));
+        //convert from the second base to u2
+        a._numers.push(new UnitPart(u2.getName(),u2.getDimension(),Math.pow(u2.getRatio(),u2.getDimension())));
+        a._denoms.push(new UnitPart(u2.getBase(),u2.getDimension(),1));
         return a;
     }
 
