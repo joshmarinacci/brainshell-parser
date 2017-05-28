@@ -29,6 +29,11 @@ class LiteralNumber {
         if (this.equalUnits(to)) {
             return new LiteralNumber(this.getValue() + to.getValue()).withUnits(this._numers,this._denoms);
         }
+        var u2 = this.as(to);
+        if(u2.equalUnits(this)) {
+            throw new Error("bad add");
+        }
+        return u2.add(to);
         throw new Error("bad add");
     }
     subtract(to) {
