@@ -188,12 +188,12 @@ class LiteralNumber {
                     //convert first to it's base
                     //convert base to other base
                     //convert other base to second
-                    a._numers.push(new UnitPart(first.getBase(),1,1));
-                    a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
-                    a._numers.push(new UnitPart(cvv.to,1,1));
-                    a._denoms.push(new UnitPart(cvv.from,1,cvv.ratio));
-                    a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
-                    a._denoms.push(new UnitPart(second.getBase(),1,1));
+                    a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
+                    a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
+                    a._numers.push(new UnitPart(cvv.to,second.getDimension(),Math.pow(1,second.getDimension())));
+                    a._denoms.push(new UnitPart(cvv.from,first.getDimension(),Math.pow(cvv.ratio,first.getDimension())));
+                    a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
+                    a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
                     //console.log("now a is",a);
                 }
             }
@@ -230,22 +230,22 @@ class LiteralNumber {
     }
 
     dimConvert(to, fromType, dim, toType) {
-        var u1 = this._numers.find((u) => u.getDimension() === dim && u.getType() === fromType);
+        var first = this._numers.find((u) => u.getDimension() === dim && u.getType() === fromType);
         //console.log("u1 = ", u1);
-        var u2 = to._numers.find((u) => u.getType() === toType);
+        var second = to._numers.find((u) => u.getType() === toType);
         //console.log('u2 = ', u2);
-        var conv = UNITS.findDimConversion(u1.getBase(), u2.getBase());
+        var conv = UNITS.findDimConversion(first.getBase(), second.getBase());
         //console.log("conv = ", conv);
         let a = this;
         //convert from u1 to the base
-        a._numers.push(new UnitPart(u1.getBase(),u1.getDimension(),1));
-        a._denoms.push(new UnitPart(u1.getName(),u1.getDimension(),Math.pow(u1.getRatio(),u1.getDimension())));
+        a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
+        a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
         //convert between bases
         a._numers.push(new UnitPart(conv.to.name, conv.to.dim, Math.pow(1,conv.to.dim)));
         a._denoms.push(new UnitPart(conv.from.name, conv.from.dim,conv.ratio));
         //convert from the second base to u2
-        a._numers.push(new UnitPart(u2.getName(),u2.getDimension(),Math.pow(u2.getRatio(),u2.getDimension())));
-        a._denoms.push(new UnitPart(u2.getBase(),u2.getDimension(),1));
+        a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
+        a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
         return a;
     }
 

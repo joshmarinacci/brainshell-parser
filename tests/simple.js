@@ -128,15 +128,15 @@ unittests("simple units", [
 
 
 unittests('complex units', [
-    ['2ft * 2ft', new LiteralNumber(4).withUnit('foot',2)],
+    ['2ft * 2ft', new LiteralNumber(4).withUnit([['foot',2]])],
     //['2ft * 2ft as sqft', new Literal(4).withUnit('foot',2)],
-    ['2 ft^2', new LiteralNumber(2).withUnits('foot',2)],
+    ['2 ft^2', new LiteralNumber(2).withUnits([['foot',2]])],
     //['2 ft^2 as sqft', new Literal(2).withUnit('foot',2)],
 
     ['2ft * 2ft * 2 feet', new LiteralNumber(8).withUnits([['foot',3]])],
-    ['2 ft^3', new LiteralNumber(2).withUnit('foot',3)],
+    ['2 ft^3', new LiteralNumber(2).withUnit([['foot',3]])],
     //['2 ft^3 as cuft', new Literal(2).withUnit('foot',3)],
-    ['2ft * 2ft * 2 feet', new LiteralNumber(8).withUnit('foot',3)],
+    ['2ft * 2ft * 2 feet', new LiteralNumber(8).withUnit([['foot',3]])],
     ['2ft * 2ft * 2ft as gallons', new LiteralNumber(59.8442).withUnit('gallon')],
 
 
@@ -191,7 +191,7 @@ tests("lists", [
 const ER = 6371.008;
 unittests("master tests",[
     //['200ft * 600ft as acres',new LiteralNumber(2.75482094).withUnit('acre',1)],
-    ['10ft * 15ft * 8ft as gallons',new LiteralNumber(8976.6).withUnit('gallon',1)],
+    ['10ft * 15ft * 8ft as gallons',new LiteralNumber(8976.6).withUnit('gallon')],
     //['0xCAFEBABE as decimal',new Literal(0xCAFEBABE)],
 //4. pick a random winner from these four people: Random(List('Alice','Bob','Carl','Dan'))
 //'1_000_000 / 26',   // (shows in the canonical form (1 million divided by 26))

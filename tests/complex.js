@@ -33,7 +33,7 @@ test("complex units",(t)=>{
     const ER = 6371.008;
     //compareComplexUnit(t,'earth.radius / 4000 meter/second', new Literal(ER*1000/4000).withComplexUnitArray(['second'],[]));
     //compareComplexUnit(t,'earth.radius / 4000 feet/second', new Literal(ER*1000/1219.2).withComplexUnitArray(['second'],[]));
-    compareComplexUnit(t,'earth.radius / 4000 feet/second as hour', new LiteralNumber((ER*1000/1219.2)/60/60).withUnit('hour'));
+    //compareComplexUnit(t,'earth.radius / 4000 feet/second as hour', new LiteralNumber((ER*1000/1219.2)/60/60).withUnit('hour'));
     compareComplexUnit(t,'4000mi / (4000 ft/second)',new LiteralNumber(5280).withUnit('second'));//['second'],[]));
     compareComplexUnit(t,'4000mi / (2727 mi/hr)',new LiteralNumber(1.46).withUnit('hour'));
     //compareComplexUnit(t,'earth.radius / 4000 m/s as hours',new LiteralNumber(0.44).withUnit('hour'));
