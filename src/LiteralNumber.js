@@ -3,6 +3,19 @@
  */
 var UNITS = require('./units2');
 
+function crossFind(ar1, ar2, cb) {
+    for(let i=0; i<ar1.length; i++) {
+        var e1 = ar1[i];
+        for(let j=0; j<ar2.length; j++) {
+            var e2 = ar2[j];
+            if(cb(e1,e2)) {
+                return [e1,e2];
+            }
+        }
+    }
+}
+
+
 class LiteralNumber {
     constructor(value, numers, denoms) {
         this._value = value;
@@ -43,12 +56,9 @@ class LiteralNumber {
     }
 
     multiply(b) {
-        function sameType(a,b,type) {
-            var first  = a._numers.find((u)=>u.getType() == type);
-            var second = b._numers.find((u)=>u.getType() == type);
-            return a.convertType(a,first,second);
-        }
-        var a = sameType(this,b,'length');
+        var a = this;
+        var found = crossFind(a._numers, b._numers, (x,y)=>x.getType() == 'length' && y.getType() == 'length');
+        if(found) a = this.convertType(a,found[0],found[1]);
         var nu = new LiteralNumber(a.getValue() * b.getValue(),
             a._numers.concat(b._numers),
             a._denoms.concat(b._denoms)
@@ -152,19 +162,9 @@ class LiteralNumber {
         a = findTypeConversion(a, b, 'length', 3, 'volume');
         a = findTypeConversion(a, b, 'length', 2, 'area');
 
-        //find part in top of each that has the same type
-        function process2(a,b) {
-            for(let i=0; i<a._numers.length; i++) {
-                for(let j=0; j<b._numers.length; j++) {
-                    let first = a._numers[i];
-                    let second = b._numers[i];
-                    if(first.getType() === second.getType()) {
-                        return a.convertType(a,first,second).reduce();
-                    }
-                }
-            }
-        }
-        return process2(a,b);
+
+        var found = crossFind(a._numers, b._numers,(a,b)=> a.getType() === b.getType());
+        if(found) return a.convertType(a,found[0],found[1]).reduce();
     }
 
     dimConvert(to, fromType, dim, toType) {
