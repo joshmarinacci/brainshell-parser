@@ -69,8 +69,8 @@ class LiteralNumber {
     exponent(b) {
         var exp = b.getValue();
         return new LiteralNumber(Math.pow(this.getValue(), exp),
-            this._numers.map(u=>u.multiplyDimension(exp)),
-            this._denoms.map(u=>u.multiplyDimension(exp)));
+            this._numers.map(u=>u.withDimension(u.getDimension()*exp)),
+            this._denoms.map(u=>u.withDimension(u.getDimension()*exp)));
     }
 
     toString() {
@@ -112,39 +112,31 @@ class LiteralNumber {
     }
 
     expand() {
-        var a = this;
-        function sameType(a,type) {
-            var first  = a._numers.find((u)=>u.getType()==type);
-            var second = a._denoms.find((u)=>u.getType()==type);
-            return a.convertType(a,first,second);
-        }
-        a = sameType(a,'duration');
-        a = sameType(a,'length');
-        a = sameType(a,'volume');
-        a = sameType(a,'area');
-        a = sameType(a,'mass');
-        return a;
+        var found = crossFind(this._numers, this._denoms, (x,y)=>x.getType() === y.getType());
+        if(found) return this.convertType(this,found[0],found[1]);
+        return this;
     }
 
     convertType(a, first, second) {
-        a = a.clone();
-        if(first && second && first.getName() !== second.getName()) {
-            if(first.getBase() === second.getBase()) {
-                a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(), second.getDimension())));
-                a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(), first.getDimension())));
-            } else {
-                var cvv = UNITS.findConversion(first.getBase(), second.getBase());
-                //convert first to it's base
-                a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
-                a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
-                //convert base to other base
-                a._numers.push(new UnitPart(cvv.to,second.getDimension(),Math.pow(1,second.getDimension())));
-                a._denoms.push(new UnitPart(cvv.from,first.getDimension(),Math.pow(cvv.ratio,first.getDimension())));
-                //convert other base to second
-                a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
-                a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
-            }
+        if(first.getName() === second.getName()) return a;
+        if(first.getBase() === second.getBase()) {
+            a = a.clone();
+            a._numers.push(new UnitPart(second.getName(), second.getDimension(), Math.pow(second.getRatio(), second.getDimension())));
+            a._denoms.push(new UnitPart(first.getName(), first.getDimension(), Math.pow(first.getRatio(), first.getDimension())));
+            return a;
         }
+
+        var cvv = UNITS.findConversion(first.getBase(), second.getBase());
+        a = a.clone();
+        //convert first to it's base
+        a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
+        a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
+        //convert base to other base
+        a._numers.push(new UnitPart(cvv.to,second.getDimension(),Math.pow(1,second.getDimension())));
+        a._denoms.push(new UnitPart(cvv.from,first.getDimension(),Math.pow(cvv.ratio,first.getDimension())));
+        //convert other base to second
+        a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
+        a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
         return a;
     }
 
@@ -162,9 +154,8 @@ class LiteralNumber {
         a = findTypeConversion(a, b, 'length', 3, 'volume');
         a = findTypeConversion(a, b, 'length', 2, 'area');
 
-
-        var found = crossFind(a._numers, b._numers,(a,b)=> a.getType() === b.getType());
-        if(found) return a.convertType(a,found[0],found[1]).reduce();
+        var match = crossFind(a._numers, b._numers,(a,b)=> a.getType() === b.getType());
+        if(match) return a.convertType(a,match[0],match[1]).reduce();
     }
 
     dimConvert(to, fromType, dim, toType) {
@@ -221,7 +212,7 @@ class LiteralNumber {
             if(a.length == 0) return a.concat([b]);
             var last = a.pop();
             if(last.getName() == b.getName()) {
-                a.push(new UnitPart(last.getName(),last.getDimension() + b.getDimension()));
+                a.push(last.withDimension(last.getDimension()+ b.getDimension()));
                 return a;
             } else {
                 a.push(last);
@@ -229,9 +220,9 @@ class LiteralNumber {
                 return a;
             }
         }
-        var ns = this._numers.filter(notNoneType).reduce(groupSameName,[]);
-        var ds = this._denoms.filter(notNoneType).reduce(groupSameName,[]);
-        return new LiteralNumber(this._value, ns, ds);
+        return new LiteralNumber(this._value,
+            this._numers.filter(notNoneType).reduce(groupSameName,[]),
+            this._denoms.filter(notNoneType).reduce(groupSameName,[]));
     }
 
 }
@@ -263,8 +254,8 @@ class UnitPart {
     getFactor() {
         return this._factor;
     }
-    multiplyDimension(exp) {
-        return new UnitPart(this.getName(), this.getDimension()*exp, this.getFactor())
+    withDimension(dim) {
+        return new UnitPart(this.getName(), dim, this.getFactor())
     }
 }
 
