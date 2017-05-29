@@ -31,28 +31,20 @@ class LiteralNumber {
     }
 
     add(to) {
-        if (this.equalUnits(to)) {
-            return new LiteralNumber(this.getValue() + to.getValue()).withUnits(this._numers,this._denoms);
-        }
+        if (this.equalUnits(to)) return new LiteralNumber(this.getValue() + to.getValue()).withUnits(this._numers,this._denoms);
         var u2 = this.as(to);
-        if(u2.equalUnits(this)) {
-            throw new Error("bad add");
-        }
+        if(u2.equalUnits(this)) throw new Error("bad add");
         return u2.add(to);
-        throw new Error("bad add");
     }
     subtract(to) {
-        if (this.equalUnits(to)) {
-            return new LiteralNumber(this.getValue() - to.getValue()).withUnits(this._numers,this._denoms);
-        }
-        throw new Error("bad sub");
+        return this.add(to.negate());
     }
 
     multiply(b) {
         function sameType(a,b,type) {
             var first = a._numers.find((u)=>u.getType() == type);
             var second = b._numers.find((u)=>u.getType() == type);
-            return a.doit(a,first,second);
+            return a.convertType(a,first,second);
         }
         var a = sameType(this,b,'length');
         var nu = new LiteralNumber(a.getValue() * b.getValue(),
@@ -90,8 +82,12 @@ class LiteralNumber {
         return this.multiply(b.invert())
     }
 
+    negate() {
+        return new LiteralNumber(-this.getValue(), this._numers.map(u=>u.clone()), this._denoms.map(u=>u.clone()));
+    }
+
     invert() {
-        return new LiteralNumber(1/this.getValue(), this._denoms.slice(), this._numers.slice())
+        return new LiteralNumber(1/this.getValue(), this._denoms.map(u=>u.clone()), this._numers.map(u=>u.clone()));
     }
 
     as(to) {
@@ -110,10 +106,6 @@ class LiteralNumber {
         return true;
     }
 
-    isNone() {
-
-    }
-
     isReduceable() {
         function check(a,type) {
             var top = a._numers.find((u)=>u.getType() == type);
@@ -125,12 +117,13 @@ class LiteralNumber {
         if(check(this,'duration')) return true;
         return false;
     }
+
     expand() {
         var a = this;
         function sameType(a,type) {
             var first = a._numers.find((u)=>u.getType()==type);
             var second = a._denoms.find((u)=>u.getType()==type);
-            return a.doit(a,first,second);
+            return a.convertType(a,first,second);
         }
         a = sameType(a,'duration');
         a = sameType(a,'length');
@@ -139,7 +132,8 @@ class LiteralNumber {
         a = sameType(a,'mass');
         return a;
     }
-    doit(a,first,second) {
+
+    convertType(a, first, second) {
         a = a.clone();
         if(first && second && first.getName() !== second.getName()) {
             if(first.getBase() === second.getBase()) {
@@ -176,10 +170,11 @@ class LiteralNumber {
         }
         a = findTypeConversion(a, b, 'length', 3, 'volume');
         a = findTypeConversion(a, b, 'length', 2, 'area');
+
         function process(a,b,type) {
             var first = a._numers.find((u)=>u.getType() == type);
             var second = b._numers.find((u)=>u.getType() == type);
-            return a.doit(a,first,second);
+            return a.convertType(a,first,second);
         }
 
         a = process(a,b,'duration');
@@ -218,11 +213,9 @@ class LiteralNumber {
         n1.forEach((n) => {
             d1.forEach((d) => {
                 if(n.getName() == d.getName()) {
-                    if(n._dim > 0 && d._dim > 0) {
-                        var sum = Math.min(n._dim, d._dim);
-                        n._dim-= sum;
-                        d._dim-= sum;
-                    }
+                    var sum = Math.min(n._dim, d._dim);
+                    n._dim-= sum;
+                    d._dim-= sum;
                 }
             });
         });
