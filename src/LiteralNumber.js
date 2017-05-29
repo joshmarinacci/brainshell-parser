@@ -49,7 +49,12 @@ class LiteralNumber {
     }
 
     multiply(b) {
-        var a = this.process(this,b,'length');
+        function sameType(a,b,type) {
+            var first = a._numers.find((u)=>u.getType() == type);
+            var second = b._numers.find((u)=>u.getType() == type);
+            return a.doit(a,first,second);
+        }
+        var a = sameType(this,b,'length');
         var nu = new LiteralNumber(a.getValue() * b.getValue(),
             a._numers.concat(b._numers),
             a._denoms.concat(b._denoms)
@@ -121,46 +126,23 @@ class LiteralNumber {
         return false;
     }
     expand() {
-        this.check2(this,'duration');
-        this.check2(this,'length');
-        this.check2(this,'volume');
-        this.check2(this,'area');
-        this.check2(this,'mass');
-        return this;
-    }
-    check2(a,type) {
-        //find something in the top and bottom of the same number
-        var first = a._numers.find((u)=>u.getType()==type);
-        var second = a._denoms.find((u)=>u.getType()==type);
-        if(first && second) {
-            if(first.getName() == second.getName()) return a;
-            //TODO: this conversion code is almost identical to what is below
-            if(first.getBase() === second.getBase()) {
-                a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
-                a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
-            } else {
-                var cvv = UNITS.findConversion(first.getBase(), second.getBase());
-                if(cvv) {
-                    a._numers.push(new UnitPart(first.getBase(),1,1));
-                    a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
-                    a._numers.push(new UnitPart(cvv.to,1,1));
-                    a._denoms.push(new UnitPart(cvv.from,1,cvv.ratio));
-                    a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
-                    a._denoms.push(new UnitPart(second.getBase(),1,1));
-                }
-            }
+        var a = this;
+        function sameType(a,type) {
+            var first = a._numers.find((u)=>u.getType()==type);
+            var second = a._denoms.find((u)=>u.getType()==type);
+            return a.doit(a,first,second);
         }
+        a = sameType(a,'duration');
+        a = sameType(a,'length');
+        a = sameType(a,'volume');
+        a = sameType(a,'area');
+        a = sameType(a,'mass');
         return a;
     }
-
-    // TODO: this conversion code is almost identical to what is above
-    process(a,b,type) {
+    doit(a,first,second) {
         a = a.clone();
-        //find something in the top of two different numbers
-        var first = a._numers.find((u)=>u.getType() == type);
-        var second = b._numers.find((u)=>u.getType() == type);
         if(first && second && first.getName() !== second.getName()) {
-            if(first.getBase() == second.getBase()) {
+            if(first.getBase() === second.getBase()) {
                 a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(), second.getDimension())));
                 a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(), first.getDimension())));
             } else {
@@ -181,6 +163,7 @@ class LiteralNumber {
         return a;
     }
 
+
     convert(b) {
         var a = this;
         function findTypeConversion(a, b, fromType, dim, toType) {
@@ -193,12 +176,18 @@ class LiteralNumber {
         }
         a = findTypeConversion(a, b, 'length', 3, 'volume');
         a = findTypeConversion(a, b, 'length', 2, 'area');
-        a = this.process(a,b,'duration');
-        a = this.process(a,b,'length');
-        a = this.process(a,b,'volume');
-        a = this.process(a,b,'area');
-        a = this.process(a,b,'mass');
-        a = this.process(a,b,'storage');
+        function process(a,b,type) {
+            var first = a._numers.find((u)=>u.getType() == type);
+            var second = b._numers.find((u)=>u.getType() == type);
+            return a.doit(a,first,second);
+        }
+
+        a = process(a,b,'duration');
+        a = process(a,b,'length');
+        a = process(a,b,'volume');
+        a = process(a,b,'area');
+        a = process(a,b,'mass');
+        a = process(a,b,'storage');
         a = a.reduce();
         return a;
     }
