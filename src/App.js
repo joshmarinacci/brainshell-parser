@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Parser from "./parser";
-var Literal = require('../src/Literal').Literal;
+var LiteralNumber = require('../src/LiteralNumber').LiteralNumber;
+var LiteralString = require('../src/LiteralString').LiteralString;
 var style = require('../src/styler').style;
 
 class App extends Component {
@@ -10,7 +11,7 @@ class App extends Component {
         super(props);
         Parser.init();
         this.state = {
-            result:new Literal(0),
+            result:new LiteralNumber(0),
             text:"4 + 6",
             crashed:false,
             error:null

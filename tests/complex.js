@@ -3,7 +3,6 @@
  */
 var test = require('tape');
 var compareComplexUnit = require('./common').compareComplexUnit;
-var Literal = require('../src/Literal').Literal;
 var LiteralNumber = require('../src/LiteralNumber').LiteralNumber;
 
 

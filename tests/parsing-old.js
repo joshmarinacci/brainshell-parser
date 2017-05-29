@@ -1,7 +1,6 @@
 var test = require('tape');
 require('tape-approximately')(test);
 var Parser = require('../src/parser.js');
-var Literal = require('../src/Literal').Literal;
 var LiteralNumber = require('../src/LiteralNumber').LiteralNumber;
 var moment = require('moment');
 

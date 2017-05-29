@@ -191,9 +191,6 @@ function addUnit(name,base,ratio,type) {
         getUnit: function() {
             return this;
         },
-        clone: function() {
-            return new SimpleUnit(this.name, this.dimension);
-        },
         toString: function() {
             return this.name + "^"+this.dimension;
         }

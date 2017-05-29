@@ -1,9 +1,6 @@
 var ohm = require('ohm-js');
-var Literal = require('./Literal').Literal;
-var LiteralString = require('./Literal').LiteralString;
-var UNIT = require('./Literal').UNIT;
+var LiteralString = require('./LiteralString').LiteralString;
 var UNITS = require('./units2');
-var ComplexUnit = require('./Literal').ComplexUnit;
 var moment = require('moment');
 var LiteralNumber = require('./LiteralNumber').LiteralNumber;
 
@@ -47,13 +44,13 @@ const SYMBOLS = {
     'year': function(arg) {
         if(arg.type === 'funcall') arg = arg.invoke();
         if(!moment.isMoment(arg)) throw new Error("not a valid date object");
-        return new Literal(arg.year());
+        return new LiteralNumber(arg.year());
     },
     'weekday': function(arg) {
         if(arg.type === 'funcall') arg = arg.invoke();
         if(!moment.isMoment(arg)) throw new Error("not a valid date object");
         console.log('real weekday is', arg.day());
-        return new Literal(arg.day());
+        return new LiteralNumber(arg.day());
     }
 };
 function resolveSymbol(name) {
