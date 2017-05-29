@@ -27,7 +27,9 @@ class LiteralNumber {
             denoms.map(toUnitPart));
     }
     clone() {
-        return new LiteralNumber(this.getValue(), this._numers.map(u=>u.clone()), this._denoms.map(u=>u.clone()));
+        return new LiteralNumber(this.getValue(),
+            this._numers.map(u=>u.clone()),
+            this._denoms.map(u=>u.clone()));
     }
 
     add(to) {
@@ -42,7 +44,7 @@ class LiteralNumber {
 
     multiply(b) {
         function sameType(a,b,type) {
-            var first = a._numers.find((u)=>u.getType() == type);
+            var first  = a._numers.find((u)=>u.getType() == type);
             var second = b._numers.find((u)=>u.getType() == type);
             return a.convertType(a,first,second);
         }
@@ -51,21 +53,14 @@ class LiteralNumber {
             a._numers.concat(b._numers),
             a._denoms.concat(b._denoms)
         );
-        nu = nu.expand();
-        nu = nu.reduce();
-        if(nu.isReduceable()) {
-            nu = nu.expand();
-            nu = nu.reduce();
-        }
-        nu = nu.collapse();
-        return nu;
+        return nu.expand().reduce().collapse();
     }
 
     exponent(b) {
         var exp = b.getValue();
-        var n2 = this._numers.map((u)=>new UnitPart(u.getName(),u.getDimension()*exp, u.getFactor()));
-        var d2 = this._denoms.map((u)=>new UnitPart(u.getName(),u.getDimension()*exp, u.getFactor()));
-        return new LiteralNumber(Math.pow(this.getValue(), exp),n2,d2);
+        return new LiteralNumber(Math.pow(this.getValue(), exp),
+            this._numers.map(u=>u.multiplyDimension(exp)),
+            this._denoms.map(u=>u.multiplyDimension(exp)));
     }
 
     toString() {
@@ -106,22 +101,10 @@ class LiteralNumber {
         return true;
     }
 
-    isReduceable() {
-        function check(a,type) {
-            var top = a._numers.find((u)=>u.getType() == type);
-            var bot = a._denoms.find((u)=>u.getType() == type);
-            if(top && bot) return true;
-            return false;
-        }
-        if(check(this,'length')) return true;
-        if(check(this,'duration')) return true;
-        return false;
-    }
-
     expand() {
         var a = this;
         function sameType(a,type) {
-            var first = a._numers.find((u)=>u.getType()==type);
+            var first  = a._numers.find((u)=>u.getType()==type);
             var second = a._denoms.find((u)=>u.getType()==type);
             return a.convertType(a,first,second);
         }
@@ -141,17 +124,15 @@ class LiteralNumber {
                 a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(), first.getDimension())));
             } else {
                 var cvv = UNITS.findConversion(first.getBase(), second.getBase());
-                if(cvv) {
-                    //convert first to it's base
-                    a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
-                    a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
-                    //convert base to other base
-                    a._numers.push(new UnitPart(cvv.to,second.getDimension(),Math.pow(1,second.getDimension())));
-                    a._denoms.push(new UnitPart(cvv.from,first.getDimension(),Math.pow(cvv.ratio,first.getDimension())));
-                    //convert other base to second
-                    a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
-                    a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
-                }
+                //convert first to it's base
+                a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
+                a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
+                //convert base to other base
+                a._numers.push(new UnitPart(cvv.to,second.getDimension(),Math.pow(1,second.getDimension())));
+                a._denoms.push(new UnitPart(cvv.from,first.getDimension(),Math.pow(cvv.ratio,first.getDimension())));
+                //convert other base to second
+                a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
+                a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
             }
         }
         return a;
@@ -171,20 +152,19 @@ class LiteralNumber {
         a = findTypeConversion(a, b, 'length', 3, 'volume');
         a = findTypeConversion(a, b, 'length', 2, 'area');
 
-        function process(a,b,type) {
-            var first = a._numers.find((u)=>u.getType() == type);
-            var second = b._numers.find((u)=>u.getType() == type);
-            return a.convertType(a,first,second);
+        //find part in top of each that has the same type
+        function process2(a,b) {
+            for(let i=0; i<a._numers.length; i++) {
+                for(let j=0; j<b._numers.length; j++) {
+                    let first = a._numers[i];
+                    let second = b._numers[i];
+                    if(first.getType() === second.getType()) {
+                        return a.convertType(a,first,second).reduce();
+                    }
+                }
+            }
         }
-
-        a = process(a,b,'duration');
-        a = process(a,b,'length');
-        a = process(a,b,'volume');
-        a = process(a,b,'area');
-        a = process(a,b,'mass');
-        a = process(a,b,'storage');
-        a = a.reduce();
-        return a;
+        return process2(a,b);
     }
 
     dimConvert(to, fromType, dim, toType) {
@@ -207,8 +187,8 @@ class LiteralNumber {
     reduce() {
         var u2 = this.clone();
         var v2 = this._value;
-        var n1 = u2._numers.slice();
-        var d1 = u2._denoms.slice();
+        var n1 = u2._numers;
+        var d1 = u2._denoms;
         //subtract dimension of any unit that is on top and bottom
         n1.forEach((n) => {
             d1.forEach((d) => {
@@ -229,14 +209,14 @@ class LiteralNumber {
             u._factor = 1;
         });
         //remove any units that were reduced to zero
-        let hasDimension = (u)=>u._dim>0;
-        n1 = n1.filter(hasDimension);
-        d1 = d1.filter(hasDimension);
-        return new LiteralNumber(v2,n1,d1);
+        let hasDimension = u=>u._dim>0;
+        return new LiteralNumber(v2,
+            n1.filter(hasDimension),
+            d1.filter(hasDimension));
     }
 
     collapse() {
-        let notNoneType = (a) => a.type !== 'none';
+        let notNoneType = (a=>a.type!=='none');
         function groupSameName(a,b) {
             if(a.length == 0) return a.concat([b]);
             var last = a.pop();
@@ -282,6 +262,9 @@ class UnitPart {
     }
     getFactor() {
         return this._factor;
+    }
+    multiplyDimension(exp) {
+        return new UnitPart(this.getName(), this.getDimension()*exp, this.getFactor())
     }
 }
 
