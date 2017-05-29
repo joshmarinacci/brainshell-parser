@@ -98,7 +98,7 @@ test("notation parsing", function(t) {
     compareUnit(t,'4ft+5ft',9,'ft');
     compareUnit(t,'4ft*5ft',20,'ft',2);
     compareUnit(t,'4ft * 5',20,'ft',1);
-    //compareUnit(t,'4ft * 5ft as square meters', 1.85806,'meter',2);
+    compareUnit(t,'4ft * 5ft as square meters', 1.85806,'meter',2);
     compareUnit(t,'4ft * 5ft * 6ft', 4*5*6,'foot',3);
     compareUnit(t,'4ft - 5ft',4-5,'ft');
     //compareUnit(t,'4ft * 5ft * 6ft as gal',897.662,'gallon',1);
@@ -107,7 +107,7 @@ test("notation parsing", function(t) {
     compareUnit(t,'4ft',4,'ft',1);
     compareUnit(t,'(4ft)',4,'ft',1);
     compareUnit(t,'4ft^2',4,'ft',2);
-    //compareUnit(t,'(4ft)^2',16,'ft',1);
+    compareUnit(t,'(4ft)^2',16,'ft',1);
     t.end();
 });
 

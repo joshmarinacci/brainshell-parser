@@ -6,7 +6,7 @@ var compareUnit = require('./common').compareUnit;
 
 test("area units", function(t) {
     compareUnit(t,'8ft^2',8,'foot',2);
-    //compareUnit(t,'(8ft)^2',64,'foot',1);
+    compareUnit(t,'(8ft)^2',64,'foot',1);
     compareUnit(t,"1 square miles as acres",1*640,"acre");
     compareUnit(t,"200ft * 300ft as acres",1.3774105,"acre");
     compareUnit(t,"42 mi^2",42,'mile',2);
