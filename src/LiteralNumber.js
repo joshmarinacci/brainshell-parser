@@ -13,18 +13,15 @@ class LiteralNumber {
         return this.withUnits(numers,denoms);
     }
     withUnits(numers, denoms) {
-        if(typeof numers === 'string') {
-            numers = [[numers,1]];
-        }
-        if(typeof denoms === 'string') {
-            denoms = [[denoms,1]];
-        }
+        if(typeof numers === 'string')  numers = [[numers,1]];
+        if(typeof denoms === 'string')  denoms = [[denoms,1]];
+        if(!numers) numers = [];
+        if(!denoms) denoms = [];
         function toUnitPart(f) {
             if(typeof f[1] === 'number') return new UnitPart(f[0],f[1]);
             if(f instanceof UnitPart) return f;
             return new UnitPart(f,1)
         }
-        if(!denoms) denoms = [];
         return new LiteralNumber(this._value,
             numers.map(toUnitPart),
             denoms.map(toUnitPart));
@@ -52,34 +49,26 @@ class LiteralNumber {
     }
 
     multiply(b) {
-        console.log("multiplying",this.toString(),'times', b.toString());
         var a = this.process(this,b,'length');
         var nu = new LiteralNumber(a.getValue() * b.getValue(),
             a._numers.concat(b._numers),
             a._denoms.concat(b._denoms)
         );
         nu = nu.expand();
-        //console.log('after expanding',nu);
         nu = nu.reduce();
-        //console.log('after reducing',nu);
         if(nu.isReduceable()) {
-            //console.log("we can reduce again");
             nu = nu.expand();
-            //console.log('after expanding',nu);
             nu = nu.reduce();
-            //console.log('after reducing',nu);
         }
         nu = nu.collapse();
-        //console.log('after collapsing',nu);
         return nu;
     }
 
     exponent(b) {
-        console.log("doing to a power", this.toString(),'to the', b.toString());
         var exp = b.getValue();
         var n2 = this._numers.map((u)=>new UnitPart(u.getName(),u.getDimension()*exp, u.getFactor()));
         var d2 = this._denoms.map((u)=>new UnitPart(u.getName(),u.getDimension()*exp, u.getFactor()));
-        return new LiteralNumber(Math.pow(this.getValue(), b.getValue()),n2,d2);
+        return new LiteralNumber(Math.pow(this.getValue(), exp),n2,d2);
     }
 
     toString() {
@@ -97,7 +86,7 @@ class LiteralNumber {
     }
 
     invert() {
-        return new LiteralNumber(1/this.getValue(), this._denoms, this._numers)
+        return new LiteralNumber(1/this.getValue(), this._denoms.slice(), this._numers.slice())
     }
 
     as(to) {
@@ -107,7 +96,6 @@ class LiteralNumber {
 
     equalUnits(b) {
         var a = this.collapse();
-        //if(!b.isCompound()) b = b.asComplex();
         b = b.collapse();
         if(a._numers.length !== b._numers.length) return false;
         if(a._denoms.length !== b._denoms.length) return false;
@@ -133,8 +121,6 @@ class LiteralNumber {
         return false;
     }
     expand() {
-        //console.log('expanding');
-        //if top and bottom have a time or length then expand it
         this.check2(this,'duration');
         this.check2(this,'length');
         this.check2(this,'volume');
@@ -146,21 +132,14 @@ class LiteralNumber {
         //find something in the top and bottom of the same number
         var first = a._numers.find((u)=>u.getType()==type);
         var second = a._denoms.find((u)=>u.getType()==type);
-        //console.log("found for type", type,top,bot);
         if(first && second) {
-            if(first.getName() == second.getName()) {
-                console.log("same on top and bottom. ignore");
-                return a;
-            }
+            if(first.getName() == second.getName()) return a;
             //TODO: this conversion code is almost identical to what is below
             if(first.getBase() === second.getBase()) {
-                //console.log("same base",first.getRatio(),second.getRatio());
                 a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
                 a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
             } else {
-                //console.log("must convert between bases");
                 var cvv = UNITS.findConversion(first.getBase(), second.getBase());
-                //console.log("found conversion",cvv);
                 if(cvv) {
                     a._numers.push(new UnitPart(first.getBase(),1,1));
                     a._denoms.push(new UnitPart(first.getName(),1,first.getRatio()));
@@ -168,7 +147,6 @@ class LiteralNumber {
                     a._denoms.push(new UnitPart(cvv.from,1,cvv.ratio));
                     a._numers.push(new UnitPart(second.getName(),1,second.getRatio()));
                     a._denoms.push(new UnitPart(second.getBase(),1,1));
-                    //console.log("now a is",a);
                 }
             }
         }
@@ -182,25 +160,21 @@ class LiteralNumber {
         var first = a._numers.find((u)=>u.getType() == type);
         var second = b._numers.find((u)=>u.getType() == type);
         if(first && second && first.getName() !== second.getName()) {
-            //console.log("looking for a conversion from",first.getName(),'to',second.getName());
             if(first.getBase() == second.getBase()) {
                 a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(), second.getDimension())));
                 a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(), first.getDimension())));
             } else {
-                //console.log("must convert between bases");
                 var cvv = UNITS.findConversion(first.getBase(), second.getBase());
-                //console.log("found conversion",cvv);
                 if(cvv) {
                     //convert first to it's base
-                    //convert base to other base
-                    //convert other base to second
                     a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
                     a._denoms.push(new UnitPart(first.getName(),first.getDimension(),Math.pow(first.getRatio(),first.getDimension())));
+                    //convert base to other base
                     a._numers.push(new UnitPart(cvv.to,second.getDimension(),Math.pow(1,second.getDimension())));
                     a._denoms.push(new UnitPart(cvv.from,first.getDimension(),Math.pow(cvv.ratio,first.getDimension())));
+                    //convert other base to second
                     a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
                     a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
-                    //console.log("now a is",a);
                 }
             }
         }
@@ -209,24 +183,16 @@ class LiteralNumber {
 
     convert(b) {
         var a = this;
-        console.log("converting", a.toString());
-        console.log('to', b.toString());
-        function ck(a, b, fromType, dim, toType) {
-            //if contains length ^3 and 'to' contains volume, then convert
+        function findTypeConversion(a, b, fromType, dim, toType) {
             if(a._numers.find((u)=>u.getDimension() === dim && u.getType() === fromType)) {
-                //console.log("found a length ^3");
                 if(b._numers.find((u)=>u.getType() === toType)) {
-                    //console.log("found a volume");
-                    //console.log("=========== do conversion");
-                    var c = a.dimConvert(b,fromType, dim, toType);
-                    //console.log("now it's",c);
-                    return c.reduce();
+                    return a.dimConvert(b,fromType, dim, toType).reduce();
                 }
             }
             return a;
         }
-        a = ck(a,b, 'length', 3, 'volume');
-        a = ck(a,b, 'length', 2, 'area');
+        a = findTypeConversion(a, b, 'length', 3, 'volume');
+        a = findTypeConversion(a, b, 'length', 2, 'area');
         a = this.process(a,b,'duration');
         a = this.process(a,b,'length');
         a = this.process(a,b,'volume');
@@ -234,20 +200,13 @@ class LiteralNumber {
         a = this.process(a,b,'mass');
         a = this.process(a,b,'storage');
         a = a.reduce();
-        //console.log("now a is",a);
         return a;
     }
 
     dimConvert(to, fromType, dim, toType) {
-        //console.log('converting',this);
-        //console.log('to',to);
-        //console.log("from type",fromType,'dim',dim,'totype',toType);
         var first = this._numers.find((u) => u.getDimension() === dim && u.getType() === fromType);
-        //console.log("first = ", first);
         var second = to._numers.find((u) => u.getType() === toType);
-        //console.log('second = ', second);
         var conv = UNITS.findDimConversion(first.getBase(), second.getBase());
-        //console.log("conv = ", conv);
         let a = this.clone();
         //convert from u1 to the base
         a._numers.push(new UnitPart(first.getBase(),first.getDimension(),1));
@@ -258,21 +217,14 @@ class LiteralNumber {
         //convert from the second base to u2
         a._numers.push(new UnitPart(second.getName(),second.getDimension(),Math.pow(second.getRatio(),second.getDimension())));
         a._denoms.push(new UnitPart(second.getBase(),second.getDimension(),1));
-        //console.log('now this is',this);
         return a;
     }
 
     reduce() {
-        //console.log("a is",this.toString());
         var u2 = this.clone();
         var v2 = this._value;
-        //console.log('v2 is',v2);
         var n1 = u2._numers.slice();
         var d1 = u2._denoms.slice();
-        //reduce dimension of any unit on both top and bottom
-        //console.log("before n1 is",n1);
-
-
         //subtract dimension of any unit that is on top and bottom
         n1.forEach((n) => {
             d1.forEach((d) => {
@@ -285,8 +237,6 @@ class LiteralNumber {
                 }
             });
         });
-        //console.log("after  n1 is",n1);
-        //console.log("after  d1 is",d1);
         //pull out the factors to the value
         n1.forEach((u)=>{
             v2 *= u.getFactor();
@@ -297,20 +247,15 @@ class LiteralNumber {
             u._factor = 1;
         });
         //remove any units that were reduced to zero
-        n1 = n1.filter((u)=>u._dim>0);
-        d1 = d1.filter((u)=>u._dim>0);
-        //console.log("after we have",n1,d1,v2);
-        return new LiteralNumber(v2,n1,d1);//ComplexUnit(n1,d1);
+        let hasDimension = (u)=>u._dim>0;
+        n1 = n1.filter(hasDimension);
+        d1 = d1.filter(hasDimension);
+        return new LiteralNumber(v2,n1,d1);
     }
 
-
-
     collapse() {
-        function removeNone(a) {
-            if(a.type === 'none') return false;
-            return true;
-        }
-        function cl(a,b) {
+        let notNoneType = (a) => a.type !== 'none';
+        function groupSameName(a,b) {
             if(a.length == 0) return a.concat([b]);
             var last = a.pop();
             if(last.getName() == b.getName()) {
@@ -322,8 +267,8 @@ class LiteralNumber {
                 return a;
             }
         }
-        var ns = this._numers.filter(removeNone).reduce(cl,[]);
-        var ds = this._denoms.filter(removeNone).reduce(cl,[]);
+        var ns = this._numers.filter(notNoneType).reduce(groupSameName,[]);
+        var ds = this._denoms.filter(notNoneType).reduce(groupSameName,[]);
         return new LiteralNumber(this._value, ns, ds);
     }
 
